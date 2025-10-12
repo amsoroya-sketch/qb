@@ -1,0 +1,6 @@
+asset_id,type,description,size,style
+TEST-IMG-001,image,"Happy child face with big smile, simple cartoon character",512x512,cartoon
+TEST-IMG-002,image,"Colorful classroom background with desks and chalkboard",1024x768,realistic
+TEST-IMG-003,image,"Green play button with white triangle icon, rounded corners",200x200,flat_design
+TEST-IMG-004,image,"Red apple with green leaf, clean simple design",256x256,cartoon
+TEST-IMG-005,image,"Blue square shape, solid color, geometric design",256x256,flat_design

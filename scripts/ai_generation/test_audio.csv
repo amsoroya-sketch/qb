@@ -1,0 +1,6 @@
+asset_id,type,description,duration,voice
+TEST-SFX-001,sfx,"Success chime sound, bright cheerful xylophone",2,
+TEST-SFX-002,sfx,"Button click sound, soft pleasant pop",0.5,
+TEST-MUS-001,music,"Upbeat children's music with xylophone and piano",30,
+TEST-VO-001,voice,"Great job! You did it!",3,v2/en_speaker_6
+TEST-VO-002,voice,"Try again!",2,v2/en_speaker_6

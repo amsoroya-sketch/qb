@@ -1,0 +1,4 @@
+asset_id,type,description,format
+TEST-3D-001,3d,"Simple wooden chair with four legs",obj
+TEST-3D-002,3d,"Red apple with green leaf",obj
+TEST-3D-003,3d,"Colorful alphabet block with letter A",glb
