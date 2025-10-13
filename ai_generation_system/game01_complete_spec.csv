@@ -1,0 +1,24 @@
+asset_id,type,filename,description,width,height,style,text,voice
+OBJ-001,image,apple_red.png,Red apple bright shiny with green leaf,512,512,educational,,
+OBJ-002,image,ball_blue.png,Blue ball round smooth glossy,512,512,educational,,
+OBJ-003,image,ball_yellow.png,Yellow ball round smooth glossy,512,512,educational,,
+OBJ-004,image,car_red.png,Red toy car simple design side view,512,512,educational,,
+OBJ-005,image,car_blue.png,Blue toy car simple design side view,512,512,educational,,
+OBJ-006,image,flower_red.png,Red flower with green stem and leaves,512,512,educational,,
+OBJ-007,image,flower_yellow.png,Yellow flower with green stem and leaves,512,512,educational,,
+OBJ-008,image,star_yellow.png,Yellow five-pointed star bright cheerful,512,512,educational,,
+OBJ-009,image,banana_yellow.png,Yellow banana curved realistic,512,512,educational,,
+OBJ-010,image,orange_fruit.png,Orange fruit round with green leaf,512,512,educational,,
+CNT-001,image,container_red.png,Red bucket container cylindrical empty,512,512,educational,,
+CNT-002,image,container_blue.png,Blue bucket container cylindrical empty,512,512,educational,,
+CNT-003,image,container_yellow.png,Yellow bucket container cylindrical empty,512,512,educational,,
+CNT-004,image,container_green.png,Green bucket container cylindrical empty,512,512,educational,,
+BG-001,image,bg_playroom.png,Cozy playroom interior soft carpet toy shelf window,1920,1080,realistic,,
+BG-002,image,bg_garden.png,Peaceful garden grass flowers trees sunny,1920,1080,realistic,,
+UI-001,image,ui_star_gold.png,Gold star icon reward achievement,128,128,flat,,
+UI-002,image,ui_button_play.png,Green play button rounded,200,200,flat,,
+VO-001,audio,vo_intro.wav,,,,,Welcome to Color Matching! Let's match things by color!,v2/en_speaker_6
+VO-002,audio,vo_encouragement1.wav,,,,,You're doing great!,v2/en_speaker_6
+VO-003,audio,vo_encouragement2.wav,,,,,Nice matching!,v2/en_speaker_6
+VO-004,audio,vo_correct.wav,,,,,Great job! That's correct!,v2/en_speaker_9
+VO-005,audio,vo_try_again.wav,,,,,Let's try that one more time,v2/en_speaker_3

@@ -1,0 +1,33 @@
+asset_id,type,filename,description,width,height,style,text,voice
+EMO-PHO-001,image,happy_child_1.png,Happy child age 5 big genuine smile clear joyful expression diverse ethnicity,1024,1024,realistic,,
+EMO-PHO-002,image,happy_child_2.png,Happy child age 6 smiling brightly cheerful expression different ethnicity,1024,1024,realistic,,
+EMO-PHO-003,image,sad_child_1.png,Sad child age 5 downturned mouth frowning clear sad expression diverse ethnicity,1024,1024,realistic,,
+EMO-PHO-004,image,sad_child_2.png,Sad child age 6 unhappy expression tear on cheek different ethnicity,1024,1024,realistic,,
+EMO-PHO-005,image,angry_child_1.png,Angry child age 5 furrowed brows frown clear angry expression diverse ethnicity,1024,1024,realistic,,
+EMO-PHO-006,image,angry_child_2.png,Angry child age 6 clenched jaw angry expression different ethnicity,1024,1024,realistic,,
+EMO-PHO-007,image,scared_child_1.png,Scared child age 5 wide eyes open mouth frightened expression diverse ethnicity,1024,1024,realistic,,
+EMO-PHO-008,image,scared_child_2.png,Scared child age 6 worried expression scared face different ethnicity,1024,1024,realistic,,
+EMO-PHO-009,image,surprised_child_1.png,Surprised child age 5 wide eyes raised eyebrows O-shaped mouth diverse ethnicity,1024,1024,realistic,,
+EMO-PHO-010,image,surprised_child_2.png,Surprised child age 6 shocked expression amazed face different ethnicity,1024,1024,realistic,,
+EMO-PHO-011,image,excited_child_1.png,Excited child age 5 huge smile hands raised energetic expression diverse ethnicity,1024,1024,realistic,,
+EMO-PHO-012,image,excited_child_2.png,Excited child age 6 jumping joyful thrilled expression different ethnicity,1024,1024,realistic,,
+EMO-ICON-001,image,icon_happy.png,Yellow circle emoji with big smile cheerful,256,256,flat,,
+EMO-ICON-002,image,icon_sad.png,Blue circle emoji with downturned mouth sad,256,256,flat,,
+EMO-ICON-003,image,icon_angry.png,Red circle emoji with furrowed brows angry,256,256,flat,,
+EMO-ICON-004,image,icon_scared.png,Purple circle emoji with wide eyes frightened,256,256,flat,,
+EMO-ICON-005,image,icon_surprised.png,Orange circle emoji with raised eyebrows surprised,256,256,flat,,
+EMO-ICON-006,image,icon_excited.png,Green circle emoji with big smile and sparkles excited,256,256,flat,,
+EMO-BG-001,image,bg_birthday_party.png,Birthday party scene balloons cake presents colorful decorations,1920,1080,realistic,,
+EMO-BG-002,image,bg_playground.png,Playground scene swings slide sandbox outdoor play area,1920,1080,realistic,,
+EMO-UI-001,image,ui_emotion_card_frame.png,Rounded rectangle card frame subtle shadow for emotion faces,400,400,flat,,
+EMO-UI-002,image,ui_progress_stars.png,Five gold stars in row for progress tracking,600,120,flat,,
+EMO-VO-001,audio,vo_touch_happy.wav,,,,,Touch the HAPPY face,v2/en_speaker_6
+EMO-VO-002,audio,vo_touch_sad.wav,,,,,Touch the SAD face,v2/en_speaker_6
+EMO-VO-003,audio,vo_touch_angry.wav,,,,,Touch the ANGRY face,v2/en_speaker_6
+EMO-VO-004,audio,vo_touch_scared.wav,,,,,Touch the SCARED face,v2/en_speaker_6
+EMO-VO-005,audio,vo_touch_surprised.wav,,,,,Touch the SURPRISED face,v2/en_speaker_6
+EMO-VO-006,audio,vo_touch_excited.wav,,,,,Touch the EXCITED face,v2/en_speaker_6
+EMO-VO-007,audio,vo_how_feel.wav,,,,,How does this person feel?,v2/en_speaker_6
+EMO-VO-008,audio,vo_correct_happy.wav,,,,,Yes! That's a HAPPY face!,v2/en_speaker_9
+EMO-VO-009,audio,vo_correct_general.wav,,,,,Great job! That's correct!,v2/en_speaker_9
+EMO-VO-010,audio,vo_try_again.wav,,,,,Hmm let's try again,v2/en_speaker_3
