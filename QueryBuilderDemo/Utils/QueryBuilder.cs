@@ -746,7 +746,6 @@ namespace PbsApi.Utils
 
       if (!string.IsNullOrEmpty(currentPath) && processedRootPaths.Contains(currentPath))
       {
-        visitedTypesInCurrentPath.Remove(currentType);
         return;
       }
 
@@ -771,16 +770,18 @@ namespace PbsApi.Utils
           }
           var recursiveIncludePath = getRecursiveIncludeString(currentType, fullPath, prop.Name);
 
-          if (
-              nestedType != typeof(object) &&
-              ((nestedType != currentType && !visitedTypesInCurrentPath.Contains(nestedType)) || recursiveIncludePath)) // Prevents indirect cycles (e.g., A.B.A)
+          // Check if we should recurse:
+          // - Always prevent cycles (visitedTypesInCurrentPath contains the type)
+          // - If property has RecursiveIncludeLevel attribute, also check the level limit
+          bool hasRecursiveAttr = prop.GetCustomAttributes(typeof(RecursiveIncludeLevelAttribute), true).Any();
+          bool noCycle = nestedType != currentType && !visitedTypesInCurrentPath.Contains(nestedType);
+          bool withinLevel = !hasRecursiveAttr || recursiveIncludePath;
+          bool shouldRecurse = noCycle && withinLevel;
+
+          if (nestedType != typeof(object) && shouldRecurse)
           {
             includes.Add(fullPath);
             selectors.Add(fullPath);
-            if (recursiveIncludePath)
-            {
-              visitedTypesInCurrentPath.Remove(currentType);
-            }
             var nextVisitedTypes = new HashSet<Type>(visitedTypesInCurrentPath);
             PopulatePathsRecursively(fullPath, nestedType, includes, selectors, processedRootPaths, nextVisitedTypes);
           }
@@ -790,7 +791,6 @@ namespace PbsApi.Utils
           selectors.Add(fullPath);
         }
       }
-      visitedTypesInCurrentPath.Remove(currentType);
     }
 
     /// <summary>
@@ -798,7 +798,7 @@ namespace PbsApi.Utils
     /// </summary>
     public static bool getRecursiveIncludeString(Type currentType, string fullPath, string propName)
     {
-      if (string.IsNullOrEmpty(fullPath) || string.IsNullOrEmpty(propName))
+      if (string.IsNullOrEmpty(propName))
         return false;
 
       var propInfo = currentType.GetProperty(propName);
@@ -809,20 +809,13 @@ namespace PbsApi.Utils
                          .FirstOrDefault() as RecursiveIncludeLevelAttribute;
 
       if (attr == null)
-        return false;
+        return true; // No attribute means no limit, allow recursion
 
+      // Count the depth: number of segments in the NEXT path (fullPath + propName)
       int maxLevel = attr.Level;
-      int currentCount = fullPath.Split('.').Count(segment => segment == propName);
-      bool result = true;
-      if (currentCount <= maxLevel)
-      {
-        result = true;
-      }
-      else
-      {
-        result = false;
-      }
-      return result;
+      int currentDepth = string.IsNullOrEmpty(fullPath) ? 1 : fullPath.Split('.').Length + 1;
+
+      return currentDepth <= maxLevel;
     }
 
     /// <summary>

@@ -1,3 +1,5 @@
+using PbsApi.Utils.Model;
+
 namespace QueryBuilderDemo.Models
 {
     public class Organisation
@@ -8,6 +10,7 @@ namespace QueryBuilderDemo.Models
         public int FoundYear { get; set; }
 
         // Navigation properties
+        [RecursiveIncludeLevel(2)]
         public List<Department> Departments { get; set; } = new();
     }
 }

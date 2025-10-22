@@ -1,3 +1,5 @@
+using PbsApi.Utils.Model;
+
 namespace QueryBuilderDemo.Models
 {
     public class Skill
@@ -8,6 +10,7 @@ namespace QueryBuilderDemo.Models
         public string Category { get; set; } = string.Empty;
 
         // Navigation properties - many-to-many
+        [RecursiveIncludeLevel(2)]
         public List<Employee> Employees { get; set; } = new();
     }
 }

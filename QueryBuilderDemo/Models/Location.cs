@@ -1,3 +1,5 @@
+using PbsApi.Utils.Model;
+
 namespace QueryBuilderDemo.Models
 {
     public class Location
@@ -8,6 +10,7 @@ namespace QueryBuilderDemo.Models
         public string Country { get; set; } = string.Empty;
 
         // Navigation properties
+        [RecursiveIncludeLevel(2)]
         public List<Client> Clients { get; set; } = new();
     }
 }

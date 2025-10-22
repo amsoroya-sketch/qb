@@ -1,4 +1,5 @@
 using System;
+using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Models
 {
@@ -13,6 +14,7 @@ namespace QueryBuilderDemo.Models
         public int InvoiceId { get; set; }
 
         // Navigation property
+        [RecursiveIncludeLevel(2)]
         public Invoice? Invoice { get; set; }
     }
 }

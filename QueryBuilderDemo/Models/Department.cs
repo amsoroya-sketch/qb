@@ -1,3 +1,5 @@
+using PbsApi.Utils.Model;
+
 namespace QueryBuilderDemo.Models
 {
     public class Department
@@ -11,7 +13,9 @@ namespace QueryBuilderDemo.Models
         public int OrganisationId { get; set; }
 
         // Navigation properties
+        [RecursiveIncludeLevel(2)]
         public Organisation? Organisation { get; set; }
+        [RecursiveIncludeLevel(2)]
         public List<Employee> Employees { get; set; } = new();
     }
 }

@@ -1,3 +1,5 @@
+using PbsApi.Utils.Model;
+
 namespace QueryBuilderDemo.Models
 {
     public class Team
@@ -8,7 +10,9 @@ namespace QueryBuilderDemo.Models
         public int Size { get; set; }
 
         // Navigation properties - many-to-many
+        [RecursiveIncludeLevel(2)]
         public List<Employee> Members { get; set; } = new();
+        [RecursiveIncludeLevel(2)]
         public List<Meeting> Meetings { get; set; } = new();
     }
 }
