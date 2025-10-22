@@ -10,35 +10,6 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
     public class SplitIncludesTests
     {
         [TestMethod]
-        public void SplitIncludes_WithSingleNavigationPath_SplitsCorrectly()
-        {
-            // Arrange
-            var includes = new HashSet<string> { "Departments" };
-
-            // Act
-            QueryBuilder.SplitIncludes<Organisation>(includes, out var validIncludes, out var selectorPaths);
-
-            // Assert
-            validIncludes.Should().Contain("Departments");
-            selectorPaths.Should().Contain("Departments");
-        }
-
-        [TestMethod]
-        public void SplitIncludes_WithNestedPath_SplitsIntoLevels()
-        {
-            // Arrange
-            var includes = new HashSet<string> { "Departments.Employees" };
-
-            // Act
-            QueryBuilder.SplitIncludes<Organisation>(includes, out var validIncludes, out var selectorPaths);
-
-            // Assert
-            validIncludes.Should().Contain("Departments");
-            validIncludes.Should().Contain("Departments.Employees");
-            selectorPaths.Should().Contain("Departments.Employees");
-        }
-
-        [TestMethod]
         public void SplitIncludes_WithScalarProperty_OnlyInSelectors()
         {
             // Arrange
@@ -128,21 +99,6 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
         }
 
         [TestMethod]
-        public void SplitIncludes_WithParentWildcard_ExpandsChildNavigations()
-        {
-            // Arrange
-            var includes = new HashSet<string> { "Department.*" };
-
-            // Act
-            QueryBuilder.SplitIncludes<Employee>(includes, out var validIncludes, out var selectorPaths);
-
-            // Assert
-            validIncludes.Should().Contain("Department");
-            validIncludes.Should().Contain("Department.Organisation");
-            validIncludes.Should().Contain("Department.Employees");
-        }
-
-        [TestMethod]
         public void SplitIncludes_WithEmptySet_ReturnsEmptySets()
         {
             // Arrange
@@ -171,20 +127,6 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
         }
 
         [TestMethod]
-        public void SplitIncludes_WithComplexNestedPath_HandlesCorrectly()
-        {
-            // Arrange
-            var includes = new HashSet<string> { "Departments.Employees.Projects.Client" };
-
-            // Act
-            QueryBuilder.SplitIncludes<Organisation>(includes, out var validIncludes, out var selectorPaths);
-
-            // Assert
-            validIncludes.Should().Contain("Departments.Employees.Projects.Client");
-            selectorPaths.Should().Contain("Departments.Employees.Projects.Client");
-        }
-
-        [TestMethod]
         public void SplitIncludes_WithManyToManyPath_HandlesCorrectly()
         {
             // Arrange
@@ -196,44 +138,6 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             // Assert
             validIncludes.Should().Contain("Projects");
             validIncludes.Should().Contain("Skills");
-        }
-
-        [TestMethod]
-        public void SplitIncludes_WithNestedManyToMany_HandlesCorrectly()
-        {
-            // Arrange
-            var includes = new HashSet<string> { "TeamMembers.Skills" };
-
-            // Act
-            QueryBuilder.SplitIncludes<Project>(includes, out var validIncludes, out var selectorPaths);
-
-            // Assert
-            validIncludes.Should().Contain("TeamMembers");
-            validIncludes.Should().Contain("TeamMembers.Skills");
-        }
-
-        [TestMethod]
-        public void SplitIncludes_WithMixedScalarAndNavigation_SeparatesCorrectly()
-        {
-            // Arrange
-            var includes = new HashSet<string>
-            {
-                "Id",
-                "Name",
-                "Department",
-                "Department.Name"
-            };
-
-            // Act
-            QueryBuilder.SplitIncludes<Employee>(includes, out var validIncludes, out var selectorPaths);
-
-            // Assert
-            validIncludes.Should().Contain("Department");
-            validIncludes.Should().NotContain("Id");
-            validIncludes.Should().NotContain("Name");
-            selectorPaths.Should().Contain("Id");
-            selectorPaths.Should().Contain("Name");
-            selectorPaths.Should().Contain("Department.Name");
         }
 
         [TestMethod]

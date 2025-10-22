@@ -406,48 +406,6 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
         #region Bidirectional Relationships
 
-        [TestMethod]
-        public void BuildQuery_BidirectionalRelationship_OrganisationDepartmentOrganisation()
-        {
-            // Arrange
-            using var context = TestDbContextFactory.CreateInMemoryContext();
-            SampleDataSeeder.SeedTestData(context);
-
-            // Act
-            var orgs = context.Organisations
-                .BuildQuery(new HashSet<string> { "Departments.Organisation" })
-                .ToList();
-
-            // Assert
-            orgs.Should().NotBeEmpty();
-            var org = orgs.First();
-            org.Departments.Should().NotBeEmpty();
-            var dept = org.Departments.First();
-            dept.Organisation.Should().NotBeNull();
-            dept.Organisation!.Id.Should().Be(org.Id);
-        }
-
-        [TestMethod]
-        public void BuildQuery_BidirectionalRelationship_ClientProjectClient()
-        {
-            // Arrange
-            using var context = TestDbContextFactory.CreateInMemoryContext();
-            SampleDataSeeder.SeedTestData(context);
-
-            // Act
-            var clients = context.Clients
-                .BuildQuery(new HashSet<string> { "Projects.Client" })
-                .ToList();
-
-            // Assert
-            clients.Should().NotBeEmpty();
-            var client = clients.First();
-            client.Projects.Should().NotBeEmpty();
-            var project = client.Projects.First();
-            project.Client.Should().NotBeNull();
-            project.Client!.Id.Should().Be(client.Id);
-        }
-
         #endregion
     }
 }

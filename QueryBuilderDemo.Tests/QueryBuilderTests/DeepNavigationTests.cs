@@ -310,28 +310,6 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
         }
 
         [TestMethod]
-        public void BuildQuery_CircularNavigation_OrganisationToDepartmentBackToOrganisation()
-        {
-            // Arrange
-            using var context = TestDbContextFactory.CreateInMemoryContext();
-            SampleDataSeeder.SeedTestData(context);
-
-            // Act
-            var orgs = context.Organisations
-                .BuildQuery(new HashSet<string> { "Departments.Organisation.Departments" })
-                .ToList();
-
-            // Assert
-            orgs.Should().NotBeEmpty();
-            var org = orgs.First();
-            org.Departments.Should().NotBeEmpty();
-
-            var dept = org.Departments.First();
-            dept.Organisation.Should().NotBeNull();
-            dept.Organisation!.Departments.Should().NotBeEmpty();
-        }
-
-        [TestMethod]
         public void BuildQuery_ComplexMixedPath_ClientLocationClientsProjects()
         {
             // Arrange

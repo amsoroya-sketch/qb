@@ -263,7 +263,10 @@ namespace PbsApi.Utils
 
       var projectionParts = BuildProjectionWithContextStructure(selectFields, contextStructure);
       var projectionString = string.Join(", ", projectionParts);
-      return flattenedQuery.Select($"new ({projectionString})");
+
+      // Apply Distinct to eliminate duplicate rows from cartesian products (SelectMany operations)
+      // This happens on the database side before materialization
+      return flattenedQuery.Select($"new ({projectionString})").Distinct();
     }
 
     private static List<string> BuildProjectionWithContextStructure(List<string> selectFeilds, List<CollectionContext> contextStructure)
@@ -950,11 +953,45 @@ namespace PbsApi.Utils
         return false;
       });
       var query = BuildQuery(source, includes);
+
+      // Check if any includes involve collection navigation properties
+      bool hasCollectionIncludes = includes.Any(includePath =>
+      {
+        var type = typeof(TEntity);
+        foreach (var part in includePath.Split('.'))
+        {
+          var prop = type.GetProperty(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+          if (prop == null) break;
+
+          // Check if this property is a collection using existing function
+          if (IsCollectionType(prop.PropertyType, out var elementType))
+          {
+            type = elementType ?? prop.PropertyType;
+            return true;
+          }
+
+          // Move to the property type
+          type = prop.PropertyType;
+        }
+        return false;
+      });
+
       if (allScalar)
       {
+        // Apply projection for scalar-only queries
         var selector = BuildSelectorExpression<TEntity>(selectorPaths);
         query = query.Select(selector);
+
+        // DISTINCT is only supported when there are NO collection navigations in the projection
+        // EF Core cannot apply DISTINCT on projections containing collections
+        if (!hasCollectionIncludes)
+        {
+          return query.Distinct();
+        }
       }
+
+      // Return query (with or without projection, but no DISTINCT if collections are included)
+      // Note: EF Core does not support DISTINCT on queries with collection navigations
       return query;
     }
 

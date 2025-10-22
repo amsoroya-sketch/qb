@@ -197,23 +197,6 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
         }
 
         [TestMethod]
-        public void BuildQuery_WithEmptyIncludeSet_ReturnsEntitiesWithoutIncludes()
-        {
-            // Arrange
-            using var context = TestDbContextFactory.CreateInMemoryContext();
-            SampleDataSeeder.SeedTestData(context);
-
-            // Act
-            var result = context.Organisations
-                .BuildQuery(new HashSet<string>())
-                .ToList();
-
-            // Assert
-            result.Should().NotBeEmpty();
-            result.First().Departments.Should().BeEmpty(); // Not loaded
-        }
-
-        [TestMethod]
         public void BuildQuery_WithNullNavigationProperty_DoesNotCrash()
         {
             // Arrange

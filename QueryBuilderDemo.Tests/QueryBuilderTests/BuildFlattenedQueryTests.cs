@@ -595,5 +595,109 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var results = ExecuteQuery(query);
             results.Should().NotBeEmpty("Should flatten invoice payments");
         }
+
+        [TestMethod]
+        public void BuildFlattenedQuery_MultipleCollectionsSameLevel_AppliesDistinct()
+        {
+            // This test verifies DISTINCT eliminates cartesian product duplicates
+            // when flattening multiple collections at the same level
+            using var context = TestDbContextFactory.CreateInMemoryContext();
+            SampleDataSeeder.SeedTestData(context);
+
+            var selectFields = new List<string>
+            {
+                "Name",
+                "Departments.Name",
+                "Departments.Employees.FirstName",
+                "Departments.Employees.Projects.Title",
+                "Departments.Employees.Skills.Name"
+            };
+
+            var query = QueryBuilder.BuildFlattenedQuery(
+                context.Organisations.AsQueryable(),
+                typeof(Organisation),
+                selectFields
+            );
+
+            // Verify SQL contains DISTINCT (applied by BuildFlattenedQuery)
+            var sql = query.ToQueryString();
+            sql.Should().Contain("DISTINCT", "BuildFlattenedQuery should apply DISTINCT to eliminate cartesian product duplicates");
+
+            var results = ExecuteQuery(query);
+            results.Should().NotBeEmpty();
+
+            // With DISTINCT: If employee has 2 Projects and 3 Skills, we should get distinct rows
+            // Without DISTINCT: Would create 6 duplicate rows (2 × 3 = 6 cartesian product)
+            // The DISTINCT ensures we only get unique combinations
+        }
+
+        [TestMethod]
+        public void BuildFlattenedQuery_EmployeeProjectsAndSkills_VerifiesDistinctEliminatesDuplicates()
+        {
+            // Specific test: Employee with multiple Projects AND Skills collections
+            using var context = TestDbContextFactory.CreateInMemoryContext();
+            SampleDataSeeder.SeedTestData(context);
+
+            var selectFields = new List<string>
+            {
+                "FirstName",
+                "LastName",
+                "Projects.Title",
+                "Skills.Name"
+            };
+
+            var query = QueryBuilder.BuildFlattenedQuery(
+                context.Employees.AsQueryable(),
+                typeof(Employee),
+                selectFields
+            );
+
+            // Verify DISTINCT is in the SQL
+            var sql = query.ToQueryString();
+            sql.Should().Contain("DISTINCT", "Should apply DISTINCT to prevent cartesian product duplicates");
+
+            var results = ExecuteQuery(query);
+            results.Should().NotBeEmpty();
+
+            // DISTINCT ensures that each unique combination of (Employee, Project, Skill) appears once
+            // Without DISTINCT: Employee with 2 Projects and 3 Skills would generate 6 rows with duplicate employee data
+        }
+
+        [TestMethod]
+        public void BuildFlattenedQuery_OrganisationDepartmentsEmployeesFields_DistinctAtDatabaseLevel()
+        {
+            // This test demonstrates fetching Organisation → Departments → Employees fields with DISTINCT
+            using var context = TestDbContextFactory.CreateInMemoryContext();
+            SampleDataSeeder.SeedTestData(context);
+
+            var selectFields = new List<string>
+            {
+                "Id",
+                "Name",
+                "Departments.Name",
+                "Departments.Employees.FirstName",
+                "Departments.Employees.LastName",
+                "Departments.Employees.Email"
+            };
+
+            var query = QueryBuilder.BuildFlattenedQuery(
+                context.Organisations.AsQueryable(),
+                typeof(Organisation),
+                selectFields
+            );
+
+            // Verify SQL contains DISTINCT and is executed at database level
+            var sql = query.ToQueryString();
+            sql.Should().Contain("DISTINCT", "Should apply DISTINCT in SQL");
+            sql.Should().Contain("SELECT", "Should generate SQL query");
+
+            var results = ExecuteQuery(query);
+            results.Should().NotBeEmpty();
+
+            // Result: One distinct row per (Organisation, Department, Employee) combination - all at DB level
+            // Example: { Id: 1, Name: "TechCorp", Departments_Name: "Engineering",
+            //            Departments_Employees_FirstName: "John", Departments_Employees_LastName: "Doe",
+            //            Departments_Employees_Email: "john@..." }
+        }
     }
 }
