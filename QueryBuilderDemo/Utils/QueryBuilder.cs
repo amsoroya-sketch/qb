@@ -25,7 +25,7 @@ namespace PbsApi.Utils
         var pathParts = includePath.Trim().Split('.');
         Type currentType = typeof(T);
         object currentQuery = query;
-        PropertyInfo parentPropertyInfo = null;
+        PropertyInfo? parentPropertyInfo = null;
         for (int i = 0; i < pathParts.Length; i++)
         {
           var part = pathParts[i];
@@ -37,7 +37,7 @@ namespace PbsApi.Utils
           {
             currentQuery = ApplyInclude((IQueryable)currentQuery, currentType, propertyInfo);
           }
-          else
+          else if (parentPropertyInfo != null)
           {
             currentQuery = ApplyThenInclude((IQueryable)currentQuery, parentPropertyInfo, currentType, propertyInfo);
           }
@@ -126,7 +126,7 @@ namespace PbsApi.Utils
           .First(m => m.Name == "Include" && m.GetParameters().Length == 2)
           .MakeGenericMethod(query.ElementType, lambda.Body.Type);
 
-      return (IQueryable)methodFiltered.Invoke(null, new object[] { query, lambda });
+      return (IQueryable)methodFiltered.Invoke(null, new object[] { query, lambda })!;
     }
 
     /// <summary>
@@ -165,7 +165,9 @@ namespace PbsApi.Utils
               firstParamType.GetGenericArguments()[1].IsGenericType &&
               firstParamType.GetGenericArguments()[1].GetGenericTypeDefinition() == typeof(IEnumerable<>))
           {
-            return method.MakeGenericMethod(entityType, GetEnumerableType(previousType), nextType);
+            var enumType = GetEnumerableType(previousType);
+            if (enumType != null)
+              return method.MakeGenericMethod(entityType, enumType, nextType);
           }
         }
         else
@@ -205,13 +207,13 @@ namespace PbsApi.Utils
       if (method == null)
         return query;
 
-      return (IQueryable)method.Invoke(null, new object[] { query, lambda });
+      return (IQueryable)method.Invoke(null, new object[] { query, lambda })!;
     }
 
     /// <summary>
     /// Gets the element type from an IEnumerable type.
     /// </summary>
-    private static Type GetEnumerableType(Type type)
+    private static Type? GetEnumerableType(Type type)
     {
       if (type.IsGenericType && typeof(IEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition()))
       {
@@ -353,6 +355,8 @@ namespace PbsApi.Utils
             {
 
               var outerProperty = targetExpression.Type.GetProperty("Outer");
+              if (outerProperty == null)
+                throw new InvalidOperationException($"Property 'Outer' not found on type {targetExpression.Type.Name}");
               targetExpression = Expression.Property(targetExpression, outerProperty);
             }
           }
@@ -360,6 +364,8 @@ namespace PbsApi.Utils
         else if (collectionInfo.CommonAncestorDepth == existingContext.Count)
         {
           var innerProperty = sourceType.GetProperty("Inner");
+          if (innerProperty == null)
+            throw new InvalidOperationException($"Property 'Inner' not found on type {sourceType.Name}");
           targetExpression = Expression.Property(outerParam, innerProperty);
         } 
         else
@@ -374,12 +380,16 @@ namespace PbsApi.Utils
           for (int i = 0; i < stepsBack; i++)
           {
             var outerProperty = targetExpression.Type.GetProperty("Outer");
+            if (outerProperty == null)
+              throw new InvalidOperationException($"Property 'Outer' not found on type {targetExpression.Type.Name}");
             targetExpression = Expression.Property(targetExpression, outerProperty);
           }
           // Now at the level containing the common ancestor
-          // Access Inner to get the collection elelment at commonDepth -1 
+          // Access Inner to get the collection elelment at commonDepth -1
 
           var innerProperty = targetExpression.Type.GetProperty("Inner");
+          if (innerProperty == null)
+            throw new InvalidOperationException($"Property 'Inner' not found on type {targetExpression.Type.Name}");
           targetExpression = Expression.Property(targetExpression, innerProperty);
         }
         collectionAccess = Expression.Property(targetExpression, collectionInfo.Property);
@@ -433,7 +443,7 @@ namespace PbsApi.Utils
         .First()
         .MakeGenericMethod(sourceType, collectionInfo.ElementType, resultType);
 
-      return (IQueryable)selectManyMethod.Invoke(null, new object[] {query, collectionSelector, resultSelector });
+      return (IQueryable)selectManyMethod.Invoke(null, new object[] {query, collectionSelector, resultSelector })!;
     }
 
     private static CollectionPropertyInfo GetCollectionPropertyInfo(
@@ -510,7 +520,7 @@ namespace PbsApi.Utils
       return string.Join(",", parts);
     }
 
-    private static bool IsCollectionType(Type type, out Type elementType)
+    private static bool IsCollectionType(Type type, out Type? elementType)
     {
       elementType = null;
       if (type == typeof(string))
@@ -662,7 +672,7 @@ namespace PbsApi.Utils
                   validIncludes.Add(currentNavPath);
                 }
                 currentType = prop.PropertyType.IsGenericType
-                    ? prop.PropertyType.GetGenericArguments().FirstOrDefault()
+                    ? (prop.PropertyType.GetGenericArguments().FirstOrDefault() ?? prop.PropertyType)
                     : prop.PropertyType;
               }
             }
@@ -708,7 +718,7 @@ namespace PbsApi.Utils
             }
           }
           type = prop.PropertyType.IsGenericType
-              ? prop.PropertyType.GetGenericArguments().FirstOrDefault()
+              ? (prop.PropertyType.GetGenericArguments().FirstOrDefault() ?? prop.PropertyType)
               : prop.PropertyType;
         }
       }
@@ -880,7 +890,7 @@ namespace PbsApi.Utils
         var prop = current.GetProperty(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
         if (prop == null) return null;
         current = prop.PropertyType.IsGenericType
-            ? prop.PropertyType.GetGenericArguments().FirstOrDefault()
+            ? (prop.PropertyType.GetGenericArguments().FirstOrDefault() ?? prop.PropertyType)
             : prop.PropertyType;
       }
       return current;
@@ -1030,16 +1040,16 @@ namespace PbsApi.Utils
     private class CollectionContext
     {
       public string Path { get; set; } = "";
-      public Type CollectionType { get; set; } = null;
+      public Type CollectionType { get; set; } = null!;
       public int Level { get; set; }
     }
 
     private class CollectionPropertyInfo
     {
-      public PropertyInfo Property { get; set; } = null;
-      public Type ElementType { get; set; } = null;
+      public PropertyInfo Property { get; set; } = null!;
+      public Type ElementType { get; set; } = null!;
       public string NavigationPath { get; set; } = "";
-      public int CommonAncestorDepth { get; set; } = 0; // how deep the common ancestor is     
+      public int CommonAncestorDepth { get; set; } = 0; // how deep the common ancestor is
     }
   }
 }
