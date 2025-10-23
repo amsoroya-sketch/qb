@@ -1,7 +1,7 @@
 using System;
 using PbsApi.Utils.Model;
 
-namespace QueryBuilderDemo.Models
+namespace QueryBuilderDemo.Tests.Models
 {
     /// <summary>
     /// Task entity with default ordering by DueDate (most urgent first)

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
-using QueryBuilderDemo.Data;
+using QueryBuilderDemo.Tests.Data;
 
 namespace QueryBuilderDemo.Tests.Helpers
 {

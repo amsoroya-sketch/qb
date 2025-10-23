@@ -1,7 +1,7 @@
 using System;
 using PbsApi.Utils.Model;
 
-namespace QueryBuilderDemo.Models
+namespace QueryBuilderDemo.Tests.Models
 {
     /// <summary>
     /// Project entity with default ordering by Deadline (most urgent first)

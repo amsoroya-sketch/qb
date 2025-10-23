@@ -1,6 +1,6 @@
 using PbsApi.Utils.Model;
 
-namespace QueryBuilderDemo.Models
+namespace QueryBuilderDemo.Tests.Models
 {
     /// <summary>
     /// Role entity with default ordering by Level (hierarchy), then Title

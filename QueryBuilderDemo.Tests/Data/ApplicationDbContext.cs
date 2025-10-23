@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using QueryBuilderDemo.Models;
+using QueryBuilderDemo.Tests.Models;
 
-namespace QueryBuilderDemo.Data
+namespace QueryBuilderDemo.Tests.Data
 {
     public class ApplicationDbContext : DbContext
     {

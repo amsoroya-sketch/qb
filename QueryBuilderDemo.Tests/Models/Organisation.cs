@@ -1,6 +1,6 @@
 using PbsApi.Utils.Model;
 
-namespace QueryBuilderDemo.Models
+namespace QueryBuilderDemo.Tests.Models
 {
     /// <summary>
     /// Organisation entity with default ordering by Name (alphabetical)

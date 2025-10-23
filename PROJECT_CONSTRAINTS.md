@@ -190,44 +190,56 @@ Before marking implementation complete, verify:
 
 ```
 /home/dev/Development/qb/
-├── QueryBuilder.cs (existing)
 ├── PROJECT_CONSTRAINTS.md (this file)
-├── QueryBuilderDemo/
+├── QueryBuilderDemo/                    # Main library - QueryBuilder utility only
 │   ├── QueryBuilderDemo.csproj
-│   ├── Models/
-│   │   ├── Organisation.cs
-│   │   ├── Department.cs
-│   │   ├── Employee.cs
-│   │   ├── Project.cs
-│   │   ├── Task.cs
-│   │   ├── Location.cs
-│   │   ├── Role.cs
-│   │   ├── Skill.cs
-│   │   ├── Certification.cs
-│   │   ├── Team.cs
-│   │   ├── Meeting.cs
-│   │   ├── Schedule.cs
-│   │   ├── Client.cs
-│   │   ├── Invoice.cs
-│   │   └── Payment.cs
-│   ├── Data/
-│   │   ├── ApplicationDbContext.cs
-│   │   └── SampleDataSeeder.cs
 │   └── Utils/
-│       └── QueryBuilder.cs (copy from root)
-└── QueryBuilderDemo.Tests/
+│       ├── QueryBuilder.cs
+│       └── Model/
+│           ├── WhereAttribute.cs
+│           ├── DLINQOrderbyAttribute.cs
+│           └── RecursiveIncludeLevelAttribute.cs
+└── QueryBuilderDemo.Tests/              # Test project - Contains all test data
     ├── QueryBuilderDemo.Tests.csproj
+    ├── Data/
+    │   ├── ApplicationDbContext.cs      # Moved from main project
+    │   └── SampleDataSeeder.cs          # Moved from main project
+    ├── Models/                          # All models moved from main project
+    │   ├── Organisation.cs
+    │   ├── Department.cs
+    │   ├── Employee.cs
+    │   ├── Project.cs
+    │   ├── Task.cs
+    │   ├── Location.cs
+    │   ├── Role.cs
+    │   ├── Skill.cs
+    │   ├── Certification.cs
+    │   ├── Team.cs
+    │   ├── Meeting.cs
+    │   ├── Schedule.cs
+    │   ├── Client.cs
+    │   ├── Invoice.cs
+    │   └── Payment.cs
     ├── Helpers/
     │   └── TestDbContextFactory.cs
-    ├── EntityTests/
-    │   ├── OrganisationTests.cs
-    │   ├── EmployeeTests.cs
-    │   └── [others]
     └── QueryBuilderTests/
+        ├── BasicQueryBuilderTests.cs
         ├── BuildQueryTests.cs
         ├── BuildDLINQQueryTests.cs
-        └── BuildFlattenedQueryTests.cs
+        ├── BuildFlattenedQueryTests.cs
+        ├── DeepNavigationTests.cs
+        ├── ExpandFieldsToScalarsTests.cs
+        ├── HierarchicalOrderingAndFilteringTests.cs
+        ├── ManyToManyTests.cs
+        ├── RelationshipTests.cs
+        ├── SplitIncludesTests.cs
+        └── WildcardQueryTests.cs
 ```
+
+**Note:** As of 2025-10-23, the project structure has been refactored so that:
+- The main project (QueryBuilderDemo) contains **only the QueryBuilder utility and attributes**
+- The test project (QueryBuilderDemo.Tests) contains **all models, DbContext, and test data**
+- This makes QueryBuilderDemo a clean, reusable library package
 
 ## Success Criteria
 

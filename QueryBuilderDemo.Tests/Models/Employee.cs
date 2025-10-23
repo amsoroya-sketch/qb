@@ -1,6 +1,6 @@
 using PbsApi.Utils.Model;
 
-namespace QueryBuilderDemo.Models
+namespace QueryBuilderDemo.Tests.Models
 {
     /// <summary>
     /// Employee entity with default ordering by LastName, then FirstName (standard person sorting)

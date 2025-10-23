@@ -1,6 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using FluentAssertions;
-using QueryBuilderDemo.Models;
+using QueryBuilderDemo.Tests.Models;
 using PbsApi.Utils;
 using System.Linq;
 

@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using FluentAssertions;
-using QueryBuilderDemo.Data;
-using QueryBuilderDemo.Models;
+using QueryBuilderDemo.Tests.Data;
+using QueryBuilderDemo.Tests.Models;
 using QueryBuilderDemo.Tests.Helpers;
 using PbsApi.Utils;
 using Microsoft.EntityFrameworkCore;
