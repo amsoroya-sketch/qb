@@ -343,6 +343,16 @@ namespace PbsApi.Utils
       return scalarFields;
     }
 
+    /// <summary>
+    /// Extension method for BuildFlattenedQuery with generic type parameter
+    /// </summary>
+    public static IQueryable BuildFlattenedQuery<T>(this IQueryable<T> query, HashSet<string> selectFields) where T : class
+    {
+      var entityType = typeof(T);
+      var fieldsList = selectFields.ToList();
+      return BuildFlattenedQuery(query, entityType, fieldsList);
+    }
+
     public static IQueryable BuildFlattenedQuery(IQueryable query, Type entityType, List<string> selectFields)
     {
       // Preprocess: expand any entity/collection references to their scalar fields
