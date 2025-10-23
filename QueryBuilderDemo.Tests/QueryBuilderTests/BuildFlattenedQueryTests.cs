@@ -699,5 +699,120 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             //            Departments_Employees_FirstName: "John", Departments_Employees_LastName: "Doe",
             //            Departments_Employees_Email: "john@..." }
         }
+
+        [TestMethod]
+        public void BuildFlattenedQuery_WithEntityReference_AutomaticallyExpandsToScalarFields()
+        {
+            // This test demonstrates the preprocessing feature where "Departments.Employees"
+            // automatically expands to all Employee scalar fields
+            using var context = TestDbContextFactory.CreateInMemoryContext();
+            SampleDataSeeder.SeedTestData(context);
+
+            // User passes entity reference "Departments.Employees" instead of individual fields
+            var selectFields = new List<string>
+            {
+                "Id",
+                "Name",
+                "Departments.Employees" // Entity reference - should expand automatically
+            };
+
+            // Act
+            var query = QueryBuilder.BuildFlattenedQuery(
+                context.Organisations.AsQueryable(),
+                typeof(Organisation),
+                selectFields
+            );
+
+            // Verify SQL is generated (preprocessing expands to scalar fields before query building)
+            var sql = query.ToQueryString();
+            sql.Should().Contain("DISTINCT", "Should apply DISTINCT after expansion");
+            sql.Should().Contain("SELECT", "Should generate SQL query");
+
+            var results = ExecuteQuery(query);
+            results.Should().NotBeEmpty();
+
+            // Verify that the expanded fields are present in the result
+            var firstResult = results.First();
+            // The preprocessing should have expanded "Departments.Employees" to all Employee scalar fields:
+            // Departments.Employees.Id, Departments.Employees.FirstName, Departments.Employees.LastName,
+            // Departments.Employees.Email, Departments.Employees.DepartmentId, Departments.Employees.RoleId
+
+            // Check that the dynamic object has the expected expanded properties using reflection
+            var resultType = firstResult.GetType();
+            var idProp = resultType.GetProperty("Departments_Employees_Id");
+            var firstNameProp = resultType.GetProperty("Departments_Employees_FirstName");
+            var lastNameProp = resultType.GetProperty("Departments_Employees_LastName");
+            var emailProp = resultType.GetProperty("Departments_Employees_Email");
+
+            Assert.IsNotNull(idProp, "Departments.Employees should expand to include Id field");
+            Assert.IsNotNull(firstNameProp, "Departments.Employees should expand to include FirstName field");
+            Assert.IsNotNull(lastNameProp, "Departments.Employees should expand to include LastName field");
+            Assert.IsNotNull(emailProp, "Departments.Employees should expand to include Email field");
+
+            // Verify we can access the values
+            dynamic dynamicResult = firstResult;
+            var id = dynamicResult.Departments_Employees_Id;
+            Assert.IsNotNull((object)id);
+        }
+
+        [TestMethod]
+        public void BuildFlattenedQuery_WithMixedScalarAndEntityReferences_ExpandsOnlyEntities()
+        {
+            // User passes a mix of scalar fields and entity references
+            using var context = TestDbContextFactory.CreateInMemoryContext();
+            SampleDataSeeder.SeedTestData(context);
+
+            var selectFields = new List<string>
+            {
+                "Id",                          // Scalar - should remain as-is
+                "Name",                        // Scalar - should remain as-is
+                "Departments.Name",            // Scalar path - should remain as-is
+                "Departments.Employees"        // Entity reference - should expand
+            };
+
+            // Act
+            var query = QueryBuilder.BuildFlattenedQuery(
+                context.Organisations.AsQueryable(),
+                typeof(Organisation),
+                selectFields
+            );
+
+            // Verify SQL generation
+            var sql = query.ToQueryString();
+            sql.Should().Contain("DISTINCT");
+            sql.Should().Contain("SELECT");
+
+            var results = ExecuteQuery(query);
+            results.Should().NotBeEmpty();
+
+            // Verify both scalar and expanded fields are present using reflection
+            var firstResult = results.First();
+            var resultType = firstResult.GetType();
+
+            // Original scalar fields should be present
+            var idProp = resultType.GetProperty("Id");
+            var nameProp = resultType.GetProperty("Name");
+            var deptNameProp = resultType.GetProperty("Departments_Name");
+
+            Assert.IsNotNull(idProp, "Scalar field Id should remain as-is");
+            Assert.IsNotNull(nameProp, "Scalar field Name should remain as-is");
+            Assert.IsNotNull(deptNameProp, "Scalar path Departments.Name should remain as-is");
+
+            // Expanded employee fields should be present
+            var empIdProp = resultType.GetProperty("Departments_Employees_Id");
+            var empFirstNameProp = resultType.GetProperty("Departments_Employees_FirstName");
+            var empLastNameProp = resultType.GetProperty("Departments_Employees_LastName");
+
+            Assert.IsNotNull(empIdProp, "Entity reference should expand to Id");
+            Assert.IsNotNull(empFirstNameProp, "Entity reference should expand to FirstName");
+            Assert.IsNotNull(empLastNameProp, "Entity reference should expand to LastName");
+
+            // Verify we can access the values
+            dynamic dynamicResult = firstResult;
+            int orgId = dynamicResult.Id;
+            string empFirstName = dynamicResult.Departments_Employees_FirstName;
+            orgId.Should().BeGreaterThan(0);
+            empFirstName.Should().NotBeNullOrEmpty();
+        }
     }
 }

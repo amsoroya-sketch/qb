@@ -2,6 +2,10 @@ using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Models
 {
+    /// <summary>
+    /// Department entity with default ordering by Name (alphabetical)
+    /// </summary>
+    [DLINQOrderby("Name")]
     public class Department
     {
         public int Id { get; set; }

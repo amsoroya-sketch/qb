@@ -2,6 +2,11 @@ using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Models
 {
+    /// <summary>
+    /// Role entity with default ordering by Level (hierarchy), then Title
+    /// </summary>
+    [DLINQOrderby("Level")]
+    [DLINQOrderby("Title")]
     public class Role
     {
         public int Id { get; set; }

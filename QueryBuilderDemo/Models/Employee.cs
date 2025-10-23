@@ -2,6 +2,11 @@ using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Models
 {
+    /// <summary>
+    /// Employee entity with default ordering by LastName, then FirstName (standard person sorting)
+    /// </summary>
+    [DLINQOrderby("LastName")]
+    [DLINQOrderby("FirstName")]
     public class Employee
     {
         public int Id { get; set; }

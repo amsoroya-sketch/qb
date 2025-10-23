@@ -73,13 +73,20 @@ namespace PbsApi.Utils
 
     private static Expression ApplyOrderByAttributes(Expression queryExpr, Type elementType, ParameterExpression parameter, PropertyInfo propertyInfo)
     {
+      // Only apply ordering to collection properties
       if (IsScalar(propertyInfo))
         return queryExpr;
+
       var orderAttrs = propertyInfo.GetCustomAttributes<DLINQOrderbyAttribute>()?.ToList()
           ?? new List<DLINQOrderbyAttribute>();
       orderAttrs.AddRange(elementType.GetCustomAttributes<DLINQOrderbyAttribute>());
 
       if (!orderAttrs.Any()) return queryExpr;
+
+      // Check if the expression type is a collection
+      // If not a collection, skip ordering to prevent Expression.Call errors
+      if (GetEnumerableType(queryExpr.Type) == null)
+        return queryExpr;
 
       bool isFirst = true;
       foreach (var attr in orderAttrs)
@@ -226,8 +233,122 @@ namespace PbsApi.Utils
       return iface?.GetGenericArguments()[0];
     }
 
+    /// <summary>
+    /// Expands entity/collection references to their scalar fields.
+    /// Example: "Departments.Employees" → ["Departments.Employees.Id", "Departments.Employees.FirstName", ...]
+    /// </summary>
+    public static List<string> ExpandFieldsToScalars(List<string> selectFields, Type rootEntityType)
+    {
+      var expandedFields = new List<string>();
+
+      foreach (var field in selectFields)
+      {
+        if (string.IsNullOrWhiteSpace(field)) continue;
+
+        // Navigate to the target type
+        var parts = field.Split('.');
+        var currentType = rootEntityType;
+
+        for (int i = 0; i < parts.Length; i++)
+        {
+          var part = parts[i];
+          var prop = currentType.GetProperty(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+
+          if (prop == null)
+          {
+            // Property not found, add as-is
+            expandedFields.Add(field);
+            break;
+          }
+
+          // Check if this is the last part
+          if (i == parts.Length - 1)
+          {
+            // Last part - check if it's a scalar or entity/collection
+            if (IsScalar(prop))
+            {
+              // Already scalar, add as-is
+              expandedFields.Add(field);
+            }
+            else
+            {
+              // Entity or collection - expand to all scalar fields
+              var targetType = GetEnumerableType(prop.PropertyType) ?? prop.PropertyType;
+              var scalarFields = GetAllScalarFields(targetType, field);
+              expandedFields.AddRange(scalarFields);
+            }
+          }
+          else
+          {
+            // Intermediate part - move to next level
+            currentType = GetEnumerableType(prop.PropertyType) ?? prop.PropertyType;
+          }
+        }
+      }
+
+      return expandedFields.Distinct().ToList();
+    }
+
+    /// <summary>
+    /// Recursively gets all scalar field paths for a given type, expanding nested entities to their leaf nodes.
+    /// Example: Employee → ["Id", "FirstName", "LastName", "Email", "DepartmentId", "RoleId",
+    ///                       "Department.Id", "Department.Name", "Department.Budget", "Department.Head", "Department.OrganisationId",
+    ///                       "Role.Id", "Role.Title", ...]
+    /// </summary>
+    private static List<string> GetAllScalarFields(Type type, string basePath = "", HashSet<Type>? visitedTypes = null)
+    {
+      var scalarFields = new List<string>();
+
+      // Initialize visited types on first call to prevent circular references
+      if (visitedTypes == null)
+      {
+        visitedTypes = new HashSet<Type>();
+      }
+
+      // Prevent infinite recursion from circular references
+      if (visitedTypes.Contains(type))
+      {
+        return scalarFields;
+      }
+
+      visitedTypes.Add(type);
+
+      foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+      {
+        var fieldPath = string.IsNullOrEmpty(basePath) ? prop.Name : $"{basePath}.{prop.Name}";
+
+        if (IsScalar(prop))
+        {
+          // Direct scalar property - add it
+          scalarFields.Add(fieldPath);
+        }
+        else if (IsCollectionType(prop.PropertyType, out var elementType))
+        {
+          // Collection property - skip it (don't expand collections recursively)
+          // Collections should be explicitly specified by the user
+          continue;
+        }
+        else
+        {
+          // Entity reference (non-scalar, non-collection) - recursively expand to leaf nodes
+          var nestedType = prop.PropertyType;
+
+          // Create a new visited set for this branch to allow the same type in different paths
+          var branchVisitedTypes = new HashSet<Type>(visitedTypes);
+          var nestedFields = GetAllScalarFields(nestedType, fieldPath, branchVisitedTypes);
+          scalarFields.AddRange(nestedFields);
+        }
+      }
+
+      return scalarFields;
+    }
+
     public static IQueryable BuildFlattenedQuery(IQueryable query, Type entityType, List<string> selectFields)
     {
+      // Preprocess: expand any entity/collection references to their scalar fields
+      // Example: "Departments.Employees" → ["Departments.Employees.Id", "Departments.Employees.FirstName", ...]
+      selectFields = ExpandFieldsToScalars(selectFields, entityType);
+
       var collectionLevels = FindAllCollectionLevels(selectFields, entityType);
 
       if (collectionLevels.Count == 0)

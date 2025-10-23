@@ -3,6 +3,12 @@ using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Models
 {
+    /// <summary>
+    /// Certification entity with default ordering by ValidUntil (descending - newest first)
+    /// Filtered to show only valid (non-expired) certifications by default
+    /// </summary>
+    [DLINQOrderby("ValidUntil", descending: true)]
+    [Where("ValidUntil >= DateTime.Now")]
     public class Certification
     {
         public int Id { get; set; }

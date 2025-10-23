@@ -2,6 +2,11 @@ using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Models
 {
+    /// <summary>
+    /// Skill entity with default ordering by Category, then Name
+    /// </summary>
+    [DLINQOrderby("Category")]
+    [DLINQOrderby("Name")]
     public class Skill
     {
         public int Id { get; set; }

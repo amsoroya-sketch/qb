@@ -3,6 +3,12 @@ using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Models
 {
+    /// <summary>
+    /// Task entity with default ordering by DueDate (most urgent first)
+    /// Filtered to exclude completed tasks by default
+    /// </summary>
+    [DLINQOrderby("DueDate")]
+    [Where("Status != \"Completed\"")]
     public class Task
     {
         public int Id { get; set; }

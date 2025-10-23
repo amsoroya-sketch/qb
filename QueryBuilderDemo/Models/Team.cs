@@ -2,6 +2,10 @@ using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Models
 {
+    /// <summary>
+    /// Team entity with default ordering by Name
+    /// </summary>
+    [DLINQOrderby("Name")]
     public class Team
     {
         public int Id { get; set; }
