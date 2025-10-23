@@ -8,12 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace QueryBuilderDemo.Tests.QueryBuilderTests
-{gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
-gtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt    /// <summary>
+{
+    /// <summary>
     /// Tests specifically focused on many-to-many relationships.
-    /// </summary>rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+    /// </summary>
     [TestClass]
-    public class ManyToManyTeststttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
+    public class ManyToManyTests
     {
         #region Employee <-> Projects
 
@@ -58,11 +58,11 @@ gttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
 
         [TestMethod]
         public void BuildQuery_BidirectionalManyToMany_EmployeeProjectsTeamMembers()
-        {ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        {
             // Arrange
-            using var context = TestDbContextFactory.CreateInMemoryContext();ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-            SampleDataSeeder.SeedTestData(context);dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddfffffffffffffffffffffffffffffffffffffffffm
-ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+            using var context = TestDbContextFactory.CreateInMemoryContext();
+            SampleDataSeeder.SeedTestData(context);
+
             // Act
             var employees = context.Employees
                 .BuildQuery(new HashSet<string> { "Projects.TeamMembers" })
