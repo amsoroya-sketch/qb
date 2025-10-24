@@ -61,7 +61,9 @@ namespace PbsApi.Utils
 
       if (string.IsNullOrEmpty(filterExpression)) return queryExpr;
 
-      var filterPredicate = DynamicExpressionParser.ParseLambda(parameter.Type, typeof(bool), filterExpression);
+      // Fix #2: ParseLambda expects parameter array, not Type
+      var filterPredicate = DynamicExpressionParser.ParseLambda(new[] { parameter }, typeof(bool), filterExpression);
+
       return Expression.Call(
           typeof(Enumerable),
           "Where",
@@ -88,11 +90,18 @@ namespace PbsApi.Utils
       if (GetEnumerableType(queryExpr.Type) == null)
         return queryExpr;
 
+      // Fix #4: Use Enumerable methods - EF Core will translate them to SQL in Include expressions
       bool isFirst = true;
       foreach (var attr in orderAttrs)
       {
         var subPropertyExpression = Expression.Property(parameter, attr.PropertyName);
-        var subPropertyLambdaExpression = Expression.Lambda(Expression.Convert(subPropertyExpression, typeof(object)), parameter);
+
+        // Fix #3: Use actual property type instead of boxing to object
+        // This allows EF Core to translate OrderBy to SQL
+        var propertyType = subPropertyExpression.Type;
+        var lambdaType = typeof(Func<,>).MakeGenericType(elementType, propertyType);
+        var subPropertyLambdaExpression = Expression.Lambda(lambdaType, subPropertyExpression, parameter);
+
         var methodName = isFirst
             ? (attr.Descending ? "OrderByDescending" : "OrderBy")
             : (attr.Descending ? "ThenByDescending" : "ThenBy");
@@ -100,7 +109,7 @@ namespace PbsApi.Utils
         queryExpr = Expression.Call(
             typeof(Enumerable),
             methodName,
-            new[] { elementType, typeof(object) },
+            new[] { elementType, propertyType },
             queryExpr,
             subPropertyLambdaExpression
         );
@@ -125,9 +134,11 @@ namespace PbsApi.Utils
       Expression queryExpr = ApplyWhereFilter(propertyAccess, actualTypeOfRelatedProp, relatedPropParam, relatedPropInfo);
       queryExpr = ApplyOrderByAttributes(queryExpr, actualTypeOfRelatedProp, relatedPropParam, relatedPropInfo);
 
-      var entityParam = Expression.Parameter(query.ElementType, "x");
-      var lambda = Expression.Lambda(queryExpr, entityParam);
+      // Fix #1: Use queryEntityParam (defined at line 129) instead of creating new parameter
+      // This ensures parameter identity matches between lambda body and parameters
+      var lambda = Expression.Lambda(queryExpr, queryEntityParam);
 
+      // The Include generic type must match the lambda body type (after OrderBy/Where)
       var methodFiltered = typeof(EntityFrameworkQueryableExtensions)
           .GetMethods()
           .First(m => m.Name == "Include" && m.GetParameters().Length == 2)
@@ -210,6 +221,7 @@ namespace PbsApi.Utils
       // Use queryEntityParam instead of query.ElementType
       var lambda = Expression.Lambda(queryExpr, queryEntityParam);
 
+      // The ThenInclude generic type must match the lambda body type (after OrderBy/Where)
       var method = GetThenIncludeMethod(query.ElementType, parentPropertyInfo.PropertyType, lambda.Body.Type);
       if (method == null)
         return query;
