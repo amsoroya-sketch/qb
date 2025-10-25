@@ -5,6 +5,7 @@ using QueryBuilderDemo.Tests.Models;
 using QueryBuilderDemo.Tests.Helpers;
 using PbsApi.Utils;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace QueryBuilderDemo.Tests.QueryBuilderTests
