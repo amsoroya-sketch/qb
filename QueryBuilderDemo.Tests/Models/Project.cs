@@ -6,7 +6,7 @@ namespace QueryBuilderDemo.Tests.Models
     /// <summary>
     /// Project entity with default ordering by Deadline (most urgent first)
     /// </summary>
-    [DLINQOrderby("Deadline")]
+    [DLINQOrderbyAttribute("Deadline")]
     public class Project
     {
         public int Id { get; set; }

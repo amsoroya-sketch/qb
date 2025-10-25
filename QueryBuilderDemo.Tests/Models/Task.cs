@@ -7,8 +7,8 @@ namespace QueryBuilderDemo.Tests.Models
     /// Task entity with default ordering by DueDate (most urgent first)
     /// Filtered to exclude completed tasks by default
     /// </summary>
-    [DLINQOrderby("DueDate")]
-    [Where("Status != \"Completed\"")]
+    [DLINQOrderbyAttribute("DueDate")]
+    [WhereAttribute("Status != \"Completed\"")]
     public class Task
     {
         public int Id { get; set; }

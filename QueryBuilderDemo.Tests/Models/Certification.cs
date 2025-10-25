@@ -7,8 +7,8 @@ namespace QueryBuilderDemo.Tests.Models
     /// Certification entity with default ordering by ValidUntil (descending - newest first)
     /// Filtered to show only valid (non-expired) certifications by default
     /// </summary>
-    [DLINQOrderby("ValidUntil", descending: true)]
-    [Where("ValidUntil >= DateTime.Now")]
+    [DLINQOrderbyAttribute("ValidUntil", descending: true)]
+    [WhereAttribute("ValidUntil >= DateTime.Now")]
     public class Certification
     {
         public int Id { get; set; }

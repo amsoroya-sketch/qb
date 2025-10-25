@@ -5,7 +5,7 @@ namespace QueryBuilderDemo.Tests.Models
     /// <summary>
     /// Organisation entity with default ordering by Name (alphabetical)
     /// </summary>
-    [DLINQOrderby("Name")]
+    [DLINQOrderbyAttribute("Name")]
     public class Organisation
     {
         public int Id { get; set; }

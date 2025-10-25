@@ -5,8 +5,8 @@ namespace QueryBuilderDemo.Tests.Models
     /// <summary>
     /// Skill entity with default ordering by Category, then Name
     /// </summary>
-    [DLINQOrderby("Category")]
-    [DLINQOrderby("Name")]
+    [DLINQOrderbyAttribute("Category")]
+    [DLINQOrderbyAttribute("Name")]
     public class Skill
     {
         public int Id { get; set; }

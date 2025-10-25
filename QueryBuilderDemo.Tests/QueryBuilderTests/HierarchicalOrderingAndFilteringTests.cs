@@ -19,7 +19,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            // Act - Include Departments which should be ordered by Department.Name due to class-level [DLINQOrderby]
+            // Act - Include Departments which should be ordered by Department.Name due to class-level [DLINQOrderbyAttribute]
             var result = context.Organisations
                 .BuildQuery(new HashSet<string> { "Departments" })
                 .ToList();
@@ -198,9 +198,9 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             if (projectWithTasks != null)
             {
-                // Due to [Where] attribute, completed tasks should be filtered out
+                // Due to [WhereAttribute] attribute, completed tasks should be filtered out
                 Assert.IsFalse(projectWithTasks.Tasks.Any(t => t.Status == "Completed"),
-                    "Tasks with Status 'Completed' should be filtered out by [Where] attribute");
+                    "Tasks with Status 'Completed' should be filtered out by [WhereAttribute] attribute");
             }
         }
 
@@ -222,7 +222,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             if (empWithCerts != null)
             {
-                // Due to [Where("ValidUntil >= DateTime.Now")] attribute, expired certs should be filtered out
+                // Due to [WhereAttribute("ValidUntil >= DateTime.Now")] attribute, expired certs should be filtered out
                 Assert.IsTrue(empWithCerts.Certifications.All(c => c.ValidUntil >= System.DateTime.Now),
                     "Only valid (non-expired) certifications should be included");
             }

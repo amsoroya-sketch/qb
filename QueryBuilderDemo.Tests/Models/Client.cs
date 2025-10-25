@@ -5,7 +5,7 @@ namespace QueryBuilderDemo.Tests.Models
     /// <summary>
     /// Client entity with default ordering by Name (alphabetical)
     /// </summary>
-    [DLINQOrderby("Name")]
+    [DLINQOrderbyAttribute("Name")]
     public class Client
     {
         public int Id { get; set; }

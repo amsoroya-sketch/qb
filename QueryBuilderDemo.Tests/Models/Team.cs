@@ -5,7 +5,7 @@ namespace QueryBuilderDemo.Tests.Models
     /// <summary>
     /// Team entity with default ordering by Name
     /// </summary>
-    [DLINQOrderby("Name")]
+    [DLINQOrderbyAttribute("Name")]
     public class Team
     {
         public int Id { get; set; }

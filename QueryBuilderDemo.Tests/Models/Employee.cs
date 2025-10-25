@@ -5,8 +5,8 @@ namespace QueryBuilderDemo.Tests.Models
     /// <summary>
     /// Employee entity with default ordering by LastName, then FirstName (standard person sorting)
     /// </summary>
-    [DLINQOrderby("LastName")]
-    [DLINQOrderby("FirstName")]
+    [DLINQOrderbyAttribute("LastName")]
+    [DLINQOrderbyAttribute("FirstName")]
     public class Employee
     {
         public int Id { get; set; }
