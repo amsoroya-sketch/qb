@@ -1,0 +1,6 @@
+@QueryBuilderDemo.GraphQL_HostAddress = http://localhost:5256
+
+GET {{QueryBuilderDemo.GraphQL_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

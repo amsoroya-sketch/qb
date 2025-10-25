@@ -11,21 +11,21 @@ namespace QueryBuilderDemo.Tests.Data
             context.Database.EnsureCreated();
 
             // Create Locations
-            var locationSF = new Location
+            var locationSF = new Models.Location
             {
                 City = "San Francisco",
                 State = "California",
                 Country = "USA"
             };
 
-            var locationNY = new Location
+            var locationNY = new Models.Location
             {
                 City = "New York",
                 State = "New York",
                 Country = "USA"
             };
 
-            var locationLondon = new Location
+            var locationLondon = new Models.Location
             {
                 City = "London",
                 State = "England",

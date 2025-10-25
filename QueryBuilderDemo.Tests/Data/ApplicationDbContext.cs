@@ -16,7 +16,7 @@ namespace QueryBuilderDemo.Tests.Data
         public DbSet<Employee> Employees { get; set; } = null!;
         public DbSet<Project> Projects { get; set; } = null!;
         public DbSet<Models.Task> Tasks { get; set; } = null!;
-        public DbSet<Location> Locations { get; set; } = null!;
+        public DbSet<Models.Location> Locations { get; set; } = null!;
         public DbSet<Role> Roles { get; set; } = null!;
         public DbSet<Skill> Skills { get; set; } = null!;
         public DbSet<Certification> Certifications { get; set; } = null!;
