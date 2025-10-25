@@ -1,5 +1,4 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using FluentAssertions;
 using QueryBuilderDemo.Tests.Models;
 using PbsApi.Utils;
 using System.Collections.Generic;
@@ -20,11 +19,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee));
 
             // Assert
-            result.Should().HaveCount(4);
-            result.Should().Contain("Id");
-            result.Should().Contain("FirstName");
-            result.Should().Contain("LastName");
-            result.Should().Contain("Email");
+            Assert.AreEqual(4, result.Count());
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("FirstName"));
+            Assert.IsTrue(result.Contains("LastName"));
+            Assert.IsTrue(result.Contains("Email"));
         }
 
         [TestMethod]
@@ -37,17 +36,17 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee));
 
             // Assert
-            result.Should().Contain("Id");
-            result.Should().Contain("FirstName");
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("FirstName"));
             // Department entity should be expanded to its scalar fields (and nested entities)
-            result.Should().Contain("Department.Id");
-            result.Should().Contain("Department.Name");
-            result.Should().Contain("Department.OrganisationId");
+            Assert.IsTrue(result.Contains("Department.Id"));
+            Assert.IsTrue(result.Contains("Department.Name"));
+            Assert.IsTrue(result.Contains("Department.OrganisationId"));
             // Should recursively expand Department.Organisation
-            result.Should().Contain("Department.Organisation.Id");
-            result.Should().Contain("Department.Organisation.Name");
+            Assert.IsTrue(result.Contains("Department.Organisation.Id"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Name"));
             // Should NOT contain the entity reference itself
-            result.Should().NotContain("Department");
+            Assert.IsFalse(result.Contains("Department"));
         }
 
         [TestMethod]
@@ -60,14 +59,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Organisation));
 
             // Assert
-            result.Should().Contain("Id");
-            result.Should().Contain("Name");
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("Name"));
             // Departments collection should be expanded to scalar fields
-            result.Should().Contain("Departments.Id");
-            result.Should().Contain("Departments.Name");
-            result.Should().Contain("Departments.OrganisationId");
+            Assert.IsTrue(result.Contains("Departments.Id"));
+            Assert.IsTrue(result.Contains("Departments.Name"));
+            Assert.IsTrue(result.Contains("Departments.OrganisationId"));
             // Should NOT contain the collection reference itself
-            result.Should().NotContain("Departments");
+            Assert.IsFalse(result.Contains("Departments"));
         }
 
         [TestMethod]
@@ -80,15 +79,15 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee));
 
             // Assert
-            result.Should().Contain("Id");
-            result.Should().Contain("FirstName");
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("FirstName"));
             // Department.Organisation should expand to Organisation scalar fields
-            result.Should().Contain("Department.Organisation.Id");
-            result.Should().Contain("Department.Organisation.Name");
-            result.Should().Contain("Department.Organisation.Industry");
-            result.Should().Contain("Department.Organisation.FoundYear");
+            Assert.IsTrue(result.Contains("Department.Organisation.Id"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Name"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Industry"));
+            Assert.IsTrue(result.Contains("Department.Organisation.FoundYear"));
             // Should NOT contain the entity reference itself
-            result.Should().NotContain("Department.Organisation");
+            Assert.IsFalse(result.Contains("Department.Organisation"));
         }
 
         [TestMethod]
@@ -101,17 +100,17 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Organisation));
 
             // Assert
-            result.Should().Contain("Id");
-            result.Should().Contain("Name");
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("Name"));
             // Departments.Employees should expand to Employee scalar fields
-            result.Should().Contain("Departments.Employees.Id");
-            result.Should().Contain("Departments.Employees.FirstName");
-            result.Should().Contain("Departments.Employees.LastName");
-            result.Should().Contain("Departments.Employees.Email");
-            result.Should().Contain("Departments.Employees.DepartmentId");
-            result.Should().Contain("Departments.Employees.RoleId");
+            Assert.IsTrue(result.Contains("Departments.Employees.Id"));
+            Assert.IsTrue(result.Contains("Departments.Employees.FirstName"));
+            Assert.IsTrue(result.Contains("Departments.Employees.LastName"));
+            Assert.IsTrue(result.Contains("Departments.Employees.Email"));
+            Assert.IsTrue(result.Contains("Departments.Employees.DepartmentId"));
+            Assert.IsTrue(result.Contains("Departments.Employees.RoleId"));
             // Should NOT contain the collection reference itself
-            result.Should().NotContain("Departments.Employees");
+            Assert.IsFalse(result.Contains("Departments.Employees"));
         }
 
         [TestMethod]
@@ -132,15 +131,15 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             // Assert
             // Scalar fields should remain
-            result.Should().Contain("Id");
-            result.Should().Contain("FirstName");
-            result.Should().Contain("LastName");
-            result.Should().Contain("Email");
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("FirstName"));
+            Assert.IsTrue(result.Contains("LastName"));
+            Assert.IsTrue(result.Contains("Email"));
             // Department should be expanded
-            result.Should().Contain("Department.Id");
-            result.Should().Contain("Department.Name");
-            result.Should().Contain("Department.OrganisationId");
-            result.Should().NotContain("Department");
+            Assert.IsTrue(result.Contains("Department.Id"));
+            Assert.IsTrue(result.Contains("Department.Name"));
+            Assert.IsTrue(result.Contains("Department.OrganisationId"));
+            Assert.IsFalse(result.Contains("Department"));
         }
 
         [TestMethod]
@@ -153,11 +152,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee));
 
             // Assert
-            result.Should().Contain("Id");
-            result.Should().Contain("FirstName");
-            result.Should().Contain("Department.Name");
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("FirstName"));
+            Assert.IsTrue(result.Contains("Department.Name"));
             // Should not expand since it's already a scalar path
-            result.Should().NotContain("Department.Id");
+            Assert.IsFalse(result.Contains("Department.Id"));
         }
 
         [TestMethod]
@@ -175,15 +174,15 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Organisation));
 
             // Assert
-            result.Should().Contain("Id");
-            result.Should().Contain("Name");
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("Name"));
             // Should expand to all Employee scalar fields
-            result.Should().Contain("Departments.Employees.Id");
-            result.Should().Contain("Departments.Employees.FirstName");
-            result.Should().Contain("Departments.Employees.LastName");
-            result.Should().Contain("Departments.Employees.Email");
-            result.Should().Contain("Departments.Employees.DepartmentId");
-            result.Should().Contain("Departments.Employees.RoleId");
+            Assert.IsTrue(result.Contains("Departments.Employees.Id"));
+            Assert.IsTrue(result.Contains("Departments.Employees.FirstName"));
+            Assert.IsTrue(result.Contains("Departments.Employees.LastName"));
+            Assert.IsTrue(result.Contains("Departments.Employees.Email"));
+            Assert.IsTrue(result.Contains("Departments.Employees.DepartmentId"));
+            Assert.IsTrue(result.Contains("Departments.Employees.RoleId"));
         }
 
         [TestMethod]
@@ -196,8 +195,8 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee));
 
             // Assert
-            result.Should().Contain("Id");
-            result.Should().Contain("InvalidProperty"); // Should add as-is when property not found
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("InvalidProperty")); // Should add as-is when property not found
         }
 
         [TestMethod]
@@ -210,7 +209,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee));
 
             // Assert
-            result.Should().BeEmpty();
+            Assert.IsFalse(result.Any());
         }
 
         [TestMethod]
@@ -228,18 +227,18 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             // Assert
             // Should have distinct fields only (recursive expansion includes Organisation too)
-            result.Should().Contain("Department.Id");
-            result.Should().Contain("Department.Name");
-            result.Should().Contain("Department.Budget");
-            result.Should().Contain("Department.Head");
-            result.Should().Contain("Department.OrganisationId");
-            result.Should().Contain("Department.Organisation.Id");
-            result.Should().Contain("Department.Organisation.Name");
-            result.Should().Contain("Department.Organisation.Industry");
-            result.Should().Contain("Department.Organisation.FoundYear");
+            Assert.IsTrue(result.Contains("Department.Id"));
+            Assert.IsTrue(result.Contains("Department.Name"));
+            Assert.IsTrue(result.Contains("Department.Budget"));
+            Assert.IsTrue(result.Contains("Department.Head"));
+            Assert.IsTrue(result.Contains("Department.OrganisationId"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Id"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Name"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Industry"));
+            Assert.IsTrue(result.Contains("Department.Organisation.FoundYear"));
             // Count should reflect distinct values (all Department + nested Organisation scalar fields)
             // No exact count assertion since it depends on recursive depth
-            result.Count.Should().BeGreaterThan(5, "Should include nested Organisation fields");
+            Assert.IsTrue(result.Count() > 5, "Should include nested Organisation fields");
         }
 
         [TestMethod]
@@ -258,19 +257,19 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee));
 
             // Assert
-            result.Should().Contain("Id");
-            result.Should().Contain("FirstName");
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("FirstName"));
             // Projects collection expanded
-            result.Should().Contain("Projects.Id");
-            result.Should().Contain("Projects.Title");
-            result.Should().Contain("Projects.Deadline");
-            result.Should().Contain("Projects.Budget");
-            result.Should().Contain("Projects.ClientId");
+            Assert.IsTrue(result.Contains("Projects.Id"));
+            Assert.IsTrue(result.Contains("Projects.Title"));
+            Assert.IsTrue(result.Contains("Projects.Deadline"));
+            Assert.IsTrue(result.Contains("Projects.Budget"));
+            Assert.IsTrue(result.Contains("Projects.ClientId"));
             // Skills collection expanded
-            result.Should().Contain("Skills.Id");
-            result.Should().Contain("Skills.Name");
-            result.Should().Contain("Skills.Proficiency");
-            result.Should().Contain("Skills.Category");
+            Assert.IsTrue(result.Contains("Skills.Id"));
+            Assert.IsTrue(result.Contains("Skills.Name"));
+            Assert.IsTrue(result.Contains("Skills.Proficiency"));
+            Assert.IsTrue(result.Contains("Skills.Category"));
         }
 
         [TestMethod]
@@ -291,12 +290,12 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             // Assert
             // All paths are already scalar, should remain unchanged
-            result.Should().Contain("Departments.Employees.FirstName");
-            result.Should().Contain("Departments.Employees.LastName");
-            result.Should().Contain("Departments.Employees.Id");
-            result.Should().Contain("Departments.Employees.Department.Id");
-            result.Should().Contain("Departments.Employees.Department.Name");
-            result.Should().HaveCount(5);
+            Assert.IsTrue(result.Contains("Departments.Employees.FirstName"));
+            Assert.IsTrue(result.Contains("Departments.Employees.LastName"));
+            Assert.IsTrue(result.Contains("Departments.Employees.Id"));
+            Assert.IsTrue(result.Contains("Departments.Employees.Department.Id"));
+            Assert.IsTrue(result.Contains("Departments.Employees.Department.Name"));
+            Assert.AreEqual(5, result.Count());
         }
 
         [TestMethod]
@@ -309,21 +308,21 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee));
 
             // Assert
-            result.Should().Contain("Id");
-            result.Should().Contain("FirstName");
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("FirstName"));
 
             // Department direct scalar fields
-            result.Should().Contain("Department.Id");
-            result.Should().Contain("Department.Name");
-            result.Should().Contain("Department.Budget");
-            result.Should().Contain("Department.Head");
-            result.Should().Contain("Department.OrganisationId");
+            Assert.IsTrue(result.Contains("Department.Id"));
+            Assert.IsTrue(result.Contains("Department.Name"));
+            Assert.IsTrue(result.Contains("Department.Budget"));
+            Assert.IsTrue(result.Contains("Department.Head"));
+            Assert.IsTrue(result.Contains("Department.OrganisationId"));
 
             // Department.Organisation nested scalar fields (recursive expansion!)
-            result.Should().Contain("Department.Organisation.Id");
-            result.Should().Contain("Department.Organisation.Name");
-            result.Should().Contain("Department.Organisation.Industry");
-            result.Should().Contain("Department.Organisation.FoundYear");
+            Assert.IsTrue(result.Contains("Department.Organisation.Id"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Name"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Industry"));
+            Assert.IsTrue(result.Contains("Department.Organisation.FoundYear"));
         }
 
         [TestMethod]
@@ -336,14 +335,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee));
 
             // Assert - Should expand but stop at circular reference
-            result.Should().Contain("Id");
-            result.Should().Contain("Department.Id");
-            result.Should().Contain("Department.Name");
-            result.Should().Contain("Department.Organisation.Id");
-            result.Should().Contain("Department.Organisation.Name");
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("Department.Id"));
+            Assert.IsTrue(result.Contains("Department.Name"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Id"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Name"));
 
             // Should NOT expand Department.Organisation.Departments.Employees (would cause infinite recursion)
-            result.Should().NotContain(f => f.Contains("Department.Organisation.Departments.Employees"));
+            Assert.IsFalse(result.Any(f => f.Contains("Department.Organisation.Departments.Employees")));
         }
 
         [TestMethod]
@@ -357,14 +356,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             // Assert
             // Should include Department and Organisation scalar fields
-            result.Should().Contain("Department.Id");
-            result.Should().Contain("Department.Organisation.Id");
+            Assert.IsTrue(result.Contains("Department.Id"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Id"));
 
             // Should NOT include Department.Organisation.Departments collection
-            result.Should().NotContain(f => f.StartsWith("Department.Organisation.Departments."));
+            Assert.IsFalse(result.Any(f => f.StartsWith("Department.Organisation.Departments.")));
 
             // Should NOT include Department.Employees collection
-            result.Should().NotContain(f => f.StartsWith("Department.Employees."));
+            Assert.IsFalse(result.Any(f => f.StartsWith("Department.Employees.")));
         }
 
         [TestMethod]
@@ -377,12 +376,12 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee));
 
             // Assert
-            result.Should().Contain("Id");
-            result.Should().Contain("FirstName");
-            result.Should().Contain("Role.Id");
-            result.Should().Contain("Role.Title");
-            result.Should().Contain("Role.Level");
-            result.Should().Contain("Role.Description");
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("FirstName"));
+            Assert.IsTrue(result.Contains("Role.Id"));
+            Assert.IsTrue(result.Contains("Role.Title"));
+            Assert.IsTrue(result.Contains("Role.Level"));
+            Assert.IsTrue(result.Contains("Role.Description"));
 
             // Role doesn't have nested entities, so no deeper expansion
         }
@@ -398,25 +397,25 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             // Assert
             // Employee direct scalar fields
-            result.Should().Contain("Departments.Employees.Id");
-            result.Should().Contain("Departments.Employees.FirstName");
-            result.Should().Contain("Departments.Employees.LastName");
-            result.Should().Contain("Departments.Employees.Email");
-            result.Should().Contain("Departments.Employees.DepartmentId");
-            result.Should().Contain("Departments.Employees.RoleId");
+            Assert.IsTrue(result.Contains("Departments.Employees.Id"));
+            Assert.IsTrue(result.Contains("Departments.Employees.FirstName"));
+            Assert.IsTrue(result.Contains("Departments.Employees.LastName"));
+            Assert.IsTrue(result.Contains("Departments.Employees.Email"));
+            Assert.IsTrue(result.Contains("Departments.Employees.DepartmentId"));
+            Assert.IsTrue(result.Contains("Departments.Employees.RoleId"));
 
             // Employee.Department nested scalar fields (recursive!)
-            result.Should().Contain("Departments.Employees.Department.Id");
-            result.Should().Contain("Departments.Employees.Department.Name");
-            result.Should().Contain("Departments.Employees.Department.Budget");
-            result.Should().Contain("Departments.Employees.Department.Head");
-            result.Should().Contain("Departments.Employees.Department.OrganisationId");
+            Assert.IsTrue(result.Contains("Departments.Employees.Department.Id"));
+            Assert.IsTrue(result.Contains("Departments.Employees.Department.Name"));
+            Assert.IsTrue(result.Contains("Departments.Employees.Department.Budget"));
+            Assert.IsTrue(result.Contains("Departments.Employees.Department.Head"));
+            Assert.IsTrue(result.Contains("Departments.Employees.Department.OrganisationId"));
 
             // Employee.Role nested scalar fields (recursive!)
-            result.Should().Contain("Departments.Employees.Role.Id");
-            result.Should().Contain("Departments.Employees.Role.Title");
-            result.Should().Contain("Departments.Employees.Role.Level");
-            result.Should().Contain("Departments.Employees.Role.Description");
+            Assert.IsTrue(result.Contains("Departments.Employees.Role.Id"));
+            Assert.IsTrue(result.Contains("Departments.Employees.Role.Title"));
+            Assert.IsTrue(result.Contains("Departments.Employees.Role.Level"));
+            Assert.IsTrue(result.Contains("Departments.Employees.Role.Description"));
         }
 
         [TestMethod]
@@ -430,24 +429,24 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             // Assert - Verify all levels are expanded
             // Level 0: Employee scalars
-            result.Should().Contain("Id");
-            result.Should().Contain("FirstName");
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("FirstName"));
 
             // Level 1: Department scalars
-            result.Should().Contain("Department.Id");
-            result.Should().Contain("Department.Name");
-            result.Should().Contain("Department.Budget");
-            result.Should().Contain("Department.Head");
-            result.Should().Contain("Department.OrganisationId");
+            Assert.IsTrue(result.Contains("Department.Id"));
+            Assert.IsTrue(result.Contains("Department.Name"));
+            Assert.IsTrue(result.Contains("Department.Budget"));
+            Assert.IsTrue(result.Contains("Department.Head"));
+            Assert.IsTrue(result.Contains("Department.OrganisationId"));
 
             // Level 2: Organisation scalars (nested)
-            result.Should().Contain("Department.Organisation.Id");
-            result.Should().Contain("Department.Organisation.Name");
-            result.Should().Contain("Department.Organisation.Industry");
-            result.Should().Contain("Department.Organisation.FoundYear");
+            Assert.IsTrue(result.Contains("Department.Organisation.Id"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Name"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Industry"));
+            Assert.IsTrue(result.Contains("Department.Organisation.FoundYear"));
 
             // Should NOT expand Organisation.Departments collection
-            result.Should().NotContain(f => f.StartsWith("Department.Organisation.Departments."));
+            Assert.IsFalse(result.Any(f => f.StartsWith("Department.Organisation.Departments.")));
         }
     }
 }

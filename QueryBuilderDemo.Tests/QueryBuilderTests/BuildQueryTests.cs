@@ -1,5 +1,4 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using FluentAssertions;
 using QueryBuilderDemo.Tests.Data;
 using QueryBuilderDemo.Tests.Models;
 using QueryBuilderDemo.Tests.Helpers;
@@ -26,9 +25,9 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
-            result.First().Departments.Should().NotBeEmpty();
-            result.First().Departments.First().Id.Should().BeGreaterThan(0);
+            Assert.IsTrue(result.Any());
+            Assert.IsTrue(result.First().Departments.Any());
+            Assert.IsTrue(result.First().Departments.First().Id > 0);
         }
 
         [TestMethod]
@@ -44,10 +43,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var client = result.First();
-            client.Projects.Should().NotBeEmpty();
-            client.Projects.First().Id.Should().BeGreaterThan(0);
+            Assert.IsTrue(client.Projects.Any());
+            Assert.IsTrue(client.Projects.First().Id > 0);
         }
 
         [TestMethod]
@@ -63,13 +62,13 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var org = result.First();
-            org.Departments.Should().NotBeEmpty();
+            Assert.IsTrue(org.Departments.Any());
 
             var dept = org.Departments.First();
-            dept.Employees.Should().NotBeEmpty();
-            dept.Employees.First().Id.Should().BeGreaterThan(0);
+            Assert.IsTrue(dept.Employees.Any());
+            Assert.IsTrue(dept.Employees.First().Id > 0);
         }
 
         [TestMethod]
@@ -85,15 +84,15 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var org = result.First();
-            org.Departments.Should().NotBeEmpty();
+            Assert.IsTrue(org.Departments.Any());
 
             var dept = org.Departments.First();
-            dept.Employees.Should().NotBeEmpty();
+            Assert.IsTrue(dept.Employees.Any());
 
             var emp = dept.Employees.First();
-            emp.Skills.Should().NotBeNull(); // Collection initialized, may be empty
+            Assert.IsNotNull(emp.Skills); // Collection initialized, may be empty
         }
 
         [TestMethod]
@@ -109,11 +108,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var client = result.First();
-            client.Projects.Should().NotBeEmpty();
-            client.Location.Should().NotBeNull();
-            client.Invoices.Should().NotBeEmpty();
+            Assert.IsTrue(client.Projects.Any());
+            Assert.IsNotNull(client.Location);
+            Assert.IsTrue(client.Invoices.Any());
         }
 
         [TestMethod]
@@ -134,14 +133,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var dept = result.First();
-            dept.Organisation.Should().NotBeNull();
-            dept.Employees.Should().NotBeEmpty();
+            Assert.IsNotNull(dept.Organisation);
+            Assert.IsTrue(dept.Employees.Any());
 
             var emp = dept.Employees.First();
-            emp.Role.Should().NotBeNull();
-            emp.Projects.Should().NotBeNull();
+            Assert.IsNotNull(emp.Role);
+            Assert.IsNotNull(emp.Projects);
         }
 
         [TestMethod]
@@ -157,15 +156,15 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var project = result.First();
-            project.Tasks.Should().NotBeEmpty();
+            Assert.IsTrue(project.Tasks.Any());
 
             var assignedTask = project.Tasks.FirstOrDefault(t => t.AssignedTo != null);
             if (assignedTask != null)
             {
-                assignedTask.AssignedTo.Should().NotBeNull();
-                assignedTask.AssignedTo!.Department.Should().NotBeNull();
+                Assert.IsNotNull(assignedTask.AssignedTo);
+                Assert.IsNotNull(assignedTask.AssignedTo!.Department);
             }
         }
 
@@ -182,18 +181,18 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var org = result.First();
-            org.Departments.Should().NotBeEmpty();
+            Assert.IsTrue(org.Departments.Any());
 
             var dept = org.Departments.First();
-            dept.Employees.Should().NotBeEmpty();
+            Assert.IsTrue(dept.Employees.Any());
 
             var emp = dept.Employees.FirstOrDefault(e => e.Projects.Any());
             if (emp != null)
             {
-                emp.Projects.Should().NotBeEmpty();
-                emp.Projects.First().Client.Should().NotBeNull();
+                Assert.IsTrue(emp.Projects.Any());
+                Assert.IsNotNull(emp.Projects.First().Client);
             }
         }
 
@@ -210,10 +209,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             // Some tasks have no assigned employee - should not crash
             var unassignedTask = result.FirstOrDefault(t => t.AssignedTo == null);
-            unassignedTask.Should().NotBeNull(); // At least one unassigned task exists
+            Assert.IsNotNull(unassignedTask); // At least one unassigned task exists
         }
 
         [TestMethod]
@@ -229,10 +228,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var empWithProjects = result.FirstOrDefault(e => e.Projects.Any());
-            empWithProjects.Should().NotBeNull();
-            empWithProjects!.Projects.Should().NotBeEmpty();
+            Assert.IsNotNull(empWithProjects);
+            Assert.IsTrue(empWithProjects!.Projects.Any());
         }
 
         [TestMethod]
@@ -248,10 +247,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var empWithSkills = result.FirstOrDefault(e => e.Skills.Any());
-            empWithSkills.Should().NotBeNull();
-            empWithSkills!.Skills.Should().NotBeEmpty();
+            Assert.IsNotNull(empWithSkills);
+            Assert.IsTrue(empWithSkills!.Skills.Any());
         }
 
         [TestMethod]
@@ -267,10 +266,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var team = result.First();
-            team.Members.Should().NotBeEmpty();
-            team.Members.First().Id.Should().BeGreaterThan(0);
+            Assert.IsTrue(team.Members.Any());
+            Assert.IsTrue(team.Members.First().Id > 0);
         }
 
         [TestMethod]
@@ -286,7 +285,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty(); // Should still return data
+            Assert.IsTrue(result.Any()); // Should still return data
         }
 
         [TestMethod]
@@ -302,14 +301,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var project = result.First();
-            project.TeamMembers.Should().NotBeEmpty();
+            Assert.IsTrue(project.TeamMembers.Any());
 
             var member = project.TeamMembers.FirstOrDefault(m => m.Skills.Any());
             if (member != null)
             {
-                member.Skills.Should().NotBeEmpty();
+                Assert.IsTrue(member.Skills.Any());
             }
         }
 
@@ -326,10 +325,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var location = result.FirstOrDefault(l => l.Clients.Any());
-            location.Should().NotBeNull();
-            location!.Clients.Should().NotBeEmpty();
+            Assert.IsNotNull(location);
+            Assert.IsTrue(location!.Clients.Any());
         }
     }
 }

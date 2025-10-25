@@ -1,5 +1,4 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using FluentAssertions;
 using QueryBuilderDemo.Tests.Data;
 using QueryBuilderDemo.Tests.Models;
 using QueryBuilderDemo.Tests.Helpers;
@@ -26,14 +25,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var org = result.First();
-            org.Departments.Should().NotBeEmpty();
+            Assert.IsTrue(org.Departments.Any());
 
             // Verify Departments are ordered by Name
             var deptNames = org.Departments.Select(d => d.Name).ToList();
             var sortedNames = deptNames.OrderBy(n => n).ToList();
-            deptNames.Should().Equal(sortedNames, "Departments should be ordered by Name alphabetically");
+            CollectionAssert.AreEqual(sortedNames.ToList(), deptNames.ToList(), "Departments should be ordered by Name alphabetically");
         }
 
         [TestMethod]
@@ -49,9 +48,9 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var dept = result.First();
-            dept.Employees.Should().NotBeEmpty();
+            Assert.IsTrue(dept.Employees.Any());
 
             // Verify Employees are ordered by LastName, then FirstName
             var employees = dept.Employees.ToList();
@@ -59,9 +58,9 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             for (int i = 0; i < employees.Count; i++)
             {
-                employees[i].LastName.Should().Be(sortedEmployees[i].LastName,
+                Assert.AreEqual(sortedEmployees[i].LastName, employees[i].LastName,
                     $"Employee at index {i} should be ordered by LastName");
-                employees[i].FirstName.Should().Be(sortedEmployees[i].FirstName,
+                Assert.AreEqual(sortedEmployees[i].FirstName, employees[i].FirstName,
                     $"Employee at index {i} should be ordered by FirstName within LastName");
             }
         }
@@ -79,14 +78,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var org = result.First();
-            org.Departments.Should().NotBeEmpty();
+            Assert.IsTrue(org.Departments.Any());
 
             // Level 1: Departments should be ordered by Name
             var deptNames = org.Departments.Select(d => d.Name).ToList();
             var sortedDeptNames = deptNames.OrderBy(n => n).ToList();
-            deptNames.Should().Equal(sortedDeptNames, "Departments should be ordered by Name");
+            CollectionAssert.AreEqual(sortedDeptNames.ToList(), deptNames.ToList(), "Departments should be ordered by Name");
 
             // Level 2: Employees within each Department should be ordered by LastName, FirstName
             foreach (var dept in org.Departments.Where(d => d.Employees.Any()))
@@ -96,7 +95,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                 for (int i = 0; i < employees.Count; i++)
                 {
-                    employees[i].LastName.Should().Be(sortedEmployees[i].LastName,
+                    Assert.AreEqual(sortedEmployees[i].LastName, employees[i].LastName,
                         $"Employees in {dept.Name} should be ordered by LastName");
                 }
             }
@@ -116,7 +115,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             // Assert
             var empWithSkills = result.FirstOrDefault(e => e.Skills.Any());
-            empWithSkills.Should().NotBeNull("At least one employee should have skills");
+            Assert.IsNotNull(empWithSkills, "At least one employee should have skills");
 
             if (empWithSkills != null && empWithSkills.Skills.Count > 1)
             {
@@ -125,9 +124,9 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                 for (int i = 0; i < skills.Count; i++)
                 {
-                    skills[i].Category.Should().Be(sortedSkills[i].Category,
+                    Assert.AreEqual(sortedSkills[i].Category, skills[i].Category,
                         $"Skill at index {i} should be ordered by Category");
-                    skills[i].Name.Should().Be(sortedSkills[i].Name,
+                    Assert.AreEqual(sortedSkills[i].Name, skills[i].Name,
                         $"Skill at index {i} should be ordered by Name within Category");
                 }
             }
@@ -147,7 +146,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             // Assert
             var empWithProjects = result.FirstOrDefault(e => e.Projects.Any());
-            empWithProjects.Should().NotBeNull("At least one employee should have projects");
+            Assert.IsNotNull(empWithProjects, "At least one employee should have projects");
 
             if (empWithProjects != null && empWithProjects.Projects.Count > 1)
             {
@@ -156,7 +155,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                 for (int i = 0; i < projects.Count; i++)
                 {
-                    projects[i].Deadline.Should().Be(sortedProjects[i].Deadline,
+                    Assert.AreEqual(sortedProjects[i].Deadline, projects[i].Deadline,
                         $"Project at index {i} should be ordered by Deadline (ascending)");
                 }
             }
@@ -174,10 +173,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert - Verify roles exist with Level and Title properties
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var role = result.First();
-            role.Level.Should().NotBeNull();
-            role.Title.Should().NotBeNull();
+            Assert.IsNotNull(role.Level);
+            Assert.IsNotNull(role.Title);
         }
 
         [TestMethod]
@@ -193,14 +192,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var projectWithTasks = result.FirstOrDefault(p => p.Tasks.Any());
-            projectWithTasks.Should().NotBeNull("At least one project should have tasks");
+            Assert.IsNotNull(projectWithTasks, "At least one project should have tasks");
 
             if (projectWithTasks != null)
             {
                 // Due to [Where] attribute, completed tasks should be filtered out
-                projectWithTasks.Tasks.Should().NotContain(t => t.Status == "Completed",
+                Assert.IsFalse(projectWithTasks.Tasks.Any(t => t.Status == "Completed"),
                     "Tasks with Status 'Completed' should be filtered out by [Where] attribute");
             }
         }
@@ -219,12 +218,12 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             // Assert
             var empWithCerts = result.FirstOrDefault(e => e.Certifications.Any());
-            empWithCerts.Should().NotBeNull("At least one employee should have certifications");
+            Assert.IsNotNull(empWithCerts, "At least one employee should have certifications");
 
             if (empWithCerts != null)
             {
                 // Due to [Where("ValidUntil >= DateTime.Now")] attribute, expired certs should be filtered out
-                empWithCerts.Certifications.Should().OnlyContain(c => c.ValidUntil >= System.DateTime.Now,
+                Assert.IsTrue(empWithCerts.Certifications.All(c => c.ValidUntil >= System.DateTime.Now),
                     "Only valid (non-expired) certifications should be included");
             }
         }
@@ -250,7 +249,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                 for (int i = 0; i < certs.Count; i++)
                 {
-                    certs[i].ValidUntil.Should().Be(sortedCerts[i].ValidUntil,
+                    Assert.AreEqual(sortedCerts[i].ValidUntil, certs[i].ValidUntil,
                         $"Certification at index {i} should be ordered by ValidUntil descending");
                 }
             }
@@ -277,7 +276,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                 for (int i = 0; i < tasks.Count; i++)
                 {
-                    tasks[i].DueDate.Should().Be(sortedTasks[i].DueDate,
+                    Assert.AreEqual(sortedTasks[i].DueDate, tasks[i].DueDate,
                         $"Task at index {i} should be ordered by DueDate (ascending)");
                 }
             }
@@ -296,9 +295,9 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var team = result.First();
-            team.Members.Should().NotBeEmpty();
+            Assert.IsTrue(team.Members.Any());
 
             if (team.Members.Count > 1)
             {
@@ -307,7 +306,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                 for (int i = 0; i < members.Count; i++)
                 {
-                    members[i].LastName.Should().Be(sortedMembers[i].LastName,
+                    Assert.AreEqual(sortedMembers[i].LastName, members[i].LastName,
                         $"Team member at index {i} should be ordered by LastName");
                 }
             }
@@ -326,9 +325,9 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var client = result.First();
-            client.Projects.Should().NotBeEmpty();
+            Assert.IsTrue(client.Projects.Any());
 
             if (client.Projects.Count > 1)
             {
@@ -337,7 +336,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                 for (int i = 0; i < projects.Count; i++)
                 {
-                    projects[i].Deadline.Should().Be(sortedProjects[i].Deadline,
+                    Assert.AreEqual(sortedProjects[i].Deadline, projects[i].Deadline,
                         $"Project at index {i} should be ordered by Deadline");
                 }
             }
@@ -357,7 +356,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var org = result.First();
 
             // Level 1: Departments ordered by Name
@@ -365,7 +364,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             {
                 var deptNames = org.Departments.Select(d => d.Name).ToList();
                 var sortedDeptNames = deptNames.OrderBy(n => n).ToList();
-                deptNames.Should().Equal(sortedDeptNames, "Departments should be ordered by Name");
+                CollectionAssert.AreEqual(sortedDeptNames.ToList(), deptNames.ToList(), "Departments should be ordered by Name");
             }
 
             // Level 2: Employees within departments ordered by LastName, FirstName
@@ -378,7 +377,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                     for (int i = 0; i < employees.Count; i++)
                     {
-                        employees[i].LastName.Should().Be(sortedEmployees[i].LastName);
+                        Assert.AreEqual(sortedEmployees[i].LastName, employees[i].LastName);
                     }
                 }
 
@@ -392,7 +391,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                         for (int i = 0; i < projects.Count; i++)
                         {
-                            projects[i].Deadline.Should().Be(sortedProjects[i].Deadline);
+                            Assert.AreEqual(sortedProjects[i].Deadline, projects[i].Deadline);
                         }
                     }
                 }
