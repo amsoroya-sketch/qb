@@ -48,6 +48,7 @@ namespace QueryBuilderDemo.Tests.Helpers
 
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseSqlite(connection)
+                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution)
                 .Options;
 
             var context = new TestApplicationDbContext(options, connection);
