@@ -362,20 +362,16 @@ namespace PbsApi.Utils
     {
       var entityType = typeof(T);
       var fieldsList = selectFields.ToList();
-      return BuildFlattenedQuery(query, entityType, fieldsList);
-    }
 
-    public static IQueryable BuildFlattenedQuery(IQueryable query, Type entityType, List<string> selectFields)
-    {
       // Preprocess: expand any entity/collection references to their scalar fields
       // Example: "Departments.Employees" → ["Departments.Employees.Id", "Departments.Employees.FirstName", ...]
-      selectFields = ExpandFieldsToScalars(selectFields, entityType);
+      var expandedFieldsList = ExpandFieldsToScalars(fieldsList, entityType);
 
-      var collectionLevels = FindAllCollectionLevels(selectFields, entityType);
+      var collectionLevels = FindAllCollectionLevels(expandedFieldsList, entityType);
 
       if (collectionLevels.Count == 0)
       {
-        var regularSelectString = BuildSelectString(selectFields);
+        var regularSelectString = BuildSelectString(expandedFieldsList);
         return query.Select($"new ({regularSelectString})");
       }
 
@@ -404,7 +400,7 @@ namespace PbsApi.Utils
         currentSourceType = flattenedQuery.ElementType;
       }
 
-      var projectionParts = BuildProjectionWithContextStructure(selectFields, contextStructure);
+      var projectionParts = BuildProjectionWithContextStructure(expandedFieldsList, contextStructure);
       var projectionString = string.Join(", ", projectionParts);
 
       // Apply Distinct to eliminate duplicate rows from cartesian products (SelectMany operations)

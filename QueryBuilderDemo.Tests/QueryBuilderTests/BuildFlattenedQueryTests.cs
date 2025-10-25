@@ -40,7 +40,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Id",
                 "Name",
@@ -50,11 +50,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             // Verify SQL generation (confirms database-side operation)
             var sql = query.ToQueryString();
@@ -77,7 +73,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Id",
                 "Name",
@@ -87,11 +83,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             // Verify database-side operation
             var sql = query.ToQueryString();
@@ -113,7 +105,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Id",
                 "Name",
@@ -123,11 +115,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             // Verify SQL generation
             var sql = query.ToQueryString();
@@ -146,7 +134,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Id",
                 "Name",
@@ -157,11 +145,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             // CRITICAL: Verify this generates SQL, not in-memory operation
             var sql = query.ToQueryString();
@@ -184,7 +168,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Name",
                 "Departments.Name",
@@ -194,11 +178,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             // Apply DISTINCT at database level
             var distinctQuery = query.Distinct();
@@ -221,7 +201,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Name",
                 "Projects.Title",
@@ -230,11 +210,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Projects.TeamMembers.Department.Organisation.Name"
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Clients.AsQueryable(),
-                typeof(Client),
-                selectFields
-            );
+            var query = context.Clients.BuildFlattenedQuery(selectFields);
 
             var sql = query.ToQueryString();
             sql.Should().NotBeNullOrEmpty();
@@ -250,7 +226,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Name",
                 "Members.FirstName",
@@ -259,11 +235,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Members.Department.Organisation.Industry"
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Teams.AsQueryable(),
-                typeof(Team),
-                selectFields
-            );
+            var query = context.Teams.BuildFlattenedQuery(selectFields);
 
             var sql = query.ToQueryString();
             sql.Should().NotBeNullOrEmpty("Should generate SQL for 5-level path");
@@ -279,7 +251,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Name",
                 "Departments.Name",
@@ -288,11 +260,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Skills.Proficiency"
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             var sql = query.ToQueryString();
             sql.Should().NotBeNullOrEmpty();
@@ -308,7 +276,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Name",
                 "Departments.Name",
@@ -317,11 +285,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Projects.Tasks.Title"
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             // Get SQL before execution
             var sql = query.ToQueryString();
@@ -344,7 +308,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Id",
                 "Name",
@@ -353,11 +317,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Projects.Id" // Level 4 collection
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             var sql = query.ToQueryString();
             sql.Should().NotBeNullOrEmpty("Should generate SQL for nested collections");
@@ -372,17 +332,13 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Departments.Name",
                 "Departments.Employees.FirstName"
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             // Apply distinct and count at database level
             var distinctQuery = query.Distinct();
@@ -397,7 +353,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Id",
                 "Name",
@@ -407,11 +363,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Projects.Tasks.Status"
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             // Get the generated SQL
             var sql = query.ToQueryString();
@@ -439,7 +391,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Name",
                 "Projects.Title",
@@ -448,11 +400,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Projects.TeamMembers.Projects.Tasks.Title"
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Clients.AsQueryable(),
-                typeof(Client),
-                selectFields
-            );
+            var query = context.Clients.BuildFlattenedQuery(selectFields);
 
             var sql = query.ToQueryString();
             sql.Should().NotBeNullOrEmpty("Should generate SQL for complex 5-level path");
@@ -468,13 +416,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string> { "Id", "Name", "Industry" };
+            var selectFields = new HashSet<string> { "Id", "Name", "Industry" };
 
             // Act
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields);
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             // Verify SQL generation
             var sql = query.ToQueryString();
@@ -495,7 +440,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Title",
                 "Tasks.Title",
@@ -504,11 +449,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Tasks.AssignedTo.Department.Organisation.Name"
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Projects.AsQueryable(),
-                typeof(Project),
-                selectFields
-            );
+            var query = context.Projects.BuildFlattenedQuery(selectFields);
 
             var sql = query.ToQueryString();
             sql.Should().NotBeNullOrEmpty("Should generate SQL for 5-level reference path");
@@ -523,18 +464,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Name",
                 "Departments.Employees.FirstName",
                 "Departments.Employees.Certifications.Name"
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             var sql = query.ToQueryString();
             sql.Should().Contain("SELECT");
@@ -549,18 +486,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Name",
                 "Meetings.Topic",
                 "Meetings.Duration"
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Teams.AsQueryable(),
-                typeof(Team),
-                selectFields
-            );
+            var query = context.Teams.BuildFlattenedQuery(selectFields);
 
             var sql = query.ToQueryString();
             sql.Should().NotBeNullOrEmpty();
@@ -575,7 +508,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Name",
                 "Invoices.Amount",
@@ -583,11 +516,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Invoices.Payments.Method"
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Clients.AsQueryable(),
-                typeof(Client),
-                selectFields
-            );
+            var query = context.Clients.BuildFlattenedQuery(selectFields);
 
             var sql = query.ToQueryString();
             sql.Should().NotBeNullOrEmpty();
@@ -604,7 +533,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Name",
                 "Departments.Name",
@@ -613,11 +542,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Skills.Name"
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             // Verify SQL contains DISTINCT (applied by BuildFlattenedQuery)
             var sql = query.ToQueryString();
@@ -638,7 +563,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "FirstName",
                 "LastName",
@@ -646,11 +571,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Skills.Name"
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Employees.AsQueryable(),
-                typeof(Employee),
-                selectFields
-            );
+            var query = context.Employees.BuildFlattenedQuery(selectFields);
 
             // Verify DISTINCT is in the SQL
             var sql = query.ToQueryString();
@@ -670,7 +591,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Id",
                 "Name",
@@ -680,11 +601,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Email"
             };
 
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             // Verify SQL contains DISTINCT and is executed at database level
             var sql = query.ToQueryString();
@@ -709,7 +626,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             SampleDataSeeder.SeedTestData(context);
 
             // User passes entity reference "Departments.Employees" instead of individual fields
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Id",
                 "Name",
@@ -717,11 +634,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             // Verify SQL is generated (preprocessing expands to scalar fields before query building)
             var sql = query.ToQueryString();
@@ -762,7 +675,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var selectFields = new List<string>
+            var selectFields = new HashSet<string>
             {
                 "Id",                          // Scalar - should remain as-is
                 "Name",                        // Scalar - should remain as-is
@@ -771,11 +684,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = QueryBuilder.BuildFlattenedQuery(
-                context.Organisations.AsQueryable(),
-                typeof(Organisation),
-                selectFields
-            );
+            var query = context.Organisations.BuildFlattenedQuery(selectFields);
 
             // Verify SQL generation
             var sql = query.ToQueryString();
