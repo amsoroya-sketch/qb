@@ -49,7 +49,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify SQL generation (confirms database-side operation)
             var sql = query.ToQueryString();
@@ -82,7 +82,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify database-side operation
             var sql = query.ToQueryString();
@@ -114,7 +114,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify SQL generation
             var sql = query.ToQueryString();
@@ -144,7 +144,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // CRITICAL: Verify this generates SQL, not in-memory operation
             var sql = query.ToQueryString();
@@ -177,7 +177,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Apply DISTINCT at database level
             var distinctQuery = query.Distinct();
@@ -209,7 +209,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Projects.TeamMembers.Department.Organisation.Name"
             };
 
-            var query = context.Clients.BuildFlattenedQuery(selectFields);
+            var query = context.Clients.BuildFlattenedQuery<Client>(selectFields);
 
             var sql = query.ToQueryString();
             Assert.IsFalse(string.IsNullOrEmpty(sql));
@@ -234,7 +234,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Members.Department.Organisation.Industry"
             };
 
-            var query = context.Teams.BuildFlattenedQuery(selectFields);
+            var query = context.Teams.BuildFlattenedQuery<Team>(selectFields);
 
             var sql = query.ToQueryString();
             Assert.IsFalse(string.IsNullOrEmpty(sql), "Should generate SQL for 5-level path");
@@ -259,7 +259,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Skills.Proficiency"
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             var sql = query.ToQueryString();
             Assert.IsFalse(string.IsNullOrEmpty(sql));
@@ -284,7 +284,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Projects.Tasks.Title"
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Get SQL before execution
             var sql = query.ToQueryString();
@@ -316,7 +316,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Projects.Id" // Level 4 collection
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             var sql = query.ToQueryString();
             Assert.IsFalse(string.IsNullOrEmpty(sql), "Should generate SQL for nested collections");
@@ -337,7 +337,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.FirstName"
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Apply distinct and count at database level
             var distinctQuery = query.Distinct();
@@ -362,7 +362,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Projects.Tasks.Status"
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Get the generated SQL
             var sql = query.ToQueryString();
@@ -399,7 +399,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Projects.TeamMembers.Projects.Tasks.Title"
             };
 
-            var query = context.Clients.BuildFlattenedQuery(selectFields);
+            var query = context.Clients.BuildFlattenedQuery<Client>(selectFields);
 
             var sql = query.ToQueryString();
             Assert.IsFalse(string.IsNullOrEmpty(sql), "Should generate SQL for complex 5-level path");
@@ -418,7 +418,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var selectFields = new HashSet<string> { "Id", "Name", "Industry" };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify SQL generation
             var sql = query.ToQueryString();
@@ -448,7 +448,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Tasks.AssignedTo.Department.Organisation.Name"
             };
 
-            var query = context.Projects.BuildFlattenedQuery(selectFields);
+            var query = context.Projects.BuildFlattenedQuery<Project>(selectFields);
 
             var sql = query.ToQueryString();
             Assert.IsFalse(string.IsNullOrEmpty(sql), "Should generate SQL for 5-level reference path");
@@ -470,7 +470,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Certifications.Name"
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             var sql = query.ToQueryString();
             Assert.IsTrue(sql.Contains("SELECT"));
@@ -492,7 +492,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Meetings.Duration"
             };
 
-            var query = context.Teams.BuildFlattenedQuery(selectFields);
+            var query = context.Teams.BuildFlattenedQuery<Team>(selectFields);
 
             var sql = query.ToQueryString();
             Assert.IsFalse(string.IsNullOrEmpty(sql));
@@ -515,7 +515,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Invoices.Payments.Method"
             };
 
-            var query = context.Clients.BuildFlattenedQuery(selectFields);
+            var query = context.Clients.BuildFlattenedQuery<Client>(selectFields);
 
             var sql = query.ToQueryString();
             Assert.IsFalse(string.IsNullOrEmpty(sql));
@@ -541,7 +541,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Skills.Name"
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify SQL contains DISTINCT (applied by BuildFlattenedQuery)
             var sql = query.ToQueryString();
@@ -570,7 +570,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Skills.Name"
             };
 
-            var query = context.Employees.BuildFlattenedQuery(selectFields);
+            var query = context.Employees.BuildFlattenedQuery<Employee>(selectFields);
 
             // Verify DISTINCT is in the SQL
             var sql = query.ToQueryString();
@@ -600,7 +600,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Email"
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify SQL contains DISTINCT and is executed at database level
             var sql = query.ToQueryString();
@@ -633,7 +633,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify SQL is generated (preprocessing expands to scalar fields before query building)
             var sql = query.ToQueryString();
@@ -683,7 +683,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify SQL generation
             var sql = query.ToQueryString();
