@@ -4,9 +4,8 @@ using PbsApi.Utils.Model;
 namespace QueryBuilderDemo.Tests.Models
 {
     /// <summary>
-    /// Project entity with default ordering by Deadline (most urgent first)
+    /// Project entity
     /// </summary>
-    [DLINQOrderbyAttribute("Deadline")]
     public class Project
     {
         public int Id { get; set; }
@@ -21,8 +20,12 @@ namespace QueryBuilderDemo.Tests.Models
         [RecursiveIncludeLevel(2)]
         public Client? Client { get; set; }
         [RecursiveIncludeLevel(2)]
+        [DLINQOrderbyAttribute("DueDate")]
+        [WhereAttribute("Status != \"Completed\"")]
         public List<Task> Tasks { get; set; } = new();
         [RecursiveIncludeLevel(2)]
+        [DLINQOrderbyAttribute("LastName")]
+        [DLINQOrderbyAttribute("FirstName")]
         public List<Employee> TeamMembers { get; set; } = new();
     }
 }

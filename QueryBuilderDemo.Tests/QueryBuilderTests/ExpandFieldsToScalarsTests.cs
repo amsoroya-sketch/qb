@@ -389,14 +389,16 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
         [TestMethod]
         public void ExpandFieldsToScalars_RecursiveExpansion_CollectionToNestedEntities()
         {
-            // Arrange - "Departments.Employees" should expand recursively
+            // Arrange - "Departments.Employees" should expand to Employee direct fields only
+            // Employee.Department and Employee.Role have [RecursiveIncludeLevel(2)]
+            // Path "Departments.Employees.Department" is at level 3, which exceeds the limit
             var fields = new List<string> { "Departments.Employees" };
 
             // Act
             var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Organisation));
 
             // Assert
-            // Employee direct scalar fields
+            // Employee direct scalar fields (level 2 - within limit)
             Assert.IsTrue(result.Contains("Departments.Employees.Id"));
             Assert.IsTrue(result.Contains("Departments.Employees.FirstName"));
             Assert.IsTrue(result.Contains("Departments.Employees.LastName"));
@@ -404,18 +406,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             Assert.IsTrue(result.Contains("Departments.Employees.DepartmentId"));
             Assert.IsTrue(result.Contains("Departments.Employees.RoleId"));
 
-            // Employee.Department nested scalar fields (recursive!)
-            Assert.IsTrue(result.Contains("Departments.Employees.Department.Id"));
-            Assert.IsTrue(result.Contains("Departments.Employees.Department.Name"));
-            Assert.IsTrue(result.Contains("Departments.Employees.Department.Budget"));
-            Assert.IsTrue(result.Contains("Departments.Employees.Department.Head"));
-            Assert.IsTrue(result.Contains("Departments.Employees.Department.OrganisationId"));
-
-            // Employee.Role nested scalar fields (recursive!)
-            Assert.IsTrue(result.Contains("Departments.Employees.Role.Id"));
-            Assert.IsTrue(result.Contains("Departments.Employees.Role.Title"));
-            Assert.IsTrue(result.Contains("Departments.Employees.Role.Level"));
-            Assert.IsTrue(result.Contains("Departments.Employees.Role.Description"));
+            // Employee.Department and Employee.Role have RecursiveIncludeLevel(2)
+            // "Departments.Employees.Department" is at level 3, exceeding the limit
+            // So nested Department and Role fields should NOT be included
+            Assert.IsFalse(result.Any(f => f.StartsWith("Departments.Employees.Department.")));
+            Assert.IsFalse(result.Any(f => f.StartsWith("Departments.Employees.Role.")));
         }
 
         [TestMethod]
@@ -447,6 +442,158 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             // Should NOT expand Organisation.Departments collection
             Assert.IsFalse(result.Any(f => f.StartsWith("Department.Organisation.Departments.")));
+        }
+
+        [TestMethod]
+        public void ExpandFieldsToScalars_RecursiveIncludeLevel_RespectsLevel2Limit()
+        {
+            // Arrange - Employee.Department has [RecursiveIncludeLevel(2)]
+            // Path "Employee" -> "Department" is level 1, should expand
+            // Path "Employee.Department" -> "Organisation" is level 2, should expand
+            // Path "Employee.Department.Organisation" -> "Departments" is level 3, should NOT expand (exceeds level 2)
+            var fields = new List<string> { "Department" };
+
+            // Act
+            var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee));
+
+            // Assert
+            // Level 1: Department direct scalar fields (within limit)
+            Assert.IsTrue(result.Contains("Department.Id"));
+            Assert.IsTrue(result.Contains("Department.Name"));
+            Assert.IsTrue(result.Contains("Department.Budget"));
+            Assert.IsTrue(result.Contains("Department.Head"));
+            Assert.IsTrue(result.Contains("Department.OrganisationId"));
+
+            // Level 2: Organisation scalar fields (within limit)
+            Assert.IsTrue(result.Contains("Department.Organisation.Id"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Name"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Industry"));
+            Assert.IsTrue(result.Contains("Department.Organisation.FoundYear"));
+
+            // Level 3: Organisation.Departments would exceed level 2 limit
+            Assert.IsFalse(result.Any(f => f.StartsWith("Department.Organisation.Departments.")));
+        }
+
+        [TestMethod]
+        public void ExpandFieldsToScalars_RecursiveIncludeLevel_RoleHasLevel2()
+        {
+            // Arrange - Employee.Role has [RecursiveIncludeLevel(2)]
+            // Role doesn't have nested entity properties, so this just verifies the attribute doesn't break anything
+            var fields = new List<string> { "Role" };
+
+            // Act
+            var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee));
+
+            // Assert
+            // Role direct scalar fields (level 1 - within limit)
+            Assert.IsTrue(result.Contains("Role.Id"));
+            Assert.IsTrue(result.Contains("Role.Title"));
+            Assert.IsTrue(result.Contains("Role.Level"));
+            Assert.IsTrue(result.Contains("Role.Description"));
+
+            // Role has no nested entities, so nothing to block
+            Assert.AreEqual(4, result.Count());
+        }
+
+        [TestMethod]
+        public void ExpandFieldsToScalars_RecursiveIncludeLevel_NestedCollectionPath()
+        {
+            // Arrange - Testing RecursiveIncludeLevel with collection paths
+            // "Departments.Employees" -> "Department" exceeds level 2
+            var fields = new List<string> { "Departments.Employees" };
+
+            // Act
+            var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Organisation));
+
+            // Assert
+            // Should have Employee direct fields only
+            Assert.IsTrue(result.Contains("Departments.Employees.Id"));
+            Assert.IsTrue(result.Contains("Departments.Employees.FirstName"));
+            Assert.IsTrue(result.Contains("Departments.Employees.LastName"));
+            Assert.IsTrue(result.Contains("Departments.Employees.Email"));
+            Assert.IsTrue(result.Contains("Departments.Employees.DepartmentId"));
+            Assert.IsTrue(result.Contains("Departments.Employees.RoleId"));
+
+            // Should NOT have Department or Role nested fields (level 3)
+            Assert.IsFalse(result.Any(f => f.StartsWith("Departments.Employees.Department.")));
+            Assert.IsFalse(result.Any(f => f.StartsWith("Departments.Employees.Role.")));
+
+            // Should only have 6 direct scalar fields
+            Assert.AreEqual(6, result.Count());
+        }
+
+        [TestMethod]
+        public void ExpandFieldsToScalars_RecursiveIncludeLevel_MixedLevels()
+        {
+            // Arrange - Mix of fields with different recursive levels
+            var fields = new List<string> { "Id", "FirstName", "Department", "Role" };
+
+            // Act
+            var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee));
+
+            // Assert
+            // Direct scalar fields
+            Assert.IsTrue(result.Contains("Id"));
+            Assert.IsTrue(result.Contains("FirstName"));
+
+            // Department fields (with nested Organisation up to level 2)
+            Assert.IsTrue(result.Contains("Department.Id"));
+            Assert.IsTrue(result.Contains("Department.Organisation.Id"));
+            Assert.IsFalse(result.Any(f => f.StartsWith("Department.Organisation.Departments.")));
+
+            // Role fields (no nested entities)
+            Assert.IsTrue(result.Contains("Role.Id"));
+            Assert.IsTrue(result.Contains("Role.Title"));
+        }
+
+        [TestMethod]
+        public void ExpandFieldsToScalars_RecursiveIncludeLevel_StopsAtExactLimit()
+        {
+            // Arrange - Verify level calculation is correct
+            // Employee -> Department (level 1) -> Organisation (level 2) STOP
+            var fields = new List<string> { "Department" };
+
+            // Act
+            var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee));
+
+            // Assert
+            // Count the maximum depth
+            var maxDepth = result.Max(f => f.Split('.').Length);
+
+            // Should expand to level 2 (Department.Organisation.*)
+            Assert.AreEqual(3, maxDepth, "Should expand to 'Department.Organisation.FieldName' which is 3 segments");
+
+            // Should have Department (level 1) and Organisation (level 2) fields
+            Assert.IsTrue(result.Any(f => f.StartsWith("Department.") && !f.Contains("Organisation")));
+            Assert.IsTrue(result.Any(f => f.StartsWith("Department.Organisation.")));
+
+            // Should NOT have any level 3 entity expansions
+            Assert.IsFalse(result.Any(f => f.StartsWith("Department.Organisation.Departments.")));
+        }
+
+        [TestMethod]
+        public void ExpandFieldsToScalars_RecursiveIncludeLevel_WithExpandNestedEntitiesFalse()
+        {
+            // Arrange - When expandNestedEntities=false, RecursiveIncludeLevel should not matter
+            // This is used by BuildFlattenedQuery
+            var fields = new List<string> { "Department" };
+
+            // Act
+            var result = QueryBuilder.ExpandFieldsToScalars(fields, typeof(Employee), expandNestedEntities: false);
+
+            // Assert
+            // Should only have Department direct scalar fields, no nested expansion at all
+            Assert.IsTrue(result.Contains("Department.Id"));
+            Assert.IsTrue(result.Contains("Department.Name"));
+            Assert.IsTrue(result.Contains("Department.Budget"));
+            Assert.IsTrue(result.Contains("Department.Head"));
+            Assert.IsTrue(result.Contains("Department.OrganisationId"));
+
+            // Should NOT have any nested Organisation fields (expandNestedEntities=false)
+            Assert.IsFalse(result.Any(f => f.StartsWith("Department.Organisation.")));
+
+            // Should only have Department's direct fields (5 scalar properties)
+            Assert.AreEqual(5, result.Count());
         }
     }
 }

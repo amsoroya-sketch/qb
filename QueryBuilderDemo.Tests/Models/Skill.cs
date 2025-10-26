@@ -3,10 +3,8 @@ using PbsApi.Utils.Model;
 namespace QueryBuilderDemo.Tests.Models
 {
     /// <summary>
-    /// Skill entity with default ordering by Category, then Name
+    /// Skill entity
     /// </summary>
-    [DLINQOrderbyAttribute("Category")]
-    [DLINQOrderbyAttribute("Name")]
     public class Skill
     {
         public int Id { get; set; }
@@ -16,6 +14,8 @@ namespace QueryBuilderDemo.Tests.Models
 
         // Navigation properties - many-to-many
         [RecursiveIncludeLevel(2)]
+        [DLINQOrderbyAttribute("LastName")]
+        [DLINQOrderbyAttribute("FirstName")]
         public List<Employee> Employees { get; set; } = new();
     }
 }

@@ -3,9 +3,8 @@ using PbsApi.Utils.Model;
 namespace QueryBuilderDemo.Tests.Models
 {
     /// <summary>
-    /// Client entity with default ordering by Name (alphabetical)
+    /// Client entity
     /// </summary>
-    [DLINQOrderbyAttribute("Name")]
     public class Client
     {
         public int Id { get; set; }
@@ -19,6 +18,7 @@ namespace QueryBuilderDemo.Tests.Models
         [RecursiveIncludeLevel(2)]
         public Location? Location { get; set; }
         [RecursiveIncludeLevel(2)]
+        [DLINQOrderbyAttribute("Deadline")]
         public List<Project> Projects { get; set; } = new();
         [RecursiveIncludeLevel(2)]
         public List<Invoice> Invoices { get; set; } = new();

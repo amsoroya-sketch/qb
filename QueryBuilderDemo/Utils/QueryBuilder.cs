@@ -249,7 +249,10 @@ namespace PbsApi.Utils
     /// Expands entity/collection references to their scalar fields.
     /// Example: "Departments.Employees" → ["Departments.Employees.Id", "Departments.Employees.FirstName", ...]
     /// </summary>
-    public static List<string> ExpandFieldsToScalars(List<string> selectFields, Type rootEntityType)
+    /// <param name="selectFields">List of field paths to expand</param>
+    /// <param name="rootEntityType">Root entity type</param>
+    /// <param name="expandNestedEntities">Whether to recursively expand nested entity references (default true)</param>
+    public static List<string> ExpandFieldsToScalars(List<string> selectFields, Type rootEntityType, bool expandNestedEntities = true)
     {
       var expandedFields = new List<string>();
 
@@ -286,7 +289,7 @@ namespace PbsApi.Utils
             {
               // Entity or collection - expand to all scalar fields
               var targetType = GetEnumerableType(prop.PropertyType) ?? prop.PropertyType;
-              var scalarFields = GetAllScalarFields(targetType, field);
+              var scalarFields = GetAllScalarFields(targetType, field, null, expandNestedEntities);
               expandedFields.AddRange(scalarFields);
             }
           }
@@ -307,7 +310,11 @@ namespace PbsApi.Utils
     ///                       "Department.Id", "Department.Name", "Department.Budget", "Department.Head", "Department.OrganisationId",
     ///                       "Role.Id", "Role.Title", ...]
     /// </summary>
-    private static List<string> GetAllScalarFields(Type type, string basePath = "", HashSet<Type>? visitedTypes = null)
+    /// <param name="type">The type to get scalar fields from</param>
+    /// <param name="basePath">The base path prefix for field names</param>
+    /// <param name="visitedTypes">Set of visited types to prevent circular references</param>
+    /// <param name="expandNestedEntities">Whether to recursively expand nested entity references (default true)</param>
+    private static List<string> GetAllScalarFields(Type type, string basePath = "", HashSet<Type>? visitedTypes = null, bool expandNestedEntities = true)
     {
       var scalarFields = new List<string>();
 
@@ -342,13 +349,38 @@ namespace PbsApi.Utils
         }
         else
         {
-          // Entity reference (non-scalar, non-collection) - recursively expand to leaf nodes
-          var nestedType = prop.PropertyType;
+          // Entity reference (non-scalar, non-collection)
+          if (expandNestedEntities)
+          {
+            // Check RecursiveIncludeLevelAttribute to determine if we should recurse
+            bool shouldRecurse = true;
+            var attr = prop.GetCustomAttribute<RecursiveIncludeLevelAttribute>();
+            if (attr != null)
+            {
+              // Calculate current depth: number of segments in the field path
+              int currentDepth = string.IsNullOrEmpty(fieldPath) ? 1 : fieldPath.Split('.').Length;
+              int maxLevel = attr.Level;
+              shouldRecurse = currentDepth <= maxLevel;
+            }
 
-          // Create a new visited set for this branch to allow the same type in different paths
-          var branchVisitedTypes = new HashSet<Type>(visitedTypes);
-          var nestedFields = GetAllScalarFields(nestedType, fieldPath, branchVisitedTypes);
-          scalarFields.AddRange(nestedFields);
+            if (shouldRecurse)
+            {
+              // Recursively expand to leaf nodes
+              var nestedType = prop.PropertyType;
+
+              // Create a new visited set for this branch to allow the same type in different paths
+              var branchVisitedTypes = new HashSet<Type>(visitedTypes);
+              var nestedFields = GetAllScalarFields(nestedType, fieldPath, branchVisitedTypes, expandNestedEntities);
+              scalarFields.AddRange(nestedFields);
+            }
+            // else: exceeded RecursiveIncludeLevel, skip this entity reference
+          }
+          else
+          {
+            // Skip entity references - only include direct scalar fields
+            // This is used by BuildFlattenedQuery where nested entity fields don't exist in the flattened structure
+            continue;
+          }
         }
       }
 
@@ -365,7 +397,8 @@ namespace PbsApi.Utils
 
       // Preprocess: expand any entity/collection references to their scalar fields
       // Example: "Departments.Employees" → ["Departments.Employees.Id", "Departments.Employees.FirstName", ...]
-      var expandedFieldsList = ExpandFieldsToScalars(fieldsList, entityType);
+      // Note: expandNestedEntities=false because flattened queries can't access nested entity fields
+      var expandedFieldsList = ExpandFieldsToScalars(fieldsList, entityType, expandNestedEntities: false);
 
       var collectionLevels = FindAllCollectionLevels(expandedFieldsList, entityType);
 

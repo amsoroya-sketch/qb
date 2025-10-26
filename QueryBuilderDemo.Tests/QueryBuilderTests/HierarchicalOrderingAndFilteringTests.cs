@@ -19,7 +19,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            // Act - Include Departments which should be ordered by Department.Name due to class-level [DLINQOrderbyAttribute]
+            // Act - Include Departments which should be ordered by Department.Name due to property-level [DLINQOrderbyAttribute]
             var result = context.Organisations
                 .BuildQuery(new HashSet<string> { "Departments" })
                 .ToList();
