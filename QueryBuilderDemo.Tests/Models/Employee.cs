@@ -1,4 +1,3 @@
-using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Tests.Models
 {
@@ -19,18 +18,10 @@ namespace QueryBuilderDemo.Tests.Models
         // Navigation properties
         public Department? Department { get; set; }
         public Role? Role { get; set; }
-        [DLINQOrderbyAttribute("Deadline")]
         public List<Project> Projects { get; set; } = new();
-        [DLINQOrderbyAttribute("Category")]
-        [DLINQOrderbyAttribute("Name")]
         public List<Skill> Skills { get; set; } = new();
-        [DLINQOrderbyAttribute("ValidUntil", descending: true)]
-        [WhereAttribute("ValidUntil >= DateTime.Now")]
         public List<Certification> Certifications { get; set; } = new();
-        [DLINQOrderbyAttribute("DueDate")]
-        [WhereAttribute("Status != \"Completed\"")]
         public List<Task> Tasks { get; set; } = new();
-        [DLINQOrderbyAttribute("Name")]
         public List<Team> Teams { get; set; } = new();
         public Schedule? Schedule { get; set; }
     }

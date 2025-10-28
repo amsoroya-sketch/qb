@@ -1,15 +1,15 @@
 # GraphQL API - QueryBuilder Demo
 
-A GraphQL API demonstrating advanced query capabilities with flattened data, pagination, sorting, and recursive inclusion control.
+A GraphQL API demonstrating advanced query capabilities with flattened data, pagination, sorting, and filtering.
 
 ## Features
 
-✅ **Flattened Data Queries** - Using `BuildFlattenedQuery<T>()` for denormalized reporting
+✅ **Flattened Data Queries** - Denormalized reporting via `BuildFlattenedQuery<T>()`
 ✅ **Cursor-Based Pagination** - Efficient navigation through large datasets
 ✅ **Offset-Based Pagination** - Traditional skip/take for flattened queries
-✅ **Recursive Inclusion Control** - Respects `RecursiveIncludeLevel` attribute
-✅ **Automatic Sorting** - Honors `DLINQOrderbyAttribute` on collections
-✅ **Filtering** - Full `WhereAttribute` support
+✅ **Recursion Prevention** - Max execution depth of 2 prevents infinite loops
+✅ **Flexible Filtering** - Full HotChocolate filtering support
+✅ **Dynamic Sorting** - Sort by any field in any direction
 
 ## Running the API
 
@@ -19,6 +19,8 @@ dotnet run
 ```
 
 Navigate to: **http://localhost:5000/graphql**
+
+You'll see the Banana Cake Pop GraphQL IDE where you can explore the schema and run queries.
 
 ## Sample Data
 
@@ -60,19 +62,20 @@ The API auto-seeds sample data on startup:
 }
 ```
 
-#### Get Organisations with Filtered Departments
+#### Get Organisations with Nested Data
 ```graphql
 {
   organisations(first: 5) {
     nodes {
       name
       industry
-      departments(where: { budget: { gte: 1000000 } }) {
+      departments {
         name
         budget
         employees {
           firstName
           lastName
+          email
         }
       }
     }
@@ -150,116 +153,7 @@ Returns one row per employee with all parent data:
 }
 ```
 
-### 3. Sorting with DLINQ Attributes
-
-Collections are automatically sorted based on `[DLINQOrderbyAttribute]`:
-
-```graphql
-{
-  employees(first: 10) {
-    nodes {
-      firstName
-      # Skills automatically sorted by Category, then Name
-      skills {
-        category
-        name
-        proficiency
-      }
-      # Projects automatically sorted by Deadline
-      projects {
-        title
-        deadline
-      }
-      # Certifications sorted by ValidUntil (descending)
-      certifications {
-        name
-        validUntil
-      }
-    }
-  }
-}
-```
-
-**Attribute Configuration (in Models):**
-```csharp
-[DLINQOrderbyAttribute("Category")]
-[DLINQOrderbyAttribute("Name")]
-public List<Skill> Skills { get; set; } = new();
-
-[DLINQOrderbyAttribute("Deadline")]
-public List<Project> Projects { get; set; } = new();
-
-[DLINQOrderbyAttribute("ValidUntil", descending: true)]
-public List<Certification> Certifications { get; set; } = new();
-```
-
-### 4. Filtering with WhereAttribute
-
-Collections are pre-filtered based on `[WhereAttribute]`:
-
-```graphql
-{
-  employees {
-    nodes {
-      firstName
-      # Tasks filtered: Status != "Completed"
-      tasks {
-        title
-        status
-        dueDate
-      }
-      # Certifications filtered: ValidUntil >= DateTime.Now
-      certifications {
-        name
-        validUntil
-        issuer
-      }
-    }
-  }
-}
-```
-
-**Attribute Configuration:**
-```csharp
-[WhereAttribute("Status != \"Completed\"")]
-public List<Task> Tasks { get; set; } = new();
-
-[WhereAttribute("ValidUntil >= DateTime.Now")]
-public List<Certification> Certifications { get; set; } = new();
-```
-
-### 5. Recursive Inclusion Control
-
-The `[RecursiveIncludeLevel(2)]` attribute prevents infinite loops in circular references:
-
-```graphql
-{
-  organisations {
-    nodes {
-      name
-      departments {
-        name
-        employees {
-          firstName
-          # Can navigate 2 levels deep
-          department {
-            name
-            # Stops here - won't load organisation again
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-**Attribute Configuration:**
-```csharp
-[RecursiveIncludeLevel(2)]
-public Department? Department { get; set; }
-```
-
-### 6. Advanced Filtering & Sorting
+### 3. Filtering
 
 #### Complex Filtering
 ```graphql
@@ -288,7 +182,51 @@ public Department? Department { get; set; }
 }
 ```
 
-#### Custom Sorting
+#### Filter by Nested Properties
+```graphql
+{
+  organisations(
+    where: {
+      departments: {
+        some: {
+          budget: { gte: 1000000 }
+        }
+      }
+    }
+  ) {
+    nodes {
+      name
+      departments {
+        name
+        budget
+      }
+    }
+  }
+}
+```
+
+### 4. Sorting
+
+#### Sort Employees
+```graphql
+{
+  employees(
+    order: [
+      { lastName: ASC }
+      { firstName: ASC }
+    ]
+    first: 10
+  ) {
+    nodes {
+      firstName
+      lastName
+      email
+    }
+  }
+}
+```
+
+#### Sort Projects
 ```graphql
 {
   projects(
@@ -310,7 +248,7 @@ public Department? Department { get; set; }
 }
 ```
 
-### 7. Pagination Patterns
+### 5. Pagination Patterns
 
 #### Cursor-Based (Forward)
 ```graphql
@@ -348,10 +286,33 @@ public Department? Department { get; set; }
 ```graphql
 {
   employeesFlattened(skip: 20, take: 10) {
-    # Page 3 (20-30)
+    # Page 3 (records 20-30)
   }
 }
 ```
+
+### 6. Recursion Prevention
+
+The API limits query depth to 2 levels to prevent circular reference issues:
+
+```graphql
+{
+  organisations {
+    nodes {
+      name
+      departments {              # Level 1
+        name
+        employees {              # Level 2
+          firstName
+          # Cannot go deeper - max depth reached
+        }
+      }
+    }
+  }
+}
+```
+
+This prevents infinite loops when querying circular relationships (e.g., Employee → Department → Employees → Department → ...).
 
 ## Architecture
 
@@ -359,34 +320,77 @@ public Department? Department { get; set; }
 - Return typed `IQueryable<T>` for all entities
 - Support HotChocolate's `UseProjection`, `UseFiltering`, `UseSorting`
 - Use cursor-based pagination via `UsePaging`
+- All operations happen at the database level (translated to SQL)
 
 ### Flattened Resolvers (`FlattenedQuery.cs`)
-- Use `BuildFlattenedQuery<T>()` from QueryBuilder
+- Use `BuildFlattenedQuery<T>()` for denormalization
 - Return `IQueryable<object>` with dynamic properties
 - Support custom field selection
 - Use offset-based pagination (skip/take)
+- Ideal for reporting and analytics
 
 ### Key Technologies
 - **HotChocolate 15.x** - GraphQL server
-- **Entity Framework Core** - Data access
-- **SQLite** - In-memory database
-- **Custom QueryBuilder** - Flattened query support
+- **Entity Framework Core** - Data access with SQLite
+- **System.Linq.Dynamic.Core** - Dynamic LINQ for flattened queries
+- **Custom QueryBuilder** - Flattened query implementation
 
-## Testing
+## Project Structure
 
-Run the test suite:
-```bash
-cd QueryBuilderDemo.Tests
-dotnet test
+```
+QueryBuilderDemo.GraphQL/
+├── GraphQL/
+│   ├── Query.cs              # Standard typed queries
+│   └── FlattenedQuery.cs     # Flattened/denormalized queries
+├── Utils/
+│   └── QueryBuilderExtensions.cs  # BuildFlattenedQuery implementation
+├── Program.cs                # GraphQL server configuration
+└── README.md
+
+QueryBuilderDemo.Tests/
+├── Models/                   # Entity models
+├── Data/
+│   ├── ApplicationDbContext.cs    # EF Core DbContext
+│   └── SampleDataSeeder.cs        # Sample data
+├── GraphQL/
+│   └── Query.cs              # Query type for tests
+└── Helpers/                  # Test helpers
 ```
 
-See `HierarchicalOrderingAndFilteringTests.cs` for GraphQL-specific tests.
+## Configuration
 
-## Notes
+### GraphQL Server (Program.cs)
+
+```csharp
+builder.Services
+    .AddGraphQLServer()
+    .AddQueryType<Query>()
+    .AddTypeExtension<FlattenedQuery>()
+    .AddProjections()           // Enable field selection
+    .AddFiltering()             // Enable WHERE clauses
+    .AddSorting()               // Enable ORDER BY
+    .ModifyPagingOptions(opt => {
+        opt.MaxPageSize = 500;
+        opt.DefaultPageSize = 50;
+        opt.IncludeTotalCount = true;
+    })
+    .AddMaxExecutionDepthRule(2)  // Prevent deep recursion
+    .ModifyRequestOptions(opt =>
+        opt.IncludeExceptionDetails = builder.Environment.IsDevelopment());
+```
+
+## Performance Notes
 
 - **Flattened queries** return denormalized data ideal for reporting/analytics
 - **Cursor pagination** is more efficient for large datasets
-- **Offset pagination** is simpler but can be slower
-- **RecursiveIncludeLevel** prevents circular reference issues
-- **DLINQ attributes** provide automatic collection ordering
-- **Where attributes** apply business rules at the query level
+- **Offset pagination** is simpler but can be slower on large tables
+- **Max execution depth** prevents circular reference infinite loops
+- All operations are translated to SQL and executed at the database level
+
+## Available Flattened Queries
+
+1. `organisationsFlattened` - Organisations with departments and employees
+2. `employeesFlattened` - Employees with all related entities
+3. `projectsFlattened` - Projects with tasks and team members
+4. `clientsFlattened` - Clients with projects, invoices, and payments
+5. `teamsFlattened` - Teams with members and departments

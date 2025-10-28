@@ -1,4 +1,3 @@
-using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Tests.Models
 {
@@ -13,7 +12,6 @@ namespace QueryBuilderDemo.Tests.Models
         public int FoundYear { get; set; }
 
         // Navigation properties
-        [DLINQOrderbyAttribute("Name")]
         public List<Department> Departments { get; set; } = new();
     }
 }

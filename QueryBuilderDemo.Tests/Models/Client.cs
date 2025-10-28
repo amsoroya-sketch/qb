@@ -1,4 +1,3 @@
-using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Tests.Models
 {
@@ -16,7 +15,6 @@ namespace QueryBuilderDemo.Tests.Models
 
         // Navigation properties
         public Location? Location { get; set; }
-        [DLINQOrderbyAttribute("Deadline")]
         public List<Project> Projects { get; set; } = new();
         public List<Invoice> Invoices { get; set; } = new();
     }

@@ -33,7 +33,7 @@ builder.Services
     })
     // Prevent recursion by limiting query execution depth
     .AddMaxExecutionDepthRule(2)
-    // Add support for dynamic types (for flattened queries)
+    // Include exception details in development for debugging
     .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = builder.Environment.IsDevelopment());
 
 // Add API explorer for GraphQL schema introspection

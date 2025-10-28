@@ -1,4 +1,3 @@
-using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Tests.Models
 {
@@ -17,8 +16,6 @@ namespace QueryBuilderDemo.Tests.Models
 
         // Navigation properties
         public Organisation? Organisation { get; set; }
-        [DLINQOrderbyAttribute("LastName")]
-        [DLINQOrderbyAttribute("FirstName")]
         public List<Employee> Employees { get; set; } = new();
     }
 }

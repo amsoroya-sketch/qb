@@ -1,4 +1,3 @@
-using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Tests.Models
 {
@@ -13,8 +12,6 @@ namespace QueryBuilderDemo.Tests.Models
         public int Size { get; set; }
 
         // Navigation properties - many-to-many
-        [DLINQOrderbyAttribute("LastName")]
-        [DLINQOrderbyAttribute("FirstName")]
         public List<Employee> Members { get; set; } = new();
         public List<Meeting> Meetings { get; set; } = new();
     }

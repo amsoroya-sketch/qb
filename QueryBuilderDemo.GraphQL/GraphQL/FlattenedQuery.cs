@@ -1,6 +1,6 @@
 using HotChocolate;
 using HotChocolate.Types;
-using PbsApi.Utils;
+using QueryBuilderDemo.GraphQL.Utils;
 using QueryBuilderDemo.Tests.Data;
 using QueryBuilderDemo.Tests.Models;
 using System.Collections.Generic;

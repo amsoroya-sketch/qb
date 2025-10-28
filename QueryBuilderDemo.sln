@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryBuilderDemo", "QueryBuilderDemo\QueryBuilderDemo.csproj", "{CD121FDA-E699-4A10-ABB0-9E42B979B61F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryBuilderDemo.Tests", "QueryBuilderDemo.Tests\QueryBuilderDemo.Tests.csproj", "{503BD00A-B9FD-484E-9411-BD80EDBD3ECA}"
 EndProject
 Global
@@ -16,10 +14,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CD121FDA-E699-4A10-ABB0-9E42B979B61F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD121FDA-E699-4A10-ABB0-9E42B979B61F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD121FDA-E699-4A10-ABB0-9E42B979B61F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD121FDA-E699-4A10-ABB0-9E42B979B61F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{503BD00A-B9FD-484E-9411-BD80EDBD3ECA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{503BD00A-B9FD-484E-9411-BD80EDBD3ECA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{503BD00A-B9FD-484E-9411-BD80EDBD3ECA}.Release|Any CPU.ActiveCfg = Release|Any CPU

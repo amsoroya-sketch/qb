@@ -1,5 +1,4 @@
 using System;
-using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Tests.Models
 {

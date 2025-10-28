@@ -1,4 +1,3 @@
-using PbsApi.Utils.Model;
 
 namespace QueryBuilderDemo.Tests.Models
 {
@@ -10,7 +9,6 @@ namespace QueryBuilderDemo.Tests.Models
         public string Country { get; set; } = string.Empty;
 
         // Navigation properties
-        [DLINQOrderbyAttribute("Name")]
         public List<Client> Clients { get; set; } = new();
     }
 }
