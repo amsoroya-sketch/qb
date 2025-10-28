@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using QueryBuilderDemo.GraphQL.GraphQL;
 using QueryBuilderDemo.Tests.Data;
 using HotChocolate.Execution.Configuration;
+using HotChocolate.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +18,7 @@ builder.Services
     .AddQueryType<Query>()
     // Register flattened query resolvers as extended query type
     .AddTypeExtension<FlattenedQuery>()
-    // Enable projections - solves EF Core ordering issue!
+    // Enable projections
     .AddProjections()
     // Enable WHERE clause filtering
     .AddFiltering()
@@ -30,6 +31,8 @@ builder.Services
         opt.DefaultPageSize = 50;
         opt.IncludeTotalCount = true;
     })
+    // Prevent recursion by limiting query execution depth
+    .AddMaxExecutionDepthRule(2)
     // Add support for dynamic types (for flattened queries)
     .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = builder.Environment.IsDevelopment());
 

@@ -15,12 +15,9 @@ namespace QueryBuilderDemo.Tests.Models
         public int LocationId { get; set; }
 
         // Navigation properties
-        [RecursiveIncludeLevel(2)]
         public Location? Location { get; set; }
-        [RecursiveIncludeLevel(2)]
         [DLINQOrderbyAttribute("Deadline")]
         public List<Project> Projects { get; set; } = new();
-        [RecursiveIncludeLevel(2)]
         public List<Invoice> Invoices { get; set; } = new();
     }
 }

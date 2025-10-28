@@ -17,7 +17,6 @@ namespace QueryBuilderDemo.Tests.Models
         public int EmployeeId { get; set; }
 
         // Navigation property
-        [RecursiveIncludeLevel(2)]
         public Employee? Employee { get; set; }
     }
 }

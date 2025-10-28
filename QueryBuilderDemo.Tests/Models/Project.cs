@@ -17,13 +17,10 @@ namespace QueryBuilderDemo.Tests.Models
         public int ClientId { get; set; }
 
         // Navigation properties
-        [RecursiveIncludeLevel(2)]
         public Client? Client { get; set; }
-        [RecursiveIncludeLevel(2)]
         [DLINQOrderbyAttribute("DueDate")]
         [WhereAttribute("Status != \"Completed\"")]
         public List<Task> Tasks { get; set; } = new();
-        [RecursiveIncludeLevel(2)]
         [DLINQOrderbyAttribute("LastName")]
         [DLINQOrderbyAttribute("FirstName")]
         public List<Employee> TeamMembers { get; set; } = new();

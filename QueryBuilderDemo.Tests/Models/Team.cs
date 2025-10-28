@@ -13,11 +13,9 @@ namespace QueryBuilderDemo.Tests.Models
         public int Size { get; set; }
 
         // Navigation properties - many-to-many
-        [RecursiveIncludeLevel(2)]
         [DLINQOrderbyAttribute("LastName")]
         [DLINQOrderbyAttribute("FirstName")]
         public List<Employee> Members { get; set; } = new();
-        [RecursiveIncludeLevel(2)]
         public List<Meeting> Meetings { get; set; } = new();
     }
 }

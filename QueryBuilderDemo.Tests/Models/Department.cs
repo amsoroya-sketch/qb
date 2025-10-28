@@ -16,9 +16,7 @@ namespace QueryBuilderDemo.Tests.Models
         public int OrganisationId { get; set; }
 
         // Navigation properties
-        [RecursiveIncludeLevel(2)]
         public Organisation? Organisation { get; set; }
-        [RecursiveIncludeLevel(2)]
         [DLINQOrderbyAttribute("LastName")]
         [DLINQOrderbyAttribute("FirstName")]
         public List<Employee> Employees { get; set; } = new();

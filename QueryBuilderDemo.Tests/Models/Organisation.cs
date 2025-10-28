@@ -13,7 +13,6 @@ namespace QueryBuilderDemo.Tests.Models
         public int FoundYear { get; set; }
 
         // Navigation properties
-        [RecursiveIncludeLevel(2)]
         [DLINQOrderbyAttribute("Name")]
         public List<Department> Departments { get; set; } = new();
     }

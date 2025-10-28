@@ -13,7 +13,6 @@ namespace QueryBuilderDemo.Tests.Models
         public string Category { get; set; } = string.Empty;
 
         // Navigation properties - many-to-many
-        [RecursiveIncludeLevel(2)]
         [DLINQOrderbyAttribute("LastName")]
         [DLINQOrderbyAttribute("FirstName")]
         public List<Employee> Employees { get; set; } = new();

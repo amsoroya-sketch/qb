@@ -18,9 +18,7 @@ namespace QueryBuilderDemo.Tests.Models
         public int? AssignedToId { get; set; }
 
         // Navigation properties
-        [RecursiveIncludeLevel(2)]
         public Project? Project { get; set; }
-        [RecursiveIncludeLevel(2)]
         public Employee? AssignedTo { get; set; }
     }
 }

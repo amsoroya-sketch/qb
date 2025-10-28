@@ -14,7 +14,6 @@ namespace QueryBuilderDemo.Tests.Models
         public int InvoiceId { get; set; }
 
         // Navigation property
-        [RecursiveIncludeLevel(2)]
         public Invoice? Invoice { get; set; }
     }
 }

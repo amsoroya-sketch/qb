@@ -14,9 +14,7 @@ namespace QueryBuilderDemo.Tests.Models
         public int ClientId { get; set; }
 
         // Navigation properties
-        [RecursiveIncludeLevel(2)]
         public Client? Client { get; set; }
-        [RecursiveIncludeLevel(2)]
         public List<Payment> Payments { get; set; } = new();
     }
 }

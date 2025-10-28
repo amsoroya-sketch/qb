@@ -10,7 +10,6 @@ namespace QueryBuilderDemo.Tests.Models
         public string Country { get; set; } = string.Empty;
 
         // Navigation properties
-        [RecursiveIncludeLevel(2)]
         [DLINQOrderbyAttribute("Name")]
         public List<Client> Clients { get; set; } = new();
     }

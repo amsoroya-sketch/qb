@@ -14,7 +14,6 @@ namespace QueryBuilderDemo.Tests.Models
         public int TeamId { get; set; }
 
         // Navigation property
-        [RecursiveIncludeLevel(2)]
         public Team? Team { get; set; }
     }
 }

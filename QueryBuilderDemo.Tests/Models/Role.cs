@@ -12,8 +12,7 @@ namespace QueryBuilderDemo.Tests.Models
         public string Level { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
 
-        // Navigation properties
-        [RecursiveIncludeLevel(2)]
+        // Navigation properties 
         [DLINQOrderbyAttribute("LastName")]
         [DLINQOrderbyAttribute("FirstName")]
         public List<Employee> Employees { get; set; } = new();
