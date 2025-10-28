@@ -15,8 +15,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Add GraphQL server with Hot Chocolate
 builder.Services
     .AddGraphQLServer()
-    // Register main Query type
+    // Register main Query type (hierarchical)
     .AddQueryType<Query>()
+    // Register flattened Query type (denormalized)
+    .AddTypeExtension<FlattenedQuery>()
     // Register custom types with sortable/filterable collections
     .AddType<EmployeeType>()
     .AddType<DepartmentType>()

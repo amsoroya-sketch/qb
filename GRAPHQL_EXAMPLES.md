@@ -9,8 +9,9 @@ This document provides practical examples of GraphQL queries demonstrating vario
 4. [Sorting Examples](#sorting-examples)
 5. [Pagination Examples](#pagination-examples)
 6. [Complex Nested Queries](#complex-nested-queries)
-7. [Real-World Use Cases](#real-world-use-cases)
-8. [Performance Tips](#performance-tips)
+7. [Flattened Queries](#flattened-queries)
+8. [Real-World Use Cases](#real-world-use-cases)
+9. [Performance Tips](#performance-tips)
 
 ---
 
@@ -629,6 +630,665 @@ var orgs = context.Organisations
 ```
 
 **Use Case:** Show teams with only senior-level members, sorted alphabetically.
+
+---
+
+## Flattened Queries
+
+### What Are Flattened Queries?
+
+Flattened queries return **denormalized data** where related entities are combined into a single flat structure. Instead of nested JSON objects, you get rows with prefixed field names.
+
+**When to Use Flattened Queries:**
+- Exporting data to CSV/Excel
+- Feeding data to reporting/analytics tools
+- Building data tables with server-side filtering/sorting
+- Integrating with systems that expect flat data structures
+- Avoiding client-side data transformation
+
+**When to Use Hierarchical Queries:**
+- Building nested UI components (trees, accordions)
+- Representing natural parent-child relationships
+- Minimizing data duplication in responses
+
+---
+
+### Comparison: Hierarchical vs Flattened
+
+**Hierarchical Query:**
+```graphql
+{
+  organisations(first: 1) {
+    nodes {
+      name
+      industry
+      departments {
+        name
+        budget
+        employees {
+          firstName
+          lastName
+        }
+      }
+    }
+  }
+}
+```
+
+**Hierarchical Response:**
+```json
+{
+  "data": {
+    "organisations": {
+      "nodes": [{
+        "name": "TechCorp Inc",
+        "industry": "Technology",
+        "departments": [
+          {
+            "name": "Engineering",
+            "budget": 5000000,
+            "employees": [
+              { "firstName": "John", "lastName": "Doe" },
+              { "firstName": "Jane", "lastName": "Smith" }
+            ]
+          }
+        ]
+      }]
+    }
+  }
+}
+```
+
+**Flattened Query:**
+```graphql
+{
+  organisationDepartmentEmployeesFlat(first: 10) {
+    nodes {
+      organisationName
+      organisationIndustry
+      departmentName
+      departmentBudget
+      employeeFirstName
+      employeeLastName
+    }
+  }
+}
+```
+
+**Flattened Response:**
+```json
+{
+  "data": {
+    "organisationDepartmentEmployeesFlat": {
+      "nodes": [
+        {
+          "organisationName": "TechCorp Inc",
+          "organisationIndustry": "Technology",
+          "departmentName": "Engineering",
+          "departmentBudget": 5000000,
+          "employeeFirstName": "John",
+          "employeeLastName": "Doe"
+        },
+        {
+          "organisationName": "TechCorp Inc",
+          "organisationIndustry": "Technology",
+          "departmentName": "Engineering",
+          "departmentBudget": 5000000,
+          "employeeFirstName": "Jane",
+          "employeeLastName": "Smith"
+        }
+      ]
+    }
+  }
+}
+```
+
+**Key Difference:** Organisation and Department data are repeated for each employee in the flattened format.
+
+---
+
+### Available Flattened Queries
+
+| Query | Entities Combined | Use Case |
+|-------|-------------------|----------|
+| `organisationDepartmentsFlat` | Organisation + Department | Org-department report |
+| `organisationDepartmentEmployeesFlat` | Organisation + Department + Employee + Role | Complete employee directory |
+| `departmentEmployeesFlat` | Department + Employee + Role | Department roster |
+| `employeeProjectsFlat` | Employee + Department + Role + Project + Client | Project assignments |
+| `projectTasksFlat` | Project + Client + Task + Assigned Employee | Task management |
+| `employeeSkillsFlat` | Employee + Department + Skill | Skill matrix |
+| `clientProjectsFlat` | Client + Location + Project | Client portfolio |
+
+---
+
+### Flattened Query 1: Organisation-Department-Employee
+
+**Query:**
+```graphql
+{
+  organisationDepartmentEmployeesFlat(
+    first: 20
+    where: {
+      organisationName: { contains: "Tech" }
+    }
+    order: { employeeLastName: ASC }
+  ) {
+    nodes {
+      organisationId
+      organisationName
+      organisationIndustry
+      departmentId
+      departmentName
+      departmentBudget
+      employeeId
+      employeeFirstName
+      employeeLastName
+      employeeEmail
+      roleTitle
+      roleLevel
+    }
+    totalCount
+  }
+}
+```
+
+**Use Case:** Export all employees from tech companies to Excel.
+
+**Generated SQL:**
+```sql
+SELECT
+  o.Id AS OrganisationId,
+  o.Name AS OrganisationName,
+  o.Industry AS OrganisationIndustry,
+  d.Id AS DepartmentId,
+  d.Name AS DepartmentName,
+  d.Budget AS DepartmentBudget,
+  e.Id AS EmployeeId,
+  e.FirstName AS EmployeeFirstName,
+  e.LastName AS EmployeeLastName,
+  e.Email AS EmployeeEmail,
+  r.Title AS RoleTitle,
+  r.Level AS RoleLevel
+FROM Employees e
+JOIN Departments d ON e.DepartmentId = d.Id
+JOIN Organisations o ON d.OrganisationId = o.Id
+JOIN Roles r ON e.RoleId = r.Id
+WHERE o.Name LIKE '%Tech%'
+ORDER BY e.LastName ASC
+LIMIT 20;
+```
+
+---
+
+### Flattened Query 2: Employee-Project Assignments (Many-to-Many)
+
+**Query:**
+```graphql
+{
+  employeeProjectsFlat(
+    first: 50
+    where: {
+      projectDeadline: { gte: "2025-11-01T00:00:00.000Z" }
+    }
+    order: [
+      { employeeLastName: ASC }
+      { projectDeadline: ASC }
+    ]
+  ) {
+    nodes {
+      employeeFirstName
+      employeeLastName
+      employeeEmail
+      departmentName
+      roleTitle
+      projectTitle
+      projectDeadline
+      projectBudget
+      clientName
+    }
+  }
+}
+```
+
+**Use Case:** Show which employees are assigned to upcoming projects.
+
+**Key Feature:** Automatically flattens the many-to-many relationship between employees and projects. Each employee-project pair creates one row.
+
+**Response:**
+```json
+{
+  "data": {
+    "employeeProjectsFlat": {
+      "nodes": [
+        {
+          "employeeFirstName": "John",
+          "employeeLastName": "Doe",
+          "departmentName": "Engineering",
+          "roleTitle": "Senior Developer",
+          "projectTitle": "E-Commerce Platform",
+          "projectDeadline": "2025-12-31",
+          "clientName": "Acme Corporation"
+        },
+        {
+          "employeeFirstName": "John",
+          "employeeLastName": "Doe",
+          "departmentName": "Engineering",
+          "roleTitle": "Senior Developer",
+          "projectTitle": "Mobile App Redesign",
+          "projectDeadline": "2025-11-15",
+          "clientName": "Beta Industries"
+        }
+      ]
+    }
+  }
+}
+```
+
+**Notice:** John Doe appears twice because he's assigned to 2 projects.
+
+---
+
+### Flattened Query 3: Project-Task Breakdown
+
+**Query:**
+```graphql
+{
+  projectTasksFlat(
+    first: 100
+    where: {
+      taskStatus: { neq: "Completed" }
+    }
+    order: { taskDueDate: ASC }
+  ) {
+    nodes {
+      projectTitle
+      projectDeadline
+      clientName
+      clientIndustry
+      taskTitle
+      taskStatus
+      taskDueDate
+      assignedToFirstName
+      assignedToLastName
+    }
+  }
+}
+```
+
+**Use Case:** Generate a task report showing all incomplete tasks across projects.
+
+**Key Feature:** Handles nullable assigned employee (tasks can be unassigned).
+
+---
+
+### Flattened Query 4: Employee Skills Matrix
+
+**Query:**
+```graphql
+{
+  employeeSkillsFlat(
+    first: 200
+    where: {
+      skillCategory: { eq: "Programming" }
+      skillProficiency: { in: ["Expert", "Advanced"] }
+    }
+    order: [
+      { employeeLastName: ASC }
+      { skillName: ASC }
+    ]
+  ) {
+    nodes {
+      employeeFirstName
+      employeeLastName
+      departmentName
+      skillName
+      skillCategory
+      skillProficiency
+    }
+  }
+}
+```
+
+**Use Case:** Find all employees with advanced programming skills.
+
+**Key Feature:** Many-to-many relationship (employees can have multiple skills).
+
+**Response:**
+```json
+{
+  "data": {
+    "employeeSkillsFlat": {
+      "nodes": [
+        {
+          "employeeFirstName": "John",
+          "employeeLastName": "Doe",
+          "departmentName": "Engineering",
+          "skillName": "C#",
+          "skillCategory": "Programming",
+          "skillProficiency": "Expert"
+        },
+        {
+          "employeeFirstName": "John",
+          "employeeLastName": "Doe",
+          "departmentName": "Engineering",
+          "skillName": "Python",
+          "skillCategory": "Programming",
+          "skillProficiency": "Advanced"
+        }
+      ]
+    }
+  }
+}
+```
+
+---
+
+### Flattened Query 5: Client Projects Portfolio
+
+**Query:**
+```graphql
+{
+  clientProjectsFlat(
+    first: 50
+    where: {
+      projectBudget: { gte: 100000 }
+    }
+    order: { projectDeadline: DESC }
+  ) {
+    nodes {
+      clientName
+      clientIndustry
+      locationCity
+      locationState
+      locationCountry
+      projectTitle
+      projectDeadline
+      projectBudget
+    }
+  }
+}
+```
+
+**Use Case:** Client portfolio report showing all high-value projects.
+
+---
+
+### Filtering on Flattened Fields
+
+**All fields in flattened queries support filtering!**
+
+**Example 1: Filter by any field in the flattened structure**
+```graphql
+{
+  organisationDepartmentEmployeesFlat(
+    first: 20
+    where: {
+      and: [
+        { organisationIndustry: { eq: "Technology" } }
+        { departmentBudget: { gte: 1000000 } }
+        { roleLevel: { in: ["Senior", "Lead"] } }
+      ]
+    }
+  ) {
+    nodes {
+      organisationName
+      departmentName
+      employeeFirstName
+      employeeLastName
+      roleTitle
+    }
+  }
+}
+```
+
+**Use Case:** Find senior employees in well-funded departments of tech companies.
+
+**Example 2: Complex filtering on many-to-many**
+```graphql
+{
+  employeeProjectsFlat(
+    first: 100
+    where: {
+      or: [
+        { clientName: { contains: "Acme" } }
+        { projectBudget: { gte: 500000 } }
+      ]
+      and: [
+        { roleLevel: { neq: "Junior" } }
+      ]
+    }
+  ) {
+    nodes {
+      employeeFirstName
+      employeeLastName
+      projectTitle
+      clientName
+    }
+  }
+}
+```
+
+**Use Case:** Find non-junior employees working on either Acme projects or high-budget projects.
+
+---
+
+### Sorting on Flattened Fields
+
+**You can sort by any field in the flattened structure!**
+
+**Example 1: Multi-level sorting**
+```graphql
+{
+  employeeProjectsFlat(
+    first: 50
+    order: [
+      { departmentName: ASC }
+      { employeeLastName: ASC }
+      { projectDeadline: ASC }
+    ]
+  ) {
+    nodes {
+      departmentName
+      employeeLastName
+      employeeFirstName
+      projectTitle
+      projectDeadline
+    }
+  }
+}
+```
+
+**Result:** Grouped by department, then by employee, then by project deadline.
+
+**Example 2: Sort by calculated urgency**
+```graphql
+{
+  projectTasksFlat(
+    first: 100
+    where: { taskStatus: { neq: "Completed" } }
+    order: { taskDueDate: ASC }
+  ) {
+    nodes {
+      projectTitle
+      taskTitle
+      taskDueDate
+      assignedToLastName
+    }
+  }
+}
+```
+
+**Use Case:** Most urgent tasks first.
+
+---
+
+### Pagination on Flattened Queries
+
+**Flattened queries support the same pagination as hierarchical queries.**
+
+**Example:**
+```graphql
+{
+  employeeSkillsFlat(first: 25, after: "cursor123") {
+    edges {
+      cursor
+      node {
+        employeeFirstName
+        employeeLastName
+        skillName
+        skillProficiency
+      }
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+  }
+}
+```
+
+**Key Point:** Pagination happens **after** flattening, so `totalCount` reflects the number of flattened rows, not entities.
+
+**Example:** If John Doe has 5 skills:
+- Hierarchical query: 1 employee node
+- Flattened query: 5 employee-skill rows
+
+---
+
+### Performance Characteristics
+
+**All flattened queries execute at the database level using LINQ `Select()` and `SelectMany()`.**
+
+**Advantages:**
+1. ✅ No in-memory joins
+2. ✅ Filtering happens in SQL WHERE clause
+3. ✅ Sorting happens in SQL ORDER BY clause
+4. ✅ Pagination happens in SQL LIMIT/OFFSET
+5. ✅ Only requested fields are selected (projection)
+
+**Trade-offs:**
+- More data duplication (organisation/department data repeated)
+- Larger response size compared to hierarchical
+- Better for systems expecting flat data
+
+**Comparison:**
+
+| Aspect | Hierarchical | Flattened |
+|--------|-------------|-----------|
+| Data duplication | Minimal | High (parent data repeated) |
+| Response size | Smaller | Larger |
+| Database operations | Multiple queries (N+1 potential) | Single query with joins |
+| Export to CSV | Requires transformation | Direct export |
+| Nested UI | Natural fit | Requires grouping |
+| Reporting tools | Requires flattening | Direct use |
+
+---
+
+### Real-World Integration Examples
+
+**Example 1: Export to CSV**
+```javascript
+// Frontend: Fetch flattened data
+const response = await fetch('http://localhost:5256/graphql', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    query: `{
+      employeeProjectsFlat(first: 1000) {
+        nodes {
+          employeeFirstName
+          employeeLastName
+          departmentName
+          projectTitle
+          projectDeadline
+        }
+      }
+    }`
+  })
+});
+
+const data = await response.json();
+const rows = data.data.employeeProjectsFlat.nodes;
+
+// Convert to CSV (already flat!)
+const csv = [
+  'First Name,Last Name,Department,Project,Deadline',
+  ...rows.map(r => `${r.employeeFirstName},${r.employeeLastName},${r.departmentName},${r.projectTitle},${r.projectDeadline}`)
+].join('\n');
+
+// Download CSV
+const blob = new Blob([csv], { type: 'text/csv' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = 'employee-projects.csv';
+a.click();
+```
+
+**Example 2: Server-Side Data Table (ag-Grid, DataTables, etc.)**
+```javascript
+// Configure data table with server-side filtering/sorting
+const gridOptions = {
+  rowModelType: 'serverSide',
+  serverSideDatasource: {
+    getRows: async (params) => {
+      // Build GraphQL query from grid state
+      const { startRow, endRow, filterModel, sortModel } = params.request;
+
+      const query = `{
+        employeeProjectsFlat(
+          first: ${endRow - startRow}
+          where: ${buildWhereClause(filterModel)}
+          order: ${buildOrderClause(sortModel)}
+        ) {
+          nodes {
+            employeeFirstName
+            employeeLastName
+            departmentName
+            projectTitle
+            projectDeadline
+          }
+          totalCount
+        }
+      }`;
+
+      const response = await fetch('http://localhost:5256/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+
+      const data = await response.json();
+      params.success({
+        rowData: data.data.employeeProjectsFlat.nodes,
+        rowCount: data.data.employeeProjectsFlat.totalCount
+      });
+    }
+  }
+};
+```
+
+---
+
+### Choosing Between Hierarchical and Flattened
+
+**Use Hierarchical When:**
+- Building nested UI components (org chart, file tree)
+- Minimizing response size
+- Representing natural parent-child relationships
+- Client needs nested JSON structure
+
+**Use Flattened When:**
+- Exporting to CSV/Excel
+- Feeding data to reporting tools (Power BI, Tableau)
+- Building data tables with server-side operations
+- Integrating with systems expecting flat data
+- Avoiding client-side data transformation
+
+**You can use both in the same application!** Choose based on the specific use case.
 
 ---
 
