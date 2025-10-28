@@ -9,8 +9,8 @@ This is a .NET project to demonstrate and test the QueryBuilder utility with a c
 ## Technology Stack
 - .NET 8.0 or later
 - Entity Framework Core with SQLite
-- xUnit for unit testing
-- FluentAssertions for test assertions
+- MSTest for unit testing
+- Microsoft.VisualStudio.TestTools.UnitTesting for test assertions
 
 ## Architecture Patterns
 
@@ -71,16 +71,16 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
 ### 3. Test Project Structure
 **MUST follow these patterns:**
 
-- Use xUnit as testing framework
-- Use FluentAssertions for readable assertions
+- Use MSTest as testing framework
+- Use Microsoft.VisualStudio.TestTools.UnitTesting for assertions
 - Each test MUST use a fresh in-memory SQLite database
 - Tests MUST be isolated (no shared database state)
-- Use `[Fact]` for single tests, `[Theory]` for parameterized tests
+- Use `[TestMethod]` for test methods, `[TestClass]` for test classes
 - Test method names MUST follow pattern: `MethodName_Scenario_ExpectedResult`
 
 **Example:**
 ```csharp
-[Fact]
+[TestMethod]
 public void BuildQuery_WithNestedIncludes_ReturnsCorrectData()
 {
     // Arrange
@@ -93,9 +93,9 @@ public void BuildQuery_WithNestedIncludes_ReturnsCorrectData()
         .ToList();
 
     // Assert
-    result.Should().NotBeEmpty();
-    result.First().Departments.Should().NotBeEmpty();
-    result.First().Departments.First().Employees.Should().NotBeEmpty();
+    Assert.IsTrue(result.Any());
+    Assert.IsTrue(result.First().Departments.Any());
+    Assert.IsTrue(result.First().Departments.First().Employees.Any());
 }
 ```
 

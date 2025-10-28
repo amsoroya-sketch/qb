@@ -2,7 +2,7 @@ using System;
 
 namespace PbsApi.Utils.Model
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Property , AllowMultiple = true)]
     public class WhereAttribute : Attribute
     {
         public string Expression { get; set; }

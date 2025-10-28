@@ -1,10 +1,10 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using FluentAssertions;
 using QueryBuilderDemo.Tests.Data;
 using QueryBuilderDemo.Tests.Models;
 using QueryBuilderDemo.Tests.Helpers;
 using PbsApi.Utils;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace QueryBuilderDemo.Tests.QueryBuilderTests
@@ -28,18 +28,18 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            orgs.Should().NotBeEmpty();
+            Assert.IsTrue(orgs.Any());
             var org = orgs.First();
-            org.Departments.Should().NotBeEmpty();
+            Assert.IsTrue(org.Departments.Any());
 
             var dept = org.Departments.First();
-            dept.Employees.Should().NotBeEmpty();
+            Assert.IsTrue(dept.Employees.Any());
 
             var emp = dept.Employees.FirstOrDefault(e => e.Skills.Any());
             if (emp != null)
             {
-                emp.Skills.Should().NotBeEmpty();
-                emp.Skills.First().Name.Should().NotBeNullOrEmpty();
+                Assert.IsTrue(emp.Skills.Any());
+                Assert.IsFalse(string.IsNullOrEmpty(emp.Skills.First().Name));
             }
         }
 
@@ -56,16 +56,16 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            orgs.Should().NotBeEmpty();
+            Assert.IsTrue(orgs.Any());
             var org = orgs.First();
-            org.Departments.Should().NotBeEmpty();
+            Assert.IsTrue(org.Departments.Any());
 
             var dept = org.Departments.First();
-            dept.Employees.Should().NotBeEmpty();
+            Assert.IsTrue(dept.Employees.Any());
 
             var empWithProjects = dept.Employees.FirstOrDefault(e => e.Projects.Any());
-            empWithProjects.Should().NotBeNull();
-            empWithProjects!.Projects.Should().NotBeEmpty();
+            Assert.IsNotNull(empWithProjects);
+            Assert.IsTrue(empWithProjects!.Projects.Any());
         }
 
         [TestMethod]
@@ -81,18 +81,18 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            clients.Should().NotBeEmpty();
+            Assert.IsTrue(clients.Any());
             var client = clients.First();
-            client.Projects.Should().NotBeEmpty();
+            Assert.IsTrue(client.Projects.Any());
 
             var project = client.Projects.First();
-            project.Tasks.Should().NotBeEmpty();
+            Assert.IsTrue(project.Tasks.Any());
 
             var taskWithAssignee = project.Tasks.FirstOrDefault(t => t.AssignedTo != null);
             if (taskWithAssignee != null)
             {
-                taskWithAssignee.AssignedTo.Should().NotBeNull();
-                taskWithAssignee.AssignedTo!.FirstName.Should().NotBeNullOrEmpty();
+                Assert.IsNotNull(taskWithAssignee.AssignedTo);
+                Assert.IsFalse(string.IsNullOrEmpty(taskWithAssignee.AssignedTo!.FirstName));
             }
         }
 
@@ -109,20 +109,20 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            orgs.Should().NotBeEmpty();
+            Assert.IsTrue(orgs.Any());
             var org = orgs.First();
-            org.Departments.Should().NotBeEmpty();
+            Assert.IsTrue(org.Departments.Any());
 
             var dept = org.Departments.First();
-            dept.Employees.Should().NotBeEmpty();
+            Assert.IsTrue(dept.Employees.Any());
 
             var empWithProjects = dept.Employees.FirstOrDefault(e => e.Projects.Any());
             if (empWithProjects != null)
             {
-                empWithProjects.Projects.Should().NotBeEmpty();
+                Assert.IsTrue(empWithProjects.Projects.Any());
                 var project = empWithProjects.Projects.First();
-                project.Client.Should().NotBeNull();
-                project.Client!.Name.Should().NotBeNullOrEmpty();
+                Assert.IsNotNull(project.Client);
+                Assert.IsFalse(string.IsNullOrEmpty(project.Client!.Name));
             }
         }
 
@@ -139,19 +139,19 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            clients.Should().NotBeEmpty();
+            Assert.IsTrue(clients.Any());
             var client = clients.First();
-            client.Projects.Should().NotBeEmpty();
+            Assert.IsTrue(client.Projects.Any());
 
             var project = client.Projects.First();
-            project.Tasks.Should().NotBeEmpty();
+            Assert.IsTrue(project.Tasks.Any());
 
             var assignedTask = project.Tasks.FirstOrDefault(t => t.AssignedTo != null);
             if (assignedTask != null)
             {
-                assignedTask.AssignedTo.Should().NotBeNull();
-                assignedTask.AssignedTo!.Department.Should().NotBeNull();
-                assignedTask.AssignedTo.Department!.Name.Should().NotBeNullOrEmpty();
+                Assert.IsNotNull(assignedTask.AssignedTo);
+                Assert.IsNotNull(assignedTask.AssignedTo!.Department);
+                Assert.IsFalse(string.IsNullOrEmpty(assignedTask.AssignedTo.Department!.Name));
             }
         }
 
@@ -168,20 +168,20 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            clients.Should().NotBeEmpty();
+            Assert.IsTrue(clients.Any());
             var client = clients.First();
-            client.Projects.Should().NotBeEmpty();
+            Assert.IsTrue(client.Projects.Any());
 
             var project = client.Projects.First();
-            project.Tasks.Should().NotBeEmpty();
+            Assert.IsTrue(project.Tasks.Any());
 
             var assignedTask = project.Tasks.FirstOrDefault(t => t.AssignedTo != null);
             if (assignedTask != null)
             {
-                assignedTask.AssignedTo.Should().NotBeNull();
-                assignedTask.AssignedTo!.Department.Should().NotBeNull();
-                assignedTask.AssignedTo.Department!.Organisation.Should().NotBeNull();
-                assignedTask.AssignedTo.Department.Organisation!.Name.Should().NotBeNullOrEmpty();
+                Assert.IsNotNull(assignedTask.AssignedTo);
+                Assert.IsNotNull(assignedTask.AssignedTo!.Department);
+                Assert.IsNotNull(assignedTask.AssignedTo.Department!.Organisation);
+                Assert.IsFalse(string.IsNullOrEmpty(assignedTask.AssignedTo.Department.Organisation!.Name));
             }
         }
 
@@ -198,14 +198,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            teams.Should().NotBeEmpty();
+            Assert.IsTrue(teams.Any());
             var team = teams.First();
-            team.Members.Should().NotBeEmpty();
+            Assert.IsTrue(team.Members.Any());
 
             var member = team.Members.First();
-            member.Department.Should().NotBeNull();
-            member.Department!.Organisation.Should().NotBeNull();
-            member.Department.Organisation!.Name.Should().NotBeNullOrEmpty();
+            Assert.IsNotNull(member.Department);
+            Assert.IsNotNull(member.Department!.Organisation);
+            Assert.IsFalse(string.IsNullOrEmpty(member.Department.Organisation!.Name));
         }
 
         [TestMethod]
@@ -221,15 +221,15 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            projects.Should().NotBeEmpty();
+            Assert.IsTrue(projects.Any());
             var project = projects.First();
-            project.TeamMembers.Should().NotBeEmpty();
+            Assert.IsTrue(project.TeamMembers.Any());
 
             var memberWithSkills = project.TeamMembers.FirstOrDefault(m => m.Skills.Any());
             if (memberWithSkills != null)
             {
-                memberWithSkills.Skills.Should().NotBeEmpty();
-                memberWithSkills.Skills.First().Name.Should().NotBeNullOrEmpty();
+                Assert.IsTrue(memberWithSkills.Skills.Any());
+                Assert.IsFalse(string.IsNullOrEmpty(memberWithSkills.Skills.First().Name));
             }
         }
 
@@ -246,13 +246,13 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            clients.Should().NotBeEmpty();
+            Assert.IsTrue(clients.Any());
             var client = clients.First();
-            client.Invoices.Should().NotBeEmpty();
+            Assert.IsTrue(client.Invoices.Any());
 
             var invoice = client.Invoices.First();
-            invoice.Payments.Should().NotBeEmpty();
-            invoice.Payments.First().Amount.Should().BeGreaterThan(0);
+            Assert.IsTrue(invoice.Payments.Any());
+            Assert.IsTrue(invoice.Payments.First().Amount > 0);
         }
 
         [TestMethod]
@@ -274,16 +274,16 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            clients.Should().NotBeEmpty();
+            Assert.IsTrue(clients.Any());
             var client = clients.First();
 
             // Verify all paths loaded
-            client.Projects.Should().NotBeEmpty();
-            client.Projects.First().Tasks.Should().NotBeEmpty();
-            client.Projects.First().TeamMembers.Should().NotBeEmpty();
-            client.Invoices.Should().NotBeEmpty();
-            client.Invoices.First().Payments.Should().NotBeEmpty();
-            client.Location.Should().NotBeNull();
+            Assert.IsTrue(client.Projects.Any());
+            Assert.IsTrue(client.Projects.First().Tasks.Any());
+            Assert.IsTrue(client.Projects.First().TeamMembers.Any());
+            Assert.IsTrue(client.Invoices.Any());
+            Assert.IsTrue(client.Invoices.First().Payments.Any());
+            Assert.IsNotNull(client.Location);
         }
 
         [TestMethod]
@@ -299,13 +299,13 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            tasks.Should().NotBeEmpty();
+            Assert.IsTrue(tasks.Any());
             // Some tasks may have null AssignedTo - should not crash
             var assignedTask = tasks.FirstOrDefault(t => t.AssignedTo != null);
             if (assignedTask != null)
             {
-                assignedTask.AssignedTo!.Department.Should().NotBeNull();
-                assignedTask.AssignedTo.Department!.Organisation.Should().NotBeNull();
+                Assert.IsNotNull(assignedTask.AssignedTo!.Department);
+                Assert.IsNotNull(assignedTask.AssignedTo.Department!.Organisation);
             }
         }
 
@@ -322,13 +322,13 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            clients.Should().NotBeEmpty();
+            Assert.IsTrue(clients.Any());
             var client = clients.First();
-            client.Location.Should().NotBeNull();
-            client.Location!.Clients.Should().NotBeEmpty();
+            Assert.IsNotNull(client.Location);
+            Assert.IsTrue(client.Location!.Clients.Any());
 
             var relatedClient = client.Location.Clients.First();
-            relatedClient.Projects.Should().NotBeEmpty();
+            Assert.IsTrue(relatedClient.Projects.Any());
         }
 
         [TestMethod]
@@ -344,14 +344,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            projects.Should().NotBeEmpty();
+            Assert.IsTrue(projects.Any());
             var project = projects.First();
-            project.Client.Should().NotBeNull();
-            project.Client!.Invoices.Should().NotBeEmpty();
+            Assert.IsNotNull(project.Client);
+            Assert.IsTrue(project.Client!.Invoices.Any());
 
             var invoice = project.Client.Invoices.First();
-            invoice.Payments.Should().NotBeEmpty();
-            invoice.Payments.First().Amount.Should().BeGreaterThan(0);
+            Assert.IsTrue(invoice.Payments.Any());
+            Assert.IsTrue(invoice.Payments.First().Amount > 0);
         }
     }
 }

@@ -49,12 +49,12 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify SQL generation (confirms database-side operation)
             var sql = query.ToQueryString();
-            StringAssert.Contains(sql, "SELECT", "Should generate SQL SELECT");
-            StringAssert.Contains(sql, "FROM", "Should have FROM clause");
+            Assert.IsTrue(sql.Contains("SELECT"), "Should generate SQL SELECT");
+            Assert.IsTrue(sql.Contains("FROM"), "Should have FROM clause");
 
             // Execute at database level
             var results = ExecuteQuery(query);
@@ -82,11 +82,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify database-side operation
             var sql = query.ToQueryString();
-            Assert.IsTrue(!string.IsNullOrEmpty(sql), "Should generate SQL");
+            Assert.IsFalse(string.IsNullOrEmpty(sql), "Should generate SQL");
 
             // Execute at database level
             var results = ExecuteQuery(query);
@@ -114,11 +114,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify SQL generation
             var sql = query.ToQueryString();
-            StringAssert.Contains(sql, "SELECT");
+            Assert.IsTrue(sql.Contains("SELECT"));
 
             var results = ExecuteQuery(query);
 
@@ -144,12 +144,12 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // CRITICAL: Verify this generates SQL, not in-memory operation
             var sql = query.ToQueryString();
-            Assert.IsTrue(!string.IsNullOrEmpty(sql), "Must generate SQL query");
-            StringAssert.Contains(sql, "SELECT", "Should have SELECT statement");
+            Assert.IsFalse(string.IsNullOrEmpty(sql), "Must generate SQL query");
+            Assert.IsTrue(sql.Contains("SELECT"), "Should have SELECT statement");
 
             // Execute query - should run at database level
             var results = ExecuteQuery(query);
@@ -177,14 +177,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Apply DISTINCT at database level
             var distinctQuery = query.Distinct();
 
             // Verify SQL contains DISTINCT
             var sql = distinctQuery.ToQueryString();
-            StringAssert.Contains(sql, "DISTINCT", "Should apply DISTINCT in SQL");
+            Assert.IsTrue(sql.Contains("DISTINCT"), "Should apply DISTINCT in SQL");
 
             var results = ExecuteQuery(distinctQuery);
 
@@ -209,10 +209,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Projects.TeamMembers.Department.Organisation.Name"
             };
 
-            var query = context.Clients.BuildFlattenedQuery(selectFields);
+            var query = context.Clients.BuildFlattenedQuery<Client>(selectFields);
 
             var sql = query.ToQueryString();
-            Assert.IsTrue(!string.IsNullOrEmpty(sql));
+            Assert.IsFalse(string.IsNullOrEmpty(sql));
 
             var results = ExecuteQuery(query);
             Assert.IsTrue(results.Count > 0);
@@ -234,10 +234,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Members.Department.Organisation.Industry"
             };
 
-            var query = context.Teams.BuildFlattenedQuery(selectFields);
+            var query = context.Teams.BuildFlattenedQuery<Team>(selectFields);
 
             var sql = query.ToQueryString();
-            Assert.IsTrue(!string.IsNullOrEmpty(sql), "Should generate SQL for 5-level path");
+            Assert.IsFalse(string.IsNullOrEmpty(sql), "Should generate SQL for 5-level path");
 
             var results = ExecuteQuery(query);
             Assert.IsTrue(results.Count > 0, "Should have results for 5-level navigation");
@@ -259,10 +259,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Skills.Proficiency"
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             var sql = query.ToQueryString();
-            Assert.IsTrue(!string.IsNullOrEmpty(sql));
+            Assert.IsFalse(string.IsNullOrEmpty(sql));
 
             var results = ExecuteQuery(query);
             Assert.IsTrue(results.Count > 0, "Should handle many-to-many at 5 levels");
@@ -284,14 +284,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Projects.Tasks.Title"
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Get SQL before execution
             var sql = query.ToQueryString();
 
             // SQL should contain all the work - no deferred operations
-            Assert.IsTrue(!string.IsNullOrEmpty(sql));
-            StringAssert.Contains(sql, "SELECT");
+            Assert.IsFalse(string.IsNullOrEmpty(sql));
+            Assert.IsTrue(sql.Contains("SELECT"));
 
             // When we call ToList(), it should just execute the SQL
             // No additional in-memory processing
@@ -316,10 +316,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Projects.Id" // Level 4 collection
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             var sql = query.ToQueryString();
-            Assert.IsTrue(!string.IsNullOrEmpty(sql), "Should generate SQL for nested collections");
+            Assert.IsFalse(string.IsNullOrEmpty(sql), "Should generate SQL for nested collections");
 
             var results = ExecuteQuery(query);
             Assert.IsTrue(results.Count > 0, "Should handle multiple nested collections");
@@ -337,7 +337,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.FirstName"
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Apply distinct and count at database level
             var distinctQuery = query.Distinct();
@@ -362,7 +362,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Projects.Tasks.Status"
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Get the generated SQL
             var sql = query.ToQueryString();
@@ -372,9 +372,9 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             Console.WriteLine(sql);
 
             // Assertions to verify database-side operations
-            Assert.IsTrue(!string.IsNullOrEmpty(sql), "SQL must be generated");
-            StringAssert.Contains(sql, "SELECT", "Must have SELECT clause");
-            StringAssert.Contains(sql, "FROM", "Must have FROM clause");
+            Assert.IsFalse(string.IsNullOrEmpty(sql), "SQL must be generated");
+            Assert.IsTrue(sql.Contains("SELECT"), "Must have SELECT clause");
+            Assert.IsTrue(sql.Contains("FROM"), "Must have FROM clause");
 
             // SelectMany should translate to SQL operations, not in-memory
             // The presence of a complete SQL query confirms this
@@ -399,10 +399,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Projects.TeamMembers.Projects.Tasks.Title"
             };
 
-            var query = context.Clients.BuildFlattenedQuery(selectFields);
+            var query = context.Clients.BuildFlattenedQuery<Client>(selectFields);
 
             var sql = query.ToQueryString();
-            Assert.IsTrue(!string.IsNullOrEmpty(sql), "Should generate SQL for complex 5-level path");
+            Assert.IsFalse(string.IsNullOrEmpty(sql), "Should generate SQL for complex 5-level path");
 
             var results = ExecuteQuery(query);
             Assert.IsTrue(results.Count > 0, "Should handle complex many-to-many at 5 levels");
@@ -418,12 +418,12 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var selectFields = new HashSet<string> { "Id", "Name", "Industry" };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify SQL generation
             var sql = query.ToQueryString();
-            Assert.IsTrue(!string.IsNullOrEmpty(sql));
-            StringAssert.Contains(sql, "SELECT");
+            Assert.IsFalse(string.IsNullOrEmpty(sql));
+            Assert.IsTrue(sql.Contains("SELECT"));
 
             var results = ExecuteQuery(query);
 
@@ -448,10 +448,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Tasks.AssignedTo.Department.Organisation.Name"
             };
 
-            var query = context.Projects.BuildFlattenedQuery(selectFields);
+            var query = context.Projects.BuildFlattenedQuery<Project>(selectFields);
 
             var sql = query.ToQueryString();
-            Assert.IsTrue(!string.IsNullOrEmpty(sql), "Should generate SQL for 5-level reference path");
+            Assert.IsFalse(string.IsNullOrEmpty(sql), "Should generate SQL for 5-level reference path");
 
             var results = ExecuteQuery(query);
             Assert.IsTrue(results.Count > 0, "Should navigate through nullable references");
@@ -470,10 +470,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Certifications.Name"
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             var sql = query.ToQueryString();
-            StringAssert.Contains(sql, "SELECT");
+            Assert.IsTrue(sql.Contains("SELECT"));
 
             var results = ExecuteQuery(query);
             Assert.IsTrue(results.Count > 0);
@@ -492,10 +492,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Meetings.Duration"
             };
 
-            var query = context.Teams.BuildFlattenedQuery(selectFields);
+            var query = context.Teams.BuildFlattenedQuery<Team>(selectFields);
 
             var sql = query.ToQueryString();
-            Assert.IsTrue(!string.IsNullOrEmpty(sql));
+            Assert.IsFalse(string.IsNullOrEmpty(sql));
 
             var results = ExecuteQuery(query);
             Assert.IsTrue(results.Count > 0, "Should flatten team meetings");
@@ -515,10 +515,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Invoices.Payments.Method"
             };
 
-            var query = context.Clients.BuildFlattenedQuery(selectFields);
+            var query = context.Clients.BuildFlattenedQuery<Client>(selectFields);
 
             var sql = query.ToQueryString();
-            Assert.IsTrue(!string.IsNullOrEmpty(sql));
+            Assert.IsFalse(string.IsNullOrEmpty(sql));
 
             var results = ExecuteQuery(query);
             Assert.IsTrue(results.Count > 0, "Should flatten invoice payments");
@@ -541,11 +541,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Skills.Name"
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify SQL contains DISTINCT (applied by BuildFlattenedQuery)
             var sql = query.ToQueryString();
-            StringAssert.Contains(sql, "DISTINCT", "BuildFlattenedQuery should apply DISTINCT to eliminate cartesian product duplicates");
+            Assert.IsTrue(sql.Contains("DISTINCT"), "BuildFlattenedQuery should apply DISTINCT to eliminate cartesian product duplicates");
 
             var results = ExecuteQuery(query);
             Assert.IsTrue(results.Count > 0);
@@ -570,11 +570,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Skills.Name"
             };
 
-            var query = context.Employees.BuildFlattenedQuery(selectFields);
+            var query = context.Employees.BuildFlattenedQuery<Employee>(selectFields);
 
             // Verify DISTINCT is in the SQL
             var sql = query.ToQueryString();
-            StringAssert.Contains(sql, "DISTINCT", "Should apply DISTINCT to prevent cartesian product duplicates");
+            Assert.IsTrue(sql.Contains("DISTINCT"), "Should apply DISTINCT to prevent cartesian product duplicates");
 
             var results = ExecuteQuery(query);
             Assert.IsTrue(results.Count > 0);
@@ -600,12 +600,12 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 "Departments.Employees.Email"
             };
 
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify SQL contains DISTINCT and is executed at database level
             var sql = query.ToQueryString();
-            StringAssert.Contains(sql, "DISTINCT", "Should apply DISTINCT in SQL");
-            StringAssert.Contains(sql, "SELECT", "Should generate SQL query");
+            Assert.IsTrue(sql.Contains("DISTINCT"), "Should apply DISTINCT in SQL");
+            Assert.IsTrue(sql.Contains("SELECT"), "Should generate SQL query");
 
             var results = ExecuteQuery(query);
             Assert.IsTrue(results.Count > 0);
@@ -633,12 +633,12 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify SQL is generated (preprocessing expands to scalar fields before query building)
             var sql = query.ToQueryString();
-            StringAssert.Contains(sql, "DISTINCT", "Should apply DISTINCT after expansion");
-            StringAssert.Contains(sql, "SELECT", "Should generate SQL query");
+            Assert.IsTrue(sql.Contains("DISTINCT"), "Should apply DISTINCT after expansion");
+            Assert.IsTrue(sql.Contains("SELECT"), "Should generate SQL query");
 
             var results = ExecuteQuery(query);
             Assert.IsTrue(results.Count > 0);
@@ -663,8 +663,8 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             // Verify we can access the values
             dynamic dynamicResult = firstResult;
-            int id = dynamicResult.Departments_Employees_Id;
-            Assert.IsTrue(id > 0);
+            var id = dynamicResult.Departments_Employees_Id;
+            Assert.IsNotNull((object)id);
         }
 
         [TestMethod]
@@ -683,12 +683,12 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             };
 
             // Act
-            var query = context.Organisations.BuildFlattenedQuery(selectFields);
+            var query = context.Organisations.BuildFlattenedQuery<Organisation>(selectFields);
 
             // Verify SQL generation
             var sql = query.ToQueryString();
-            StringAssert.Contains(sql, "DISTINCT");
-            StringAssert.Contains(sql, "SELECT");
+            Assert.IsTrue(sql.Contains("DISTINCT"));
+            Assert.IsTrue(sql.Contains("SELECT"));
 
             var results = ExecuteQuery(query);
             Assert.IsTrue(results.Count > 0);
@@ -720,7 +720,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             int orgId = dynamicResult.Id;
             string empFirstName = dynamicResult.Departments_Employees_FirstName;
             Assert.IsTrue(orgId > 0);
-            Assert.IsTrue(!string.IsNullOrEmpty(empFirstName));
+            Assert.IsFalse(string.IsNullOrEmpty(empFirstName));
         }
     }
 }

@@ -2,7 +2,7 @@ using System;
 
 namespace PbsApi.Utils.Model
 {
-    [AttributeUsage(AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
     public class RecursiveIncludeLevelAttribute : Attribute
     {
         public int Level { get; set; }

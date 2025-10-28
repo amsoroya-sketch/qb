@@ -3,9 +3,8 @@ using PbsApi.Utils.Model;
 namespace QueryBuilderDemo.Tests.Models
 {
     /// <summary>
-    /// Organisation entity with default ordering by Name (alphabetical)
+    /// Organisation entity
     /// </summary>
-    [DLINQOrderby("Name")]
     public class Organisation
     {
         public int Id { get; set; }
@@ -15,6 +14,7 @@ namespace QueryBuilderDemo.Tests.Models
 
         // Navigation properties
         [RecursiveIncludeLevel(2)]
+        [DLINQOrderbyAttribute("Name")]
         public List<Department> Departments { get; set; } = new();
     }
 }

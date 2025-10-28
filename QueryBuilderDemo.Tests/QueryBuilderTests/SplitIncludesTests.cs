@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using FluentAssertions;
 using QueryBuilderDemo.Tests.Models;
 using PbsApi.Utils;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace QueryBuilderDemo.Tests.QueryBuilderTests
@@ -19,8 +19,8 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             QueryBuilder.SplitIncludes<Organisation>(includes, out var validIncludes, out var selectorPaths);
 
             // Assert
-            validIncludes.Should().NotContain("Name"); // Scalar not in includes
-            selectorPaths.Should().Contain("Name");
+            Assert.IsFalse(validIncludes.Contains("Name")); // Scalar not in includes
+            Assert.IsTrue(selectorPaths.Contains("Name"));
         }
 
         [TestMethod]
@@ -33,8 +33,8 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             QueryBuilder.SplitIncludes<Employee>(includes, out var validIncludes, out var selectorPaths);
 
             // Assert
-            validIncludes.Should().Contain("Department");
-            selectorPaths.Should().Contain("Department.Name");
+            Assert.IsTrue(validIncludes.Contains("Department"));
+            Assert.IsTrue(selectorPaths.Contains("Department.Name"));
         }
 
         [TestMethod]
@@ -53,11 +53,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             QueryBuilder.SplitIncludes<Employee>(includes, out var validIncludes, out var selectorPaths);
 
             // Assert
-            validIncludes.Should().Contain("Department");
-            validIncludes.Should().Contain("Role");
-            validIncludes.Should().Contain("Projects");
-            validIncludes.Should().Contain("Skills");
-            validIncludes.Should().HaveCount(4);
+            Assert.IsTrue(validIncludes.Contains("Department"));
+            Assert.IsTrue(validIncludes.Contains("Role"));
+            Assert.IsTrue(validIncludes.Contains("Projects"));
+            Assert.IsTrue(validIncludes.Contains("Skills"));
+            Assert.AreEqual(4, validIncludes.Count());
         }
 
         [TestMethod]
@@ -76,9 +76,9 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             // Assert
             // Should remove shorter paths that are covered by longer ones
-            validIncludes.Should().NotContain("Departments"); // Covered by longer paths
-            validIncludes.Should().NotContain("Departments.Employees"); // Covered by longer path
-            validIncludes.Should().Contain("Departments.Employees.Role");
+            Assert.IsFalse(validIncludes.Contains("Departments")); // Covered by longer paths
+            Assert.IsFalse(validIncludes.Contains("Departments.Employees")); // Covered by longer path
+            Assert.IsTrue(validIncludes.Contains("Departments.Employees.Role"));
         }
 
         [TestMethod]
@@ -91,11 +91,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             QueryBuilder.SplitIncludes<Employee>(includes, out var validIncludes, out var selectorPaths);
 
             // Assert
-            validIncludes.Should().Contain("Department");
-            validIncludes.Should().Contain("Role");
-            validIncludes.Should().Contain("Projects");
-            validIncludes.Should().Contain("Skills");
-            selectorPaths.Should().NotBeEmpty();
+            Assert.IsTrue(validIncludes.Contains("Department"));
+            Assert.IsTrue(validIncludes.Contains("Role"));
+            Assert.IsTrue(validIncludes.Contains("Projects"));
+            Assert.IsTrue(validIncludes.Contains("Skills"));
+            Assert.IsTrue(selectorPaths.Any());
         }
 
         [TestMethod]
@@ -108,8 +108,8 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             QueryBuilder.SplitIncludes<Organisation>(includes, out var validIncludes, out var selectorPaths);
 
             // Assert
-            validIncludes.Should().BeEmpty();
-            selectorPaths.Should().BeEmpty();
+            Assert.IsFalse(validIncludes.Any());
+            Assert.IsFalse(selectorPaths.Any());
         }
 
         [TestMethod]
@@ -122,8 +122,8 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             QueryBuilder.SplitIncludes<Organisation>(includes, out var validIncludes, out var selectorPaths);
 
             // Assert
-            validIncludes.Should().Contain("Departments");
-            validIncludes.Should().HaveCount(1);
+            Assert.IsTrue(validIncludes.Contains("Departments"));
+            Assert.AreEqual(1, validIncludes.Count());
         }
 
         [TestMethod]
@@ -136,8 +136,8 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             QueryBuilder.SplitIncludes<Employee>(includes, out var validIncludes, out var selectorPaths);
 
             // Assert
-            validIncludes.Should().Contain("Projects");
-            validIncludes.Should().Contain("Skills");
+            Assert.IsTrue(validIncludes.Contains("Projects"));
+            Assert.IsTrue(validIncludes.Contains("Skills"));
         }
 
         [TestMethod]
@@ -151,7 +151,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             // Assert
             // Should handle case insensitivity
-            validIncludes.Should().Contain("Departments");
+            Assert.IsTrue(validIncludes.Contains("Departments"));
         }
 
         [TestMethod]
@@ -165,8 +165,8 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             // Assert
             // Should handle gracefully
-            validIncludes.Should().BeEmpty();
-            selectorPaths.Should().BeEmpty();
+            Assert.IsFalse(validIncludes.Any());
+            Assert.IsFalse(selectorPaths.Any());
         }
     }
 }

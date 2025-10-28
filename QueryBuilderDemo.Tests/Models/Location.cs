@@ -11,6 +11,7 @@ namespace QueryBuilderDemo.Tests.Models
 
         // Navigation properties
         [RecursiveIncludeLevel(2)]
+        [DLINQOrderbyAttribute("Name")]
         public List<Client> Clients { get; set; } = new();
     }
 }

@@ -3,10 +3,8 @@ using PbsApi.Utils.Model;
 namespace QueryBuilderDemo.Tests.Models
 {
     /// <summary>
-    /// Role entity with default ordering by Level (hierarchy), then Title
+    /// Role entity
     /// </summary>
-    [DLINQOrderby("Level")]
-    [DLINQOrderby("Title")]
     public class Role
     {
         public int Id { get; set; }
@@ -16,6 +14,8 @@ namespace QueryBuilderDemo.Tests.Models
 
         // Navigation properties
         [RecursiveIncludeLevel(2)]
+        [DLINQOrderbyAttribute("LastName")]
+        [DLINQOrderbyAttribute("FirstName")]
         public List<Employee> Employees { get; set; } = new();
     }
 }

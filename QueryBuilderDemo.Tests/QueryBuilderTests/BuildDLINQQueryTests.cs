@@ -1,10 +1,10 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using FluentAssertions;
 using QueryBuilderDemo.Tests.Data;
 using QueryBuilderDemo.Tests.Models;
 using QueryBuilderDemo.Tests.Helpers;
 using PbsApi.Utils;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace QueryBuilderDemo.Tests.QueryBuilderTests
@@ -26,11 +26,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var org = result.First();
-            org.Id.Should().BeGreaterThan(0);
-            org.Name.Should().NotBeNullOrEmpty();
-            org.Industry.Should().NotBeNullOrEmpty();
+            Assert.IsTrue(org.Id > 0);
+            Assert.IsFalse(string.IsNullOrEmpty(org.Name));
+            Assert.IsFalse(string.IsNullOrEmpty(org.Industry));
         }
 
         [TestMethod]
@@ -47,11 +47,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var emp = result.First();
-            emp.Id.Should().BeGreaterThan(0);
-            emp.FirstName.Should().NotBeNullOrEmpty();
-            emp.Department.Should().NotBeNull();
+            Assert.IsTrue(emp.Id > 0);
+            Assert.IsFalse(string.IsNullOrEmpty(emp.FirstName));
+            Assert.IsNotNull(emp.Department);
         }
 
         [TestMethod]
@@ -68,12 +68,12 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var emp = result.First();
-            emp.Id.Should().BeGreaterThan(0);
-            emp.FirstName.Should().NotBeNullOrEmpty();
-            emp.Department.Should().NotBeNull();
-            emp.Department!.Name.Should().NotBeNullOrEmpty();
+            Assert.IsTrue(emp.Id > 0);
+            Assert.IsFalse(string.IsNullOrEmpty(emp.FirstName));
+            Assert.IsNotNull(emp.Department);
+            Assert.IsFalse(string.IsNullOrEmpty(emp.Department!.Name));
         }
 
         [TestMethod]
@@ -96,14 +96,14 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var emp = result.First();
-            emp.Id.Should().BeGreaterThan(0);
-            emp.FirstName.Should().NotBeNullOrEmpty();
-            emp.Department.Should().NotBeNull();
-            emp.Department!.Name.Should().NotBeNullOrEmpty();
-            emp.Department.Organisation.Should().NotBeNull();
-            emp.Department.Organisation!.Name.Should().NotBeNullOrEmpty();
+            Assert.IsTrue(emp.Id > 0);
+            Assert.IsFalse(string.IsNullOrEmpty(emp.FirstName));
+            Assert.IsNotNull(emp.Department);
+            Assert.IsFalse(string.IsNullOrEmpty(emp.Department!.Name));
+            Assert.IsNotNull(emp.Department.Organisation);
+            Assert.IsFalse(string.IsNullOrEmpty(emp.Department.Organisation!.Name));
         }
 
         [TestMethod]
@@ -120,11 +120,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var org = result.First();
-            org.Id.Should().BeGreaterThan(0);
-            org.Name.Should().NotBeNullOrEmpty();
-            org.Departments.Should().NotBeEmpty();
+            Assert.IsTrue(org.Id > 0);
+            Assert.IsFalse(string.IsNullOrEmpty(org.Name));
+            Assert.IsTrue(org.Departments.Any());
         }
 
         [TestMethod]
@@ -141,12 +141,12 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var org = result.First();
-            org.Id.Should().BeGreaterThan(0);
-            org.Name.Should().NotBeNullOrEmpty();
-            org.Departments.Should().NotBeEmpty();
-            org.Departments.First().Name.Should().NotBeNullOrEmpty();
+            Assert.IsTrue(org.Id > 0);
+            Assert.IsFalse(string.IsNullOrEmpty(org.Name));
+            Assert.IsTrue(org.Departments.Any());
+            Assert.IsFalse(string.IsNullOrEmpty(org.Departments.First().Name));
         }
 
         [TestMethod]
@@ -171,15 +171,15 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var emp = result.First();
-            emp.Id.Should().BeGreaterThan(0);
-            emp.FirstName.Should().NotBeNullOrEmpty();
-            emp.Email.Should().NotBeNullOrEmpty();
-            emp.Department.Should().NotBeNull();
-            emp.Department!.Name.Should().NotBeNullOrEmpty();
-            emp.Role.Should().NotBeNull();
-            emp.Role!.Title.Should().NotBeNullOrEmpty();
+            Assert.IsTrue(emp.Id > 0);
+            Assert.IsFalse(string.IsNullOrEmpty(emp.FirstName));
+            Assert.IsFalse(string.IsNullOrEmpty(emp.Email));
+            Assert.IsNotNull(emp.Department);
+            Assert.IsFalse(string.IsNullOrEmpty(emp.Department!.Name));
+            Assert.IsNotNull(emp.Role);
+            Assert.IsFalse(string.IsNullOrEmpty(emp.Role!.Title));
         }
 
         [TestMethod]
@@ -228,12 +228,12 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var client = result.First();
-            client.Id.Should().BeGreaterThan(0);
-            client.Name.Should().NotBeNullOrEmpty();
-            client.Projects.Should().NotBeEmpty();
-            client.Projects.First().Title.Should().NotBeNullOrEmpty();
+            Assert.IsTrue(client.Id > 0);
+            Assert.IsFalse(string.IsNullOrEmpty(client.Name));
+            Assert.IsTrue(client.Projects.Any());
+            Assert.IsFalse(string.IsNullOrEmpty(client.Projects.First().Title));
         }
 
         [TestMethod]
@@ -255,10 +255,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var empWithSkills = result.FirstOrDefault(e => e.Skills.Any());
-            empWithSkills.Should().NotBeNull();
-            empWithSkills!.Skills.First().Name.Should().NotBeNullOrEmpty();
+            Assert.IsNotNull(empWithSkills);
+            Assert.IsFalse(string.IsNullOrEmpty(empWithSkills!.Skills.First().Name));
         }
 
         [TestMethod]
@@ -275,10 +275,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 .ToList();
 
             // Assert
-            result.Should().NotBeEmpty();
+            Assert.IsTrue(result.Any());
             var org = result.First();
-            org.Id.Should().BeGreaterThan(0);
-            org.Name.Should().NotBeNullOrEmpty();
+            Assert.IsTrue(org.Id > 0);
+            Assert.IsFalse(string.IsNullOrEmpty(org.Name));
             // Industry and FoundYear should be default values since not selected
         }
     }

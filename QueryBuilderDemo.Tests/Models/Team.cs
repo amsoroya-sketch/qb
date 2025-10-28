@@ -3,9 +3,8 @@ using PbsApi.Utils.Model;
 namespace QueryBuilderDemo.Tests.Models
 {
     /// <summary>
-    /// Team entity with default ordering by Name
+    /// Team entity
     /// </summary>
-    [DLINQOrderby("Name")]
     public class Team
     {
         public int Id { get; set; }
@@ -15,6 +14,8 @@ namespace QueryBuilderDemo.Tests.Models
 
         // Navigation properties - many-to-many
         [RecursiveIncludeLevel(2)]
+        [DLINQOrderbyAttribute("LastName")]
+        [DLINQOrderbyAttribute("FirstName")]
         public List<Employee> Members { get; set; } = new();
         [RecursiveIncludeLevel(2)]
         public List<Meeting> Meetings { get; set; } = new();

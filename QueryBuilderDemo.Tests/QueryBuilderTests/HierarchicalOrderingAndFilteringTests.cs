@@ -1,5 +1,4 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using FluentAssertions;
 using QueryBuilderDemo.Tests.Data;
 using QueryBuilderDemo.Tests.Helpers;
 using System.Linq;
@@ -39,21 +38,21 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var result = await GraphQLTestHelper.ExecuteQueryAsync(context, query);
 
             // Assert
-            result.Should().NotBeNull();
+            Assert.IsNotNull(result);
             var jsonResult = result.ToJson();
             var jsonDoc = JsonDocument.Parse(jsonResult);
             var orgs = jsonDoc.RootElement.GetProperty("data").GetProperty("organisations").GetProperty("nodes");
 
-            orgs.GetArrayLength().Should().BeGreaterThan(0);
+            Assert.IsTrue(orgs.GetArrayLength() > 0);
             var org = orgs[0];
             var departments = org.GetProperty("departments").EnumerateArray().ToList();
 
-            departments.Should().NotBeEmpty();
+            Assert.IsTrue(departments.Count > 0);
 
             // Verify Departments are ordered by Name
             var deptNames = departments.Select(d => d.GetProperty("name").GetString()).ToList();
             var sortedNames = deptNames.OrderBy(n => n).ToList();
-            deptNames.Should().Equal(sortedNames, "Departments should be ordered by Name alphabetically");
+            CollectionAssert.AreEqual(sortedNames, deptNames, "Departments should be ordered by Name alphabetically");
         }
 
         [TestMethod]
@@ -84,11 +83,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var jsonDoc = JsonDocument.Parse(jsonResult);
             var depts = jsonDoc.RootElement.GetProperty("data").GetProperty("departments").GetProperty("nodes");
 
-            depts.GetArrayLength().Should().BeGreaterThan(0);
+            Assert.IsTrue(depts.GetArrayLength() > 0);
             var dept = depts[0];
             var employees = dept.GetProperty("employees").EnumerateArray().ToList();
 
-            employees.Should().NotBeEmpty();
+            Assert.IsTrue(employees.Count > 0);
 
             // Verify Employees are ordered by LastName, then FirstName
             var empData = employees.Select(e => new
@@ -101,10 +100,8 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
             for (int i = 0; i < empData.Count; i++)
             {
-                empData[i].LastName.Should().Be(sortedEmpData[i].LastName,
-                    $"Employee at index {i} should be ordered by LastName");
-                empData[i].FirstName.Should().Be(sortedEmpData[i].FirstName,
-                    $"Employee at index {i} should be ordered by FirstName within LastName");
+                Assert.AreEqual(sortedEmpData[i].LastName, empData[i].LastName, $"Employee at index {i} should be ordered by LastName");
+                Assert.AreEqual(sortedEmpData[i].FirstName, empData[i].FirstName, $"Employee at index {i} should be ordered by FirstName within LastName");
             }
         }
 
@@ -139,16 +136,16 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var jsonDoc = JsonDocument.Parse(jsonResult);
             var orgs = jsonDoc.RootElement.GetProperty("data").GetProperty("organisations").GetProperty("nodes");
 
-            orgs.GetArrayLength().Should().BeGreaterThan(0);
+            Assert.IsTrue(orgs.GetArrayLength() > 0);
             var org = orgs[0];
             var departments = org.GetProperty("departments").EnumerateArray().ToList();
 
-            departments.Should().NotBeEmpty();
+            Assert.IsTrue(departments.Count > 0);
 
             // Level 1: Departments should be ordered by Name
             var deptNames = departments.Select(d => d.GetProperty("name").GetString()).ToList();
             var sortedDeptNames = deptNames.OrderBy(n => n).ToList();
-            deptNames.Should().Equal(sortedDeptNames, "Departments should be ordered by Name");
+            CollectionAssert.AreEqual(sortedDeptNames, deptNames, "Departments should be ordered by Name");
 
             // Level 2: Employees within each Department should be ordered by LastName, FirstName
             foreach (var dept in departments)
@@ -165,8 +162,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                     for (int i = 0; i < employees.Count; i++)
                     {
-                        employees[i].LastName.Should().Be(sortedEmployees[i].LastName,
-                            $"Employees in {dept.GetProperty("name").GetString()} should be ordered by LastName");
+                        Assert.AreEqual(sortedEmployees[i].LastName, employees[i].LastName, $"Employees in {dept.GetProperty("name").GetString()} should be ordered by LastName");
                     }
                 }
             }
@@ -211,7 +207,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 }
             }
 
-            empWithSkills.Should().NotBeNull("At least one employee should have skills");
+            Assert.IsNotNull(empWithSkills, "At least one employee should have skills");
 
             if (empWithSkills.HasValue)
             {
@@ -225,10 +221,8 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                 for (int i = 0; i < skills.Count; i++)
                 {
-                    skills[i].Category.Should().Be(sortedSkills[i].Category,
-                        $"Skill at index {i} should be ordered by Category");
-                    skills[i].Name.Should().Be(sortedSkills[i].Name,
-                        $"Skill at index {i} should be ordered by Name within Category");
+                    Assert.AreEqual(sortedSkills[i].Category, skills[i].Category, $"Skill at index {i} should be ordered by Category");
+                    Assert.AreEqual(sortedSkills[i].Name, skills[i].Name, $"Skill at index {i} should be ordered by Name within Category");
                 }
             }
         }
@@ -272,7 +266,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 }
             }
 
-            empWithProjects.Should().NotBeNull("At least one employee should have projects");
+            Assert.IsNotNull(empWithProjects, "At least one employee should have projects");
 
             if (empWithProjects.HasValue)
             {
@@ -286,8 +280,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                 for (int i = 0; i < projects.Count; i++)
                 {
-                    projects[i].Deadline.Should().Be(sortedProjects[i].Deadline,
-                        $"Project at index {i} should be ordered by Deadline (ascending)");
+                    Assert.AreEqual(sortedProjects[i].Deadline, projects[i].Deadline, $"Project at index {i} should be ordered by Deadline (ascending)");
                 }
             }
         }
@@ -317,10 +310,10 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var jsonDoc = JsonDocument.Parse(jsonResult);
             var roles = jsonDoc.RootElement.GetProperty("data").GetProperty("roles").GetProperty("nodes");
 
-            roles.GetArrayLength().Should().BeGreaterThan(0);
+            Assert.IsTrue(roles.GetArrayLength() > 0);
             var role = roles[0];
-            role.TryGetProperty("level", out _).Should().BeTrue();
-            role.TryGetProperty("title", out _).Should().BeTrue();
+            Assert.IsTrue(role.TryGetProperty("level", out _));
+            Assert.IsTrue(role.TryGetProperty("title", out _));
         }
 
         [TestMethod]
@@ -362,7 +355,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 }
             }
 
-            projectWithTasks.Should().NotBeNull("At least one project should have tasks");
+            Assert.IsNotNull(projectWithTasks, "At least one project should have tasks");
 
             if (projectWithTasks.HasValue)
             {
@@ -370,8 +363,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 foreach (var task in tasks)
                 {
                     var status = task.GetProperty("status").GetString();
-                    status.Should().NotBe("Completed",
-                        "Tasks with Status 'Completed' should be filtered out by where clause");
+                    Assert.AreNotEqual("Completed", status, "Tasks with Status 'Completed' should be filtered out by where clause");
                 }
             }
         }
@@ -416,7 +408,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 }
             }
 
-            empWithCerts.Should().NotBeNull("At least one employee should have certifications");
+            Assert.IsNotNull(empWithCerts, "At least one employee should have certifications");
 
             if (empWithCerts.HasValue)
             {
@@ -424,8 +416,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
                 foreach (var cert in certs)
                 {
                     var validUntil = cert.GetProperty("validUntil").GetDateTime();
-                    validUntil.Should().BeOnOrAfter(System.DateTime.Now,
-                        "Only valid (non-expired) certifications should be included");
+                    Assert.IsTrue(validUntil >= System.DateTime.Now, "Only valid (non-expired) certifications should be included");
                 }
             }
         }
@@ -478,8 +469,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                 for (int i = 0; i < certs.Count; i++)
                 {
-                    certs[i].Should().Be(sortedCerts[i],
-                        $"Certification at index {i} should be ordered by ValidUntil descending");
+                    Assert.AreEqual(sortedCerts[i], certs[i], $"Certification at index {i} should be ordered by ValidUntil descending");
                 }
             }
         }
@@ -532,8 +522,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                 for (int i = 0; i < tasks.Count; i++)
                 {
-                    tasks[i].Should().Be(sortedTasks[i],
-                        $"Task at index {i} should be ordered by DueDate (ascending)");
+                    Assert.AreEqual(sortedTasks[i], tasks[i], $"Task at index {i} should be ordered by DueDate (ascending)");
                 }
             }
         }
@@ -566,11 +555,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var jsonDoc = JsonDocument.Parse(jsonResult);
             var teams = jsonDoc.RootElement.GetProperty("data").GetProperty("teams").GetProperty("nodes");
 
-            teams.GetArrayLength().Should().BeGreaterThan(0);
+            Assert.IsTrue(teams.GetArrayLength() > 0);
             var team = teams[0];
             var members = team.GetProperty("members").EnumerateArray().ToList();
 
-            members.Should().NotBeEmpty();
+            Assert.IsTrue(members.Count > 0);
 
             if (members.Count > 1)
             {
@@ -584,8 +573,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                 for (int i = 0; i < memberData.Count; i++)
                 {
-                    memberData[i].LastName.Should().Be(sortedMembers[i].LastName,
-                        $"Team member at index {i} should be ordered by LastName");
+                    Assert.AreEqual(sortedMembers[i].LastName, memberData[i].LastName, $"Team member at index {i} should be ordered by LastName");
                 }
             }
         }
@@ -618,11 +606,11 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var jsonDoc = JsonDocument.Parse(jsonResult);
             var clients = jsonDoc.RootElement.GetProperty("data").GetProperty("clients").GetProperty("nodes");
 
-            clients.GetArrayLength().Should().BeGreaterThan(0);
+            Assert.IsTrue(clients.GetArrayLength() > 0);
             var client = clients[0];
             var projects = client.GetProperty("projects").EnumerateArray().ToList();
 
-            projects.Should().NotBeEmpty();
+            Assert.IsTrue(projects.Count > 0);
 
             if (projects.Count > 1)
             {
@@ -631,8 +619,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                 for (int i = 0; i < projectDeadlines.Count; i++)
                 {
-                    projectDeadlines[i].Should().Be(sortedDeadlines[i],
-                        $"Project at index {i} should be ordered by Deadline");
+                    Assert.AreEqual(sortedDeadlines[i], projectDeadlines[i], $"Project at index {i} should be ordered by Deadline");
                 }
             }
         }
@@ -672,7 +659,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             var jsonDoc = JsonDocument.Parse(jsonResult);
             var orgs = jsonDoc.RootElement.GetProperty("data").GetProperty("organisations").GetProperty("nodes");
 
-            orgs.GetArrayLength().Should().BeGreaterThan(0);
+            Assert.IsTrue(orgs.GetArrayLength() > 0);
             var org = orgs[0];
             var departments = org.GetProperty("departments").EnumerateArray().ToList();
 
@@ -681,7 +668,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
             {
                 var deptNames = departments.Select(d => d.GetProperty("name").GetString()).ToList();
                 var sortedDeptNames = deptNames.OrderBy(n => n).ToList();
-                deptNames.Should().Equal(sortedDeptNames, "Departments should be ordered by Name");
+                CollectionAssert.AreEqual(sortedDeptNames, deptNames, "Departments should be ordered by Name");
             }
 
             // Level 2: Employees within departments ordered by LastName, FirstName
@@ -700,7 +687,7 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                     for (int i = 0; i < employees.Count; i++)
                     {
-                        employees[i].LastName.Should().Be(sortedEmployees[i].LastName);
+                        Assert.AreEqual(sortedEmployees[i].LastName, employees[i].LastName);
                     }
 
                     // Level 3: Projects within employees ordered by Deadline
@@ -713,9 +700,9 @@ namespace QueryBuilderDemo.Tests.QueryBuilderTests
 
                             var sortedProjects = projects.OrderBy(p => p).ToList();
 
-                            for (int i = 0; i < projects.Count; i++)
+                            for (int j = 0; j < projects.Count; j++)
                             {
-                                projects[i].Should().Be(sortedProjects[i]);
+                                Assert.AreEqual(sortedProjects[j], projects[j]);
                             }
                         }
                     }
