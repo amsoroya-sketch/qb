@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using QueryBuilderDemo.GraphQL.GraphQL;
+using QueryBuilderDemo.GraphQL.GraphQL.Types;
 using QueryBuilderDemo.Tests.Data;
 using HotChocolate.Execution.Configuration;
 using HotChocolate.Data;
@@ -16,6 +17,8 @@ builder.Services
     .AddGraphQLServer()
     // Register main Query type
     .AddQueryType<Query>()
+    // Register custom types with sortable/filterable collections
+    .AddType<EmployeeType>()
     // Enable projections
     .AddProjections()
     // Enable WHERE clause filtering

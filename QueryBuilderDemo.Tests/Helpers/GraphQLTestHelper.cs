@@ -37,7 +37,13 @@ public static class GraphQLTestHelper
             .AddQueryType<Query>()
             .AddProjections()   // Enable projections - this solves the ordering issue!
             .AddFiltering()
-            .AddSorting();
+            .AddSorting()
+            .ModifyPagingOptions(opt =>
+            {
+                opt.MaxPageSize = 500;
+                opt.DefaultPageSize = 50;
+                opt.IncludeTotalCount = true;
+            });
 
         // Build the service provider
         var serviceProvider = services.BuildServiceProvider();

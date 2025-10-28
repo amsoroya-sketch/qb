@@ -15,7 +15,7 @@ namespace QueryBuilderDemo.Tests.Data
         public DbSet<Department> Departments { get; set; } = null!;
         public DbSet<Employee> Employees { get; set; } = null!;
         public DbSet<Project> Projects { get; set; } = null!;
-        public DbSet<Models.Task> Tasks { get; set; } = null!;
+        public DbSet<MdTask> Tasks { get; set; } = null!;
         public DbSet<Models.Location> Locations { get; set; } = null!;
         public DbSet<Role> Roles { get; set; } = null!;
         public DbSet<Skill> Skills { get; set; } = null!;
@@ -107,14 +107,14 @@ namespace QueryBuilderDemo.Tests.Data
                 .HasPrecision(18, 2);
 
             // Project -> Tasks (1:N)
-            modelBuilder.Entity<Models.Task>()
+            modelBuilder.Entity<MdTask>()
                 .HasOne(t => t.Project)
                 .WithMany(p => p.Tasks)
                 .HasForeignKey(t => t.ProjectId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Employee -> Tasks (1:N, optional)
-            modelBuilder.Entity<Models.Task>()
+            modelBuilder.Entity<MdTask>()
                 .HasOne(t => t.AssignedTo)
                 .WithMany(e => e.Tasks)
                 .HasForeignKey(t => t.AssignedToId)

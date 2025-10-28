@@ -21,7 +21,7 @@ namespace QueryBuilderDemo.Tests.Models
         public List<Project> Projects { get; set; } = new();
         public List<Skill> Skills { get; set; } = new();
         public List<Certification> Certifications { get; set; } = new();
-        public List<Task> Tasks { get; set; } = new();
+        public List<MdTask> Tasks { get; set; } = new();
         public List<Team> Teams { get; set; } = new();
         public Schedule? Schedule { get; set; }
     }

@@ -352,7 +352,7 @@ namespace QueryBuilderDemo.Tests.Data
             context.SaveChanges();
 
             // Create Tasks
-            var task1 = new Models.Task
+            var task1 = new MdTask
             {
                 Title = "Design database schema",
                 Status = "Completed",
@@ -361,7 +361,7 @@ namespace QueryBuilderDemo.Tests.Data
                 AssignedToId = emp1.Id
             };
 
-            var task2 = new Models.Task
+            var task2 = new MdTask
             {
                 Title = "Implement payment gateway",
                 Status = "In Progress",
@@ -370,7 +370,7 @@ namespace QueryBuilderDemo.Tests.Data
                 AssignedToId = emp2.Id
             };
 
-            var task3 = new Models.Task
+            var task3 = new MdTask
             {
                 Title = "Setup CI/CD pipeline",
                 Status = "Pending",
@@ -379,7 +379,7 @@ namespace QueryBuilderDemo.Tests.Data
                 AssignedToId = emp1.Id
             };
 
-            var task4 = new Models.Task
+            var task4 = new MdTask
             {
                 Title = "Design UI mockups",
                 Status = "Completed",
@@ -388,7 +388,7 @@ namespace QueryBuilderDemo.Tests.Data
                 AssignedToId = emp2.Id
             };
 
-            var task5 = new Models.Task
+            var task5 = new MdTask
             {
                 Title = "Implement authentication",
                 Status = "In Progress",
@@ -397,7 +397,7 @@ namespace QueryBuilderDemo.Tests.Data
                 AssignedToId = emp1.Id
             };
 
-            var task6 = new Models.Task
+            var task6 = new MdTask
             {
                 Title = "Assess current infrastructure",
                 Status = "Completed",
@@ -406,7 +406,7 @@ namespace QueryBuilderDemo.Tests.Data
                 AssignedToId = emp1.Id
             };
 
-            var task7 = new Models.Task
+            var task7 = new MdTask
             {
                 Title = "Survey construction site",
                 Status = "Completed",
@@ -415,7 +415,7 @@ namespace QueryBuilderDemo.Tests.Data
                 AssignedToId = emp5.Id
             };
 
-            var task8 = new Models.Task
+            var task8 = new MdTask
             {
                 Title = "Acquire building permits",
                 Status = "In Progress",

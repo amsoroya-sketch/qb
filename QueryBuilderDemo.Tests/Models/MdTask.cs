@@ -3,9 +3,9 @@ using System;
 namespace QueryBuilderDemo.Tests.Models
 {
     /// <summary>
-    /// Task entity
+    /// Task entity (renamed to MdTask to avoid conflict with System.Threading.Tasks.Task)
     /// </summary>
-    public class Task
+    public class MdTask
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;

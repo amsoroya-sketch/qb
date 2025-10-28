@@ -17,7 +17,7 @@ namespace QueryBuilderDemo.Tests.Models
 
         // Navigation properties
         public Client? Client { get; set; }
-        public List<Task> Tasks { get; set; } = new();
+        public List<MdTask> Tasks { get; set; } = new();
         public List<Employee> TeamMembers { get; set; } = new();
     }
 }

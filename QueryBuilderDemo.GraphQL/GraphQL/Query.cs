@@ -16,40 +16,40 @@ public class Query
     /// Navigation properties (Departments) will be loaded via projections, preserving order.
     /// Supports cursor-based pagination for efficient data fetching.
     /// </summary>
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10, MaxPageSize = 100)]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10, MaxPageSize = 100)]
     public IQueryable<Organisation> GetOrganisations([Service] ApplicationDbContext context)
         => context.Organisations;
 
     /// <summary>
     /// Get all departments with optional filtering, sorting, and pagination
     /// </summary>
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 20, MaxPageSize = 100)]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 20, MaxPageSize = 100)]
     public IQueryable<Department> GetDepartments([Service] ApplicationDbContext context)
         => context.Departments;
 
     /// <summary>
     /// Get all employees with optional filtering, sorting, and pagination
     /// </summary>
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 50, MaxPageSize = 200)]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 50, MaxPageSize = 200)]
     public IQueryable<Employee> GetEmployees([Service] ApplicationDbContext context)
         => context.Employees;
 
     /// <summary>
     /// Get all projects with optional filtering, sorting, and pagination
     /// </summary>
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 20, MaxPageSize = 100)]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 20, MaxPageSize = 100)]
     public IQueryable<Project> GetProjects([Service] ApplicationDbContext context)
         => context.Projects;
 
@@ -77,7 +77,7 @@ public class Query
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<QueryBuilderDemo.Tests.Models.Task> GetTasks([Service] ApplicationDbContext context)
+    public IQueryable<MdTask> GetTasks([Service] ApplicationDbContext context)
         => context.Tasks;
 
     /// <summary>

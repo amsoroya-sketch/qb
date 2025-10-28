@@ -19,6 +19,4 @@
     <PackageReference Include="MSTest.TestFramework" Version="3.5.0" />
   </ItemGroup>
 
-  <!-- No project references needed for GraphQL-only branch -->
-
 </Project>

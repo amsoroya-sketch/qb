@@ -1,5 +1,5 @@
-using HotChocolate;
 using HotChocolate.Data;
+using HotChocolate.Types;
 using Microsoft.EntityFrameworkCore;
 using QueryBuilderDemo.Tests.Data;
 using QueryBuilderDemo.Tests.Models;
@@ -7,14 +7,16 @@ using QueryBuilderDemo.Tests.Models;
 namespace QueryBuilderDemo.Tests.GraphQL;
 
 /// <summary>
-/// Root GraphQL Query type exposing all entities with projection, filtering, and sorting support
+/// Root GraphQL Query type exposing all entities with projection, filtering, sorting, and pagination support
 /// </summary>
 public class Query
 {
     /// <summary>
-    /// Get all organisations with optional filtering and sorting.
+    /// Get all organisations with optional filtering, sorting, and pagination.
     /// Navigation properties (Departments) will be loaded via projections, preserving order.
+    /// Supports cursor-based pagination for efficient data fetching.
     /// </summary>
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10, MaxPageSize = 100)]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
@@ -22,8 +24,9 @@ public class Query
         => context.Organisations;
 
     /// <summary>
-    /// Get all departments with optional filtering and sorting
+    /// Get all departments with optional filtering, sorting, and pagination
     /// </summary>
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 20, MaxPageSize = 100)]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
@@ -31,8 +34,9 @@ public class Query
         => context.Departments;
 
     /// <summary>
-    /// Get all employees with optional filtering and sorting
+    /// Get all employees with optional filtering, sorting, and pagination
     /// </summary>
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 50, MaxPageSize = 200)]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
@@ -40,8 +44,9 @@ public class Query
         => context.Employees;
 
     /// <summary>
-    /// Get all projects with optional filtering and sorting
+    /// Get all projects with optional filtering, sorting, and pagination
     /// </summary>
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 20, MaxPageSize = 100)]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
@@ -72,7 +77,7 @@ public class Query
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<QueryBuilderDemo.Tests.Models.Task> GetTasks([Service] ApplicationDbContext context)
+    public IQueryable<MdTask> GetTasks([Service] ApplicationDbContext context)
         => context.Tasks;
 
     /// <summary>
