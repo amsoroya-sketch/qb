@@ -2,7 +2,7 @@ using HotChocolate.Data;
 using HotChocolate.Types;
 using QueryBuilderDemo.Tests.Models;
 
-namespace QueryBuilderDemo.GraphQL.GraphQL.Types;
+namespace QueryBuilderDemo.Tests.GraphQL.Types;
 
 /// <summary>
 /// GraphQL type extension for Employee that adds server-side sorting/filtering for collections

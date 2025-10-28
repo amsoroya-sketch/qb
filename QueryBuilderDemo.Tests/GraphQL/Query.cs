@@ -81,8 +81,9 @@ public class Query
         => context.Tasks;
 
     /// <summary>
-    /// Get all teams with optional filtering and sorting
+    /// Get all teams with optional filtering, sorting, and pagination
     /// </summary>
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 20, MaxPageSize = 100)]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
@@ -90,8 +91,9 @@ public class Query
         => context.Teams;
 
     /// <summary>
-    /// Get all roles with optional filtering and sorting
+    /// Get all roles with optional filtering, sorting, and pagination
     /// </summary>
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 20, MaxPageSize = 100)]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
@@ -99,8 +101,9 @@ public class Query
         => context.Roles;
 
     /// <summary>
-    /// Get all clients with optional filtering and sorting
+    /// Get all clients with optional filtering, sorting, and pagination
     /// </summary>
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 20, MaxPageSize = 100)]
     [UseProjection]
     [UseFiltering]
     [UseSorting]

@@ -19,6 +19,11 @@ builder.Services
     .AddQueryType<Query>()
     // Register custom types with sortable/filterable collections
     .AddType<EmployeeType>()
+    .AddType<DepartmentType>()
+    .AddType<OrganisationType>()
+    .AddType<TeamType>()
+    .AddType<ClientType>()
+    .AddType<ProjectType>()
     // Enable projections
     .AddProjections()
     // Enable WHERE clause filtering

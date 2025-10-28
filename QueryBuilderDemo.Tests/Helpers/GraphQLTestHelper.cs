@@ -3,6 +3,7 @@ using HotChocolate.Execution;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using QueryBuilderDemo.Tests.GraphQL;
+using QueryBuilderDemo.Tests.GraphQL.Types;
 using QueryBuilderDemo.Tests.Data;
 using System.Threading.Tasks;
 
@@ -35,6 +36,12 @@ public static class GraphQLTestHelper
         services
             .AddGraphQLServer()
             .AddQueryType<Query>()
+            .AddType<EmployeeType>()
+            .AddType<DepartmentType>()
+            .AddType<OrganisationType>()
+            .AddType<TeamType>()
+            .AddType<ClientType>()
+            .AddType<ProjectType>()
             .AddProjections()   // Enable projections - this solves the ordering issue!
             .AddFiltering()
             .AddSorting()

@@ -185,7 +185,7 @@ namespace QueryBuilderDemo.Tests.GraphQLTests
 
             var query = @"
 {
-    employees {
+    employees(first: 10) {
         nodes {
             firstName
             skills(order: [{ category: ASC }, { name: ASC }]) {
@@ -201,7 +201,15 @@ namespace QueryBuilderDemo.Tests.GraphQLTests
 
             // Assert
             var jsonResult = result.ToJson();
+            System.Console.WriteLine("GraphQL Result: " + jsonResult);
             var jsonDoc = JsonDocument.Parse(jsonResult);
+
+            // Check if there are errors
+            if (jsonDoc.RootElement.TryGetProperty("errors", out var errors))
+            {
+                Assert.Fail($"GraphQL query returned errors: {errors}");
+            }
+
             var employees = jsonDoc.RootElement.GetProperty("data").GetProperty("employees").GetProperty("nodes");
 
             // Find employee with multiple skills
@@ -244,7 +252,7 @@ namespace QueryBuilderDemo.Tests.GraphQLTests
 
             var query = @"
 {
-    employees {
+    employees(first: 10) {
         nodes {
             firstName
             projects(order: { deadline: ASC }) {
@@ -260,7 +268,15 @@ namespace QueryBuilderDemo.Tests.GraphQLTests
 
             // Assert
             var jsonResult = result.ToJson();
+            System.Console.WriteLine("GraphQL Result: " + jsonResult);
             var jsonDoc = JsonDocument.Parse(jsonResult);
+
+            // Check if there are errors
+            if (jsonDoc.RootElement.TryGetProperty("errors", out var errors))
+            {
+                Assert.Fail($"GraphQL query returned errors: {errors}");
+            }
+
             var employees = jsonDoc.RootElement.GetProperty("data").GetProperty("employees").GetProperty("nodes");
 
             // Find employee with multiple projects
@@ -383,10 +399,10 @@ namespace QueryBuilderDemo.Tests.GraphQLTests
             using var context = TestDbContextFactory.CreateInMemoryContext();
             SampleDataSeeder.SeedTestData(context);
 
-            var now = System.DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+            var now = System.DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
             var query = $@"
 {{
-    employees {{
+    employees(first: 10) {{
         nodes {{
             firstName
             certifications(where: {{ validUntil: {{ gte: ""{now}"" }} }}) {{
@@ -402,7 +418,15 @@ namespace QueryBuilderDemo.Tests.GraphQLTests
 
             // Assert
             var jsonResult = result.ToJson();
+            System.Console.WriteLine("GraphQL Result: " + jsonResult);
             var jsonDoc = JsonDocument.Parse(jsonResult);
+
+            // Check if there are errors
+            if (jsonDoc.RootElement.TryGetProperty("errors", out var errors))
+            {
+                Assert.Fail($"GraphQL query returned errors: {errors}");
+            }
+
             var employees = jsonDoc.RootElement.GetProperty("data").GetProperty("employees").GetProperty("nodes");
 
             // Find employee with certifications
@@ -438,7 +462,7 @@ namespace QueryBuilderDemo.Tests.GraphQLTests
 
             var query = @"
 {
-    employees {
+    employees(first: 10) {
         nodes {
             firstName
             certifications(order: { validUntil: DESC }) {
@@ -454,7 +478,15 @@ namespace QueryBuilderDemo.Tests.GraphQLTests
 
             // Assert
             var jsonResult = result.ToJson();
+            System.Console.WriteLine("GraphQL Result: " + jsonResult);
             var jsonDoc = JsonDocument.Parse(jsonResult);
+
+            // Check if there are errors
+            if (jsonDoc.RootElement.TryGetProperty("errors", out var errors))
+            {
+                Assert.Fail($"GraphQL query returned errors: {errors}");
+            }
+
             var employees = jsonDoc.RootElement.GetProperty("data").GetProperty("employees").GetProperty("nodes");
 
             // Find employee with multiple certifications
