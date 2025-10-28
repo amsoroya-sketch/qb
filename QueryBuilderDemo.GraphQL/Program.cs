@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using QueryBuilderDemo.GraphQL.GraphQL;
 using QueryBuilderDemo.Tests.Data;
+using HotChocolate.Execution.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,21 +13,45 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Add GraphQL server with Hot Chocolate
 builder.Services
     .AddGraphQLServer()
+    // Register main Query type
     .AddQueryType<Query>()
-    .AddProjections()   // Enable field projections - solves EF Core ordering issue!
-    .AddFiltering()     // Enable WHERE clause filtering
-    .AddSorting();      // Enable ORDER BY sorting
+    // Register flattened query resolvers as extended query type
+    .AddTypeExtension<FlattenedQuery>()
+    // Enable projections - solves EF Core ordering issue!
+    .AddProjections()
+    // Enable WHERE clause filtering
+    .AddFiltering()
+    // Enable ORDER BY sorting
+    .AddSorting()
+    // Configure pagination settings
+    .ModifyPagingOptions(opt =>
+    {
+        opt.MaxPageSize = 500;
+        opt.DefaultPageSize = 50;
+        opt.IncludeTotalCount = true;
+    })
+    // Add support for dynamic types (for flattened queries)
+    .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = builder.Environment.IsDevelopment());
 
 // Add API explorer for GraphQL schema introspection
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
+// Seed database on startup
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    context.Database.EnsureCreated();
+    QueryBuilderDemo.Tests.Data.SampleDataSeeder.SeedTestData(context);
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     // Banana Cake Pop (GraphQL IDE) is included with Hot Chocolate
     // Navigate to /graphql to access it
+    app.UseHttpsRedirection();
 }
 
 // Map the GraphQL endpoint

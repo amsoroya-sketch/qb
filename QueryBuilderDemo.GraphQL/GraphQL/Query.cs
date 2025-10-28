@@ -1,4 +1,5 @@
 using HotChocolate.Data;
+using HotChocolate.Types;
 using Microsoft.EntityFrameworkCore;
 using QueryBuilderDemo.Tests.Data;
 using QueryBuilderDemo.Tests.Models;
@@ -6,44 +7,49 @@ using QueryBuilderDemo.Tests.Models;
 namespace QueryBuilderDemo.GraphQL.GraphQL;
 
 /// <summary>
-/// Root GraphQL Query type exposing all entities with projection, filtering, and sorting support
+/// Root GraphQL Query type exposing all entities with projection, filtering, sorting, and pagination support
 /// </summary>
 public class Query
 {
     /// <summary>
-    /// Get all organisations with optional filtering and sorting.
+    /// Get all organisations with optional filtering, sorting, and pagination.
     /// Navigation properties (Departments) will be loaded via projections, preserving order.
+    /// Supports cursor-based pagination for efficient data fetching.
     /// </summary>
     [UseProjection]
     [UseFiltering]
     [UseSorting]
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10, MaxPageSize = 100)]
     public IQueryable<Organisation> GetOrganisations([Service] ApplicationDbContext context)
         => context.Organisations;
 
     /// <summary>
-    /// Get all departments with optional filtering and sorting
+    /// Get all departments with optional filtering, sorting, and pagination
     /// </summary>
     [UseProjection]
     [UseFiltering]
     [UseSorting]
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 20, MaxPageSize = 100)]
     public IQueryable<Department> GetDepartments([Service] ApplicationDbContext context)
         => context.Departments;
 
     /// <summary>
-    /// Get all employees with optional filtering and sorting
+    /// Get all employees with optional filtering, sorting, and pagination
     /// </summary>
     [UseProjection]
     [UseFiltering]
     [UseSorting]
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 50, MaxPageSize = 200)]
     public IQueryable<Employee> GetEmployees([Service] ApplicationDbContext context)
         => context.Employees;
 
     /// <summary>
-    /// Get all projects with optional filtering and sorting
+    /// Get all projects with optional filtering, sorting, and pagination
     /// </summary>
     [UseProjection]
     [UseFiltering]
     [UseSorting]
+    [UsePaging(IncludeTotalCount = true, DefaultPageSize = 20, MaxPageSize = 100)]
     public IQueryable<Project> GetProjects([Service] ApplicationDbContext context)
         => context.Projects;
 
