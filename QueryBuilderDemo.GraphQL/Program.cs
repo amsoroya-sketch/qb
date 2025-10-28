@@ -7,10 +7,10 @@ using HotChocolate.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add EF Core DbContext (using SQLite in-memory for demo/testing)
+// Add EF Core DbContext (using SQLite file-based database)
 // In production, this would be configured via appsettings.json
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite("DataSource=:memory:"));
+    options.UseSqlite("DataSource=graphql_demo.db"));
 
 // Add GraphQL server with Hot Chocolate
 builder.Services
@@ -38,7 +38,7 @@ builder.Services
         opt.IncludeTotalCount = true;
     })
     // Prevent recursion by limiting query execution depth
-    .AddMaxExecutionDepthRule(2)
+    .AddMaxExecutionDepthRule(5)
     // Include exception details in development for debugging
     .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = builder.Environment.IsDevelopment());
 
