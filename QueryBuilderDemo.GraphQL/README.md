@@ -1,15 +1,14 @@
 # GraphQL API - QueryBuilder Demo
 
-A GraphQL API demonstrating advanced query capabilities with flattened data, pagination, sorting, and filtering.
+A GraphQL API demonstrating query capabilities with pagination, sorting, and filtering.
 
 ## Features
 
-✅ **Flattened Data Queries** - Denormalized reporting via `BuildFlattenedQuery<T>()`
 ✅ **Cursor-Based Pagination** - Efficient navigation through large datasets
-✅ **Offset-Based Pagination** - Traditional skip/take for flattened queries
+✅ **Filtering** - Full HotChocolate filtering support
+✅ **Sorting** - Sort by any field in any direction
+✅ **Projection** - Select only the fields you need
 ✅ **Recursion Prevention** - Max execution depth of 2 prevents infinite loops
-✅ **Flexible Filtering** - Full HotChocolate filtering support
-✅ **Dynamic Sorting** - Sort by any field in any direction
 
 ## Running the API
 
@@ -33,9 +32,41 @@ The API auto-seeds sample data on startup:
 
 ## Query Examples
 
-### 1. Standard Queries with Pagination
+### 1. Basic Queries
 
-#### Get Employees with Pagination (Cursor-Based)
+#### Get All Employees
+```graphql
+{
+  employees {
+    nodes {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+}
+```
+
+#### Get Employees with Department
+```graphql
+{
+  employees {
+    nodes {
+      firstName
+      lastName
+      department {
+        name
+        budget
+      }
+    }
+  }
+}
+```
+
+### 2. Pagination
+
+#### Cursor-Based Pagination (Forward)
 ```graphql
 {
   employees(first: 10) {
@@ -44,12 +75,6 @@ The API auto-seeds sample data on startup:
       firstName
       lastName
       email
-      department {
-        name
-        organisation {
-          name
-        }
-      }
     }
     pageInfo {
       hasNextPage
@@ -62,98 +87,60 @@ The API auto-seeds sample data on startup:
 }
 ```
 
-#### Get Organisations with Nested Data
+#### Next Page
 ```graphql
 {
-  organisations(first: 5) {
+  employees(first: 10, after: "cursor_from_previous_query") {
     nodes {
-      name
-      industry
-      departments {
-        name
-        budget
-        employees {
-          firstName
-          lastName
-          email
-        }
-      }
+      firstName
+      lastName
     }
-    totalCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
   }
 }
 ```
 
-### 2. Flattened Data Queries
-
-#### Flatten Organisations → Departments → Employees
-Returns one row per employee with all parent data:
-
+#### Backward Pagination
 ```graphql
 {
-  organisationsFlattened(skip: 0, take: 50) {
-    # Returns dynamic objects with flattened fields
-    # Fields: Id, Name, Industry, Departments_Name,
-    #         Departments_Employees_FirstName, etc.
+  employees(last: 10, before: "cursor_value") {
+    nodes {
+      firstName
+      lastName
+    }
+    pageInfo {
+      hasPreviousPage
+      startCursor
+    }
   }
-}
-```
-
-**Custom Fields:**
-```graphql
-{
-  organisationsFlattened(
-    fields: [
-      "Id"
-      "Name"
-      "Departments.Name"
-      "Departments.Budget"
-      "Departments.Employees.FirstName"
-      "Departments.Employees.Email"
-    ]
-    skip: 0
-    take: 100
-  )
-}
-```
-
-#### Flatten Employees with Projects and Skills
-```graphql
-{
-  employeesFlattened(
-    fields: [
-      "Id"
-      "FirstName"
-      "LastName"
-      "Department.Name"
-      "Projects.Title"
-      "Skills.Name"
-    ]
-    skip: 0
-    take: 50
-  )
-}
-```
-
-#### Flatten Projects with Tasks and Team Members
-```graphql
-{
-  projectsFlattened(
-    fields: [
-      "Title"
-      "Deadline"
-      "Client.Name"
-      "Tasks.Title"
-      "Tasks.Status"
-      "TeamMembers.FirstName"
-      "TeamMembers.Department.Name"
-    ]
-    take: 100
-  )
 }
 ```
 
 ### 3. Filtering
+
+#### Filter by Department
+```graphql
+{
+  employees(
+    where: {
+      department: {
+        name: { contains: "Engineering" }
+      }
+    }
+  ) {
+    nodes {
+      firstName
+      lastName
+      department {
+        name
+      }
+    }
+  }
+}
+```
 
 #### Complex Filtering
 ```graphql
@@ -182,7 +169,7 @@ Returns one row per employee with all parent data:
 }
 ```
 
-#### Filter by Nested Properties
+#### Filter Organisations by Department Budget
 ```graphql
 {
   organisations(
@@ -196,6 +183,7 @@ Returns one row per employee with all parent data:
   ) {
     nodes {
       name
+      industry
       departments {
         name
         budget
@@ -226,7 +214,7 @@ Returns one row per employee with all parent data:
 }
 ```
 
-#### Sort Projects
+#### Sort Projects by Deadline
 ```graphql
 {
   projects(
@@ -234,7 +222,6 @@ Returns one row per employee with all parent data:
       { deadline: ASC }
       { budget: DESC }
     ]
-    first: 10
   ) {
     nodes {
       title
@@ -248,45 +235,64 @@ Returns one row per employee with all parent data:
 }
 ```
 
-### 5. Pagination Patterns
+### 5. Nested Data
 
-#### Cursor-Based (Forward)
+#### Organisations with Departments and Employees
 ```graphql
 {
-  employees(first: 10, after: "cursor_value") {
+  organisations {
     nodes {
-      firstName
-      lastName
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
+      name
+      industry
+      departments {
+        name
+        budget
+        head
+        employees {
+          firstName
+          lastName
+          email
+          role {
+            title
+            level
+          }
+        }
+      }
     }
   }
 }
 ```
 
-#### Cursor-Based (Backward)
+#### Employees with All Relations
 ```graphql
 {
-  employees(last: 10, before: "cursor_value") {
+  employees(first: 5) {
     nodes {
       firstName
       lastName
+      email
+      department {
+        name
+        organisation {
+          name
+          industry
+        }
+      }
+      role {
+        title
+        level
+        description
+      }
+      projects {
+        title
+        deadline
+      }
+      skills {
+        name
+        proficiency
+        category
+      }
     }
-    pageInfo {
-      hasPreviousPage
-      startCursor
-    }
-  }
-}
-```
-
-#### Offset-Based (Flattened Queries)
-```graphql
-{
-  employeesFlattened(skip: 20, take: 10) {
-    # Page 3 (records 20-30)
   }
 }
 ```
@@ -314,37 +320,95 @@ The API limits query depth to 2 levels to prevent circular reference issues:
 
 This prevents infinite loops when querying circular relationships (e.g., Employee → Department → Employees → Department → ...).
 
+### 7. Combining Features
+
+```graphql
+{
+  employees(
+    where: {
+      department: {
+        budget: { gte: 500000 }
+      }
+    }
+    order: { lastName: ASC }
+    first: 20
+  ) {
+    nodes {
+      firstName
+      lastName
+      email
+      department {
+        name
+        budget
+      }
+      role {
+        title
+        level
+      }
+      projects {
+        title
+        deadline
+        status
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    totalCount
+  }
+}
+```
+
+## Available Queries
+
+### Entities
+- `organisations` - All organisations
+- `departments` - All departments
+- `employees` - All employees
+- `projects` - All projects
+- `clients` - All clients
+- `roles` - All roles
+- `skills` - All skills
+- `teams` - All teams
+- `certifications` - All certifications
+- `tasks` - All tasks
+- `meetings` - All meetings
+- `schedules` - All schedules
+- `locations` - All locations
+- `invoices` - All invoices
+- `payments` - All payments
+
+All queries support:
+- Filtering via `where` parameter
+- Sorting via `order` parameter
+- Pagination via `first`/`after` or `last`/`before`
+- Field selection (only request the fields you need)
+
 ## Architecture
 
-### Standard Resolvers (`Query.cs`)
-- Return typed `IQueryable<T>` for all entities
-- Support HotChocolate's `UseProjection`, `UseFiltering`, `UseSorting`
-- Use cursor-based pagination via `UsePaging`
-- All operations happen at the database level (translated to SQL)
+### GraphQL Server
+- **HotChocolate 15.x** - GraphQL server framework
+- **Entity Framework Core** - ORM with SQLite in-memory database
+- **Cursor-based pagination** - Efficient for large datasets
+- **Max execution depth: 2** - Prevents infinite recursion
 
-### Flattened Resolvers (`FlattenedQuery.cs`)
-- Use `BuildFlattenedQuery<T>()` for denormalization
-- Return `IQueryable<object>` with dynamic properties
-- Support custom field selection
-- Use offset-based pagination (skip/take)
-- Ideal for reporting and analytics
-
-### Key Technologies
-- **HotChocolate 15.x** - GraphQL server
-- **Entity Framework Core** - Data access with SQLite
-- **System.Linq.Dynamic.Core** - Dynamic LINQ for flattened queries
-- **Custom QueryBuilder** - Flattened query implementation
+### Query Resolution
+All queries:
+- Return typed `IQueryable<T>`
+- Support `UseProjection` for field selection
+- Support `UseFiltering` for WHERE clauses
+- Support `UseSorting` for ORDER BY
+- Use `UsePaging` for cursor-based pagination
+- Execute at the database level (translated to SQL)
 
 ## Project Structure
 
 ```
 QueryBuilderDemo.GraphQL/
 ├── GraphQL/
-│   ├── Query.cs              # Standard typed queries
-│   └── FlattenedQuery.cs     # Flattened/denormalized queries
-├── Utils/
-│   └── QueryBuilderExtensions.cs  # BuildFlattenedQuery implementation
-├── Program.cs                # GraphQL server configuration
+│   └── Query.cs              # All GraphQL queries
+├── Program.cs                # Server configuration
 └── README.md
 
 QueryBuilderDemo.Tests/
@@ -365,7 +429,6 @@ QueryBuilderDemo.Tests/
 builder.Services
     .AddGraphQLServer()
     .AddQueryType<Query>()
-    .AddTypeExtension<FlattenedQuery>()
     .AddProjections()           // Enable field selection
     .AddFiltering()             // Enable WHERE clauses
     .AddSorting()               // Enable ORDER BY
@@ -381,16 +444,8 @@ builder.Services
 
 ## Performance Notes
 
-- **Flattened queries** return denormalized data ideal for reporting/analytics
-- **Cursor pagination** is more efficient for large datasets
-- **Offset pagination** is simpler but can be slower on large tables
+- **Cursor pagination** is more efficient than offset pagination for large datasets
+- **Projections** ensure only requested fields are fetched from the database
 - **Max execution depth** prevents circular reference infinite loops
 - All operations are translated to SQL and executed at the database level
-
-## Available Flattened Queries
-
-1. `organisationsFlattened` - Organisations with departments and employees
-2. `employeesFlattened` - Employees with all related entities
-3. `projectsFlattened` - Projects with tasks and team members
-4. `clientsFlattened` - Clients with projects, invoices, and payments
-5. `teamsFlattened` - Teams with members and departments
+- Use `totalCount` sparingly as it requires an additional COUNT query

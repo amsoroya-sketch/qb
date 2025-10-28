@@ -16,8 +16,6 @@ builder.Services
     .AddGraphQLServer()
     // Register main Query type
     .AddQueryType<Query>()
-    // Register flattened query resolvers as extended query type
-    .AddTypeExtension<FlattenedQuery>()
     // Enable projections
     .AddProjections()
     // Enable WHERE clause filtering
