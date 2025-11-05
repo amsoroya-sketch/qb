@@ -1,0 +1,625 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Management
+model User {
+  id       String   @id @default(uuid()) @db.Uuid
+  email    String   @unique @db.VarChar(255)
+  password String   @db.VarChar(255)
+  name     String   @db.VarChar(255)
+  role     UserRole @default(STUDENT)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  progress       UserProgress?
+  exercises      UserExercise[]
+  achievements   UserAchievement[]
+  lessonProgress UserLessonProgress[]
+  bookmarks      Bookmark[]
+  refreshTokens  RefreshToken[]
+  quizAttempts   QuizAttempt[]
+  examAttempts   ExamAttempt[]
+  grammarStats   UserGrammarStats[]
+
+  @@index([email])
+  @@map("users")
+}
+
+// Refresh Token Rotation (Security)
+model RefreshToken {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tokenHash String @unique @map("token_hash") @db.VarChar(255) // SHA-256 hash of token
+  familyId  String @map("family_id") @db.Uuid // Token family for rotation tracking
+
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  isRevoked Boolean  @default(false) @map("is_revoked")
+  isUsed    Boolean  @default(false) @map("is_used")
+
+  // For detecting token reuse attacks
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz
+  usedAt    DateTime? @map("used_at") @db.Timestamptz
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+// User Progress & Gamification
+model UserProgress {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @unique @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  currentXP      Int       @default(0) @map("current_xp")
+  currentLevel   Int       @default(1) @map("current_level")
+  currentStreak  Int       @default(0) @map("current_streak")
+  longestStreak  Int       @default(0) @map("longest_streak")
+  lastActiveDate DateTime? @map("last_active_date") @db.Date
+
+  lessonsCompleted   Int     @default(0) @map("lessons_completed")
+  exercisesCompleted Int     @default(0) @map("exercises_completed")
+  totalTimeSpent     Int     @default(0) @map("total_time_spent") // seconds
+  averageAccuracy    Decimal @default(0) @db.Decimal(5, 2)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("user_progress")
+}
+
+// Curriculum Structure
+model Lesson {
+  id            String  @id @default(uuid()) @db.Uuid
+  title         String  @db.VarChar(255)
+  titleArabic   String  @map("title_arabic") @db.VarChar(255)
+  description   String? @db.Text
+  content       String  @db.Text
+  contentArabic String? @map("content_arabic") @db.Text
+
+  track         Track
+  stage         Int        @db.SmallInt
+  order         Int        @db.SmallInt
+  grammarTopic  String     @map("grammar_topic") @db.VarChar(100)
+  difficulty    Difficulty
+  estimatedTime Int        @map("estimated_time") @db.SmallInt // minutes
+
+  xpReward    Int     @default(50) @map("xp_reward")
+  isPublished Boolean @default(false) @map("is_published")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  exercises        Exercise[]
+  verses           LessonVerse[]
+  userProgress     UserLessonProgress[]
+  prerequisites    LessonPrerequisite[] @relation("LessonPrerequisites")
+  dependentLessons LessonPrerequisite[] @relation("PrerequisiteFor")
+
+  @@index([track, stage, order])
+  @@index([grammarTopic])
+  @@map("lessons")
+}
+
+enum Track {
+  A
+  B
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model LessonPrerequisite {
+  id             String @id @default(uuid()) @db.Uuid
+  lessonId       String @map("lesson_id") @db.Uuid
+  prerequisiteId String @map("prerequisite_id") @db.Uuid
+
+  lesson       Lesson @relation("LessonPrerequisites", fields: [lessonId], references: [id], onDelete: Cascade)
+  prerequisite Lesson @relation("PrerequisiteFor", fields: [prerequisiteId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, prerequisiteId])
+  @@map("lesson_prerequisites")
+}
+
+model UserLessonProgress {
+  id       String       @id @default(uuid()) @db.Uuid
+  userId   String       @map("user_id") @db.Uuid
+  lessonId String       @map("lesson_id") @db.Uuid
+  status   LessonStatus @default(NOT_STARTED)
+
+  startedAt   DateTime? @map("started_at") @db.Timestamptz
+  completedAt DateTime? @map("completed_at") @db.Timestamptz
+  timeSpent   Int       @default(0) @map("time_spent") // seconds
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId, status])
+  @@map("user_lesson_progress")
+}
+
+enum LessonStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+// Exercises
+model Exercise {
+  id       String @id @default(uuid()) @db.Uuid
+  lessonId String @map("lesson_id") @db.Uuid
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  title          String       @db.VarChar(255)
+  type           ExerciseType
+  question       String       @db.Text
+  questionArabic String?      @map("question_arabic") @db.Text
+
+  options       Json? // For multiple choice
+  correctAnswer String  @map("correct_answer") @db.Text
+  explanation   String? @db.Text
+
+  order      Int        @db.SmallInt
+  difficulty Difficulty
+  xpReward   Int        @default(10) @map("xp_reward")
+
+  // NEW: Exercise metadata for advanced types
+  metadata Json? // Exercise-specific configuration
+  // Example: { "grammarFocus": "aspect", "verseSource": "1:1", "wordPosition": 3 }
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  userExercises UserExercise[]
+
+  @@index([lessonId, order])
+  @@map("exercises")
+}
+
+enum ExerciseType {
+  // Basic types
+  MULTIPLE_CHOICE
+  FILL_IN_BLANK
+  TRUE_FALSE
+  MATCHING
+  DRAG_DROP
+  WORD_ANALYSIS
+
+  // NEW: Morphological analysis types
+  MORPHEME_IDENTIFICATION // Identify PREFIX/STEM/SUFFIX
+  VERB_CONJUGATION // Identify aspect, person, mood
+  NOUN_DECLENSION // Identify case, definiteness, gender/number
+  ROOT_EXTRACTION // Find 3-letter root
+
+  // NEW: Syntactic analysis types
+  SENTENCE_TYPE // Identify nominal vs verbal
+  SYNTACTIC_ROLE // Identify subject/object/predicate
+  PHRASE_GROUPING // Identify idafa/prepositional phrases
+  AGREEMENT_CHECKING // Check gender/number/case agreement
+
+  // NEW: Advanced types
+  I3RAB_ANALYSIS // Full grammatical case analysis
+  MORPHEME_SEGMENTATION // Segment word into morphemes
+  DEPENDENCY_TREE // Build word dependency relationships
+}
+
+model UserExercise {
+  id         String @id @default(uuid()) @db.Uuid
+  userId     String @map("user_id") @db.Uuid
+  exerciseId String @map("exercise_id") @db.Uuid
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  userAnswer String  @map("user_answer") @db.Text
+  isCorrect  Boolean @map("is_correct")
+  accuracy   Decimal @db.Decimal(5, 2) // 0-100%
+  timeSpent  Int     @map("time_spent") // seconds
+  xpEarned   Int     @map("xp_earned")
+
+  attemptNumber Int      @default(1) @map("attempt_number")
+  completedAt   DateTime @default(now()) @map("completed_at") @db.Timestamptz
+
+  @@index([userId, exerciseId])
+  @@index([userId, completedAt])
+  @@map("user_exercises")
+}
+
+// Quranic Data
+model QuranVerse {
+  id                    String  @id @default(uuid()) @db.Uuid
+  surahNumber           Int     @map("surah_number") @db.SmallInt
+  verseNumber           Int     @map("verse_number") @db.SmallInt
+  textArabic            String  @map("text_arabic") @db.Text
+  textWithoutDiacritics String  @map("text_without_diacritics") @db.Text
+  translation           String  @db.Text
+  transliteration       String? @db.Text
+
+  // Full-text search vectors
+  searchVectorAr String? @map("search_vector_ar") @db.Text
+  searchVectorEn String? @map("search_vector_en") @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  words        VerseWord[]
+  lessonVerses LessonVerse[]
+  bookmarks    Bookmark[]
+
+  @@unique([surahNumber, verseNumber])
+  @@index([surahNumber])
+  @@map("quran_verses")
+}
+
+model VerseWord {
+  id      String     @id @default(uuid()) @db.Uuid
+  verseId String     @map("verse_id") @db.Uuid
+  verse   QuranVerse @relation(fields: [verseId], references: [id], onDelete: Cascade)
+
+  position              Int     @db.SmallInt
+  arabicText            String  @map("arabic_text") @db.VarChar(100)
+  textWithoutDiacritics String  @map("text_without_diacritics") @db.VarChar(100)
+  translation           String  @db.VarChar(255)
+  transliteration       String? @db.VarChar(255)
+
+  // 7 Essential Grammatical Properties
+  posType             String  @map("pos_type") @db.VarChar(20)
+  posArabic           String? @map("pos_arabic") @db.VarChar(50)
+  gender              String? @db.VarChar(10)
+  genderArabic        String? @map("gender_arabic") @db.VarChar(20)
+  number              String? @db.VarChar(10)
+  numberArabic        String? @map("number_arabic") @db.VarChar(20)
+  definiteness        String? @db.VarChar(20)
+  definitenessArabic  String? @map("definiteness_arabic") @db.VarChar(20)
+  irabCase            String? @map("irab_case") @db.VarChar(20)
+  irabCaseArabic      String? @map("irab_case_arabic") @db.VarChar(20)
+  caseSign            String? @map("case_sign") @db.VarChar(20)
+  caseSignArabic      String? @map("case_sign_arabic") @db.VarChar(20)
+  caseSignSymbol      String? @map("case_sign_symbol") @db.VarChar(5)
+  structureType       String? @map("structure_type") @db.VarChar(50)
+  structureTypeArabic String? @map("structure_type_arabic") @db.VarChar(50)
+
+  // NEW: Syntactic features (Features 9-10)
+  syntacticRole      String?     @map("syntactic_role") @db.VarChar(50)
+  syntacticRoleAr    String?     @map("syntactic_role_ar") @db.VarChar(50)
+  parentWordId       String?     @map("parent_word_id") @db.Uuid
+  parentWord         VerseWord?  @relation("Dependencies", fields: [parentWordId], references: [id], onDelete: SetNull)
+  childWords         VerseWord[] @relation("Dependencies")
+  dependencyRelation String?     @map("dependency_relation") @db.VarChar(50)
+
+  // Additional grammatical data (JSONB for flexibility)
+  grammarData Json? @map("grammar_data")
+
+  // Root and morphology
+  root  String? @db.VarChar(10)
+  lemma String? @db.VarChar(100)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([verseId, position])
+  @@index([root])
+  @@index([posType])
+  @@index([parentWordId])
+  @@index([syntacticRole])
+  @@map("verse_words")
+}
+
+model LessonVerse {
+  id       String  @id @default(uuid()) @db.Uuid
+  lessonId String  @map("lesson_id") @db.Uuid
+  verseId  String  @map("verse_id") @db.Uuid
+  order    Int     @db.SmallInt
+  notes    String? @db.Text
+
+  lesson Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  verse  QuranVerse @relation(fields: [verseId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, verseId])
+  @@map("lesson_verses")
+}
+
+// Achievements & Gamification
+model Achievement {
+  id          String            @id @default(uuid()) @db.Uuid
+  name        String            @db.VarChar(255)
+  nameArabic  String            @map("name_arabic") @db.VarChar(255)
+  description String            @db.Text
+  icon        String            @db.VarChar(255)
+  category    String            @db.VarChar(50)
+  rarity      AchievementRarity @default(COMMON) // NEW: Badge rarity
+
+  requirement Json // Flexible requirement definition
+  xpReward    Int  @map("xp_reward")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  userAchievements UserAchievement[]
+
+  @@map("achievements")
+}
+
+enum AchievementRarity {
+  COMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+model UserAchievement {
+  id            String @id @default(uuid()) @db.Uuid
+  userId        String @map("user_id") @db.Uuid
+  achievementId String @map("achievement_id") @db.Uuid
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  unlockedAt DateTime @default(now()) @map("unlocked_at") @db.Timestamptz
+
+  @@unique([userId, achievementId])
+  @@index([userId, unlockedAt])
+  @@map("user_achievements")
+}
+
+// Bookmarks
+model Bookmark {
+  id      String  @id @default(uuid()) @db.Uuid
+  userId  String  @map("user_id") @db.Uuid
+  verseId String  @map("verse_id") @db.Uuid
+  notes   String? @db.Text
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verse QuranVerse @relation(fields: [verseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@unique([userId, verseId])
+  @@map("bookmarks")
+}
+
+// Analytics Events
+model UserEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  eventType String   @map("event_type") @db.VarChar(50)
+  timestamp DateTime @default(now()) @db.Timestamptz
+
+  // Event metadata
+  metadata Json?
+
+  // Extracted fields for indexing
+  lessonId   String?  @map("lesson_id") @db.Uuid
+  exerciseId String?  @map("exercise_id") @db.Uuid
+  accuracy   Decimal? @db.Decimal(5, 2)
+  timeSpent  Int?     @map("time_spent")
+  xpEarned   Int?     @map("xp_earned")
+
+  @@index([userId, timestamp])
+  @@index([eventType])
+  @@index([lessonId])
+  @@map("user_events")
+}
+
+// Quiz System (NEW)
+model Quiz {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @db.VarChar(255)
+  titleArabic String?  @map("title_arabic") @db.VarChar(255)
+  description String?  @db.Text
+  type        QuizType
+
+  lessonId String? @map("lesson_id") @db.Uuid // For topic quizzes
+  stage    Int?    @db.SmallInt // For comprehensive quizzes
+  track    Track?
+
+  minPassScore Int  @default(80) // Passing threshold (0-100)
+  timeLimit    Int? @db.SmallInt // Time limit in seconds, null = no limit
+  xpReward     Int  @default(50)
+
+  isPublished Boolean @default(false) @map("is_published")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+
+  @@index([type, stage])
+  @@index([lessonId])
+  @@map("quizzes")
+}
+
+enum QuizType {
+  TOPIC // After lesson completion
+  COMPREHENSIVE // After stage completion
+  DIAGNOSTIC // Entry assessment
+  PRACTICE // Practice quiz
+}
+
+model QuizQuestion {
+  id     String @id @default(uuid()) @db.Uuid
+  quizId String @map("quiz_id") @db.Uuid
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  question       String       @db.Text
+  questionArabic String?      @map("question_arabic") @db.Text
+  type           ExerciseType
+  options        Json? // For multiple choice
+  correctAnswer  String       @map("correct_answer") @db.Text
+  explanation    String?      @db.Text
+
+  // NEW: Grammar metadata
+  grammarFocus   String? @map("grammar_focus") @db.VarChar(50) // "aspect", "case", "gender", etc.
+  verseReference String? @map("verse_reference") @db.VarChar(20) // "1:1" if question uses Quranic text
+  wordPosition   Int?    @map("word_position") @db.SmallInt
+
+  order  Int @db.SmallInt
+  points Int @default(1) // Point value for scoring
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([quizId, order])
+  @@index([grammarFocus])
+  @@map("quiz_questions")
+}
+
+model QuizAttempt {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizId String @map("quiz_id") @db.Uuid
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  score     Int  @db.SmallInt // 0-100
+  answers   Json // User answers with correctness
+  timeSpent Int  @map("time_spent") // seconds
+  xpEarned  Int  @map("xp_earned")
+
+  passed Boolean // score >= quiz.minPassScore
+
+  completedAt DateTime @default(now()) @map("completed_at") @db.Timestamptz
+
+  @@index([userId, quizId])
+  @@index([userId, completedAt])
+  @@map("quiz_attempts")
+}
+
+// Exam System (NEW)
+model Exam {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @db.VarChar(255)
+  titleArabic String?  @map("title_arabic") @db.VarChar(255)
+  description String?  @db.Text
+  type        ExamType
+
+  stage Int   @db.SmallInt // 1-10 (exam for stage completion)
+  track Track // A or B
+
+  minPassScore Int @default(85) @map("min_pass_score") // Higher than Quiz (85% vs 80%)
+  timeLimit    Int @db.SmallInt // REQUIRED (not optional like Quiz)
+  xpReward     Int @default(150) @map("xp_reward") // 3x Quiz reward
+
+  certificateTemplate String? @map("certificate_template") @db.Text // SVG or HTML template
+  retakeCooldown      Int     @default(86400) @map("retake_cooldown") // seconds (default 24hrs)
+
+  isPublished Boolean @default(false) @map("is_published")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  questions ExamQuestion[]
+  attempts  ExamAttempt[]
+
+  @@index([type, stage])
+  @@index([track, stage])
+  @@map("exams")
+}
+
+enum ExamType {
+  STAGE_COMPLETION // After completing all lessons in a stage
+  FINAL_ASSESSMENT // Track completion exam
+  CERTIFICATION // Official certificate exam
+}
+
+model ExamQuestion {
+  id     String @id @default(uuid()) @db.Uuid
+  examId String @map("exam_id") @db.Uuid
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  question       String       @db.Text
+  questionArabic String?      @map("question_arabic") @db.Text
+  type           ExerciseType
+  options        Json? // For multiple choice
+  correctAnswer  String       @map("correct_answer") @db.Text
+  explanation    String?      @db.Text
+
+  grammarFocus   String? @map("grammar_focus") @db.VarChar(50)
+  verseReference String? @map("verse_reference") @db.VarChar(20)
+  wordPosition   Int?    @map("word_position") @db.SmallInt
+
+  order  Int @db.SmallInt
+  points Int @default(1)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([examId, order])
+  @@index([grammarFocus])
+  @@map("exam_questions")
+}
+
+model ExamAttempt {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  examId String @map("exam_id") @db.Uuid
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  score     Int  @db.SmallInt // 0-100
+  answers   Json // User answers (stored only at completion, not during exam)
+  timeSpent Int  @map("time_spent") // seconds
+
+  passed         Boolean @map("passed") // score >= exam.minPassScore
+  certificateUrl String? @map("certificate_url") @db.Text // Generated certificate
+  xpEarned       Int     @map("xp_earned")
+
+  startedAt   DateTime  @map("started_at") @db.Timestamptz
+  completedAt DateTime? @map("completed_at") @db.Timestamptz
+
+  @@index([userId, examId])
+  @@index([userId, completedAt])
+  @@map("exam_attempts")
+}
+
+// Grammar Performance Tracking (NEW)
+model UserGrammarStats {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  grammarFocus String @map("grammar_focus") @db.VarChar(50) // "aspect", "case", "gender", "root", etc.
+
+  totalAttempts   Int     @default(0) @map("total_attempts")
+  correctAttempts Int     @default(0) @map("correct_attempts")
+  accuracy        Decimal @default(0) @db.Decimal(5, 2) // Calculated: (correct/total)*100
+
+  lastPracticed DateTime? @map("last_practiced") @db.Timestamptz
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([userId, grammarFocus])
+  @@index([userId, accuracy])
+  @@index([grammarFocus])
+  @@map("user_grammar_stats")
+}

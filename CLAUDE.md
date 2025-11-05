@@ -1,0 +1,1 @@
+- we are on 100% playwright mcp tests policy , no UI part is complete without through mcp playwright tests.

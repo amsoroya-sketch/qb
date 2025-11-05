@@ -1,0 +1,576 @@
+{
+  "info": {
+    "name": "arQ API Collection",
+    "description": "Complete API collection for arQ Quranic Arabic Grammar LMS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lessonId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "exerciseId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', jsonData.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', jsonData.refreshToken);",
+                  "    pm.collectionVariables.set('userId', jsonData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@arq.com\",\n  \"password\": \"student123\",\n  \"name\": \"Ahmed Khan\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', jsonData.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', jsonData.refreshToken);",
+                  "    pm.collectionVariables.set('userId', jsonData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@arq.com\",\n  \"password\": \"student123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', jsonData.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lessons",
+      "item": [
+        {
+          "name": "Get All Lessons",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lessons?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"},
+                {"key": "track", "value": "A", "disabled": true},
+                {"key": "stage", "value": "1", "disabled": true},
+                {"key": "difficulty", "value": "BEGINNER", "disabled": true}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Lesson by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('lessonId', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lessons/{{lessonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "{{lessonId}}"]
+            }
+          }
+        },
+        {
+          "name": "Start Lesson",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lessons/{{lessonId}}/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "{{lessonId}}", "start"]
+            }
+          }
+        },
+        {
+          "name": "Complete Lesson",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timeSpent\": 900\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lessons/{{lessonId}}/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "{{lessonId}}", "complete"]
+            }
+          }
+        },
+        {
+          "name": "Get Lesson Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lessons/{{lessonId}}/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "{{lessonId}}", "progress"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exercises",
+      "item": [
+        {
+          "name": "Get Exercises by Lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 && pm.response.json().length > 0) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('exerciseId', jsonData[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/exercises/lesson/{{lessonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["exercises", "lesson", "{{lessonId}}"]
+            }
+          }
+        },
+        {
+          "name": "Submit Exercise",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userAnswer\": \"الكتاب\",\n  \"timeSpent\": 45\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exercises/{{exerciseId}}/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["exercises", "{{exerciseId}}", "submit"]
+            }
+          }
+        },
+        {
+          "name": "Get Exercise Attempts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/exercises/{{exerciseId}}/attempts",
+              "host": ["{{baseUrl}}"],
+              "path": ["exercises", "{{exerciseId}}", "attempts"]
+            }
+          }
+        },
+        {
+          "name": "Get Exercise Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/exercises/{{exerciseId}}/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["exercises", "{{exerciseId}}", "stats"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Progress",
+      "item": [
+        {
+          "name": "Get My Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/progress/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "me"]
+            }
+          }
+        },
+        {
+          "name": "Get Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/progress/me/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "me", "dashboard"]
+            }
+          }
+        },
+        {
+          "name": "Get My Lessons Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/progress/me/lessons",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "me", "lessons"]
+            }
+          }
+        },
+        {
+          "name": "Update Streak",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/progress/me/streak",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "me", "streak"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Achievements",
+      "item": [
+        {
+          "name": "Get All Achievements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/achievements",
+              "host": ["{{baseUrl}}"],
+              "path": ["achievements"]
+            }
+          }
+        },
+        {
+          "name": "Get My Achievements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/achievements/me/unlocked",
+              "host": ["{{baseUrl}}"],
+              "path": ["achievements", "me", "unlocked"]
+            }
+          }
+        },
+        {
+          "name": "Check Achievements",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/achievements/me/check",
+              "host": ["{{baseUrl}}"],
+              "path": ["achievements", "me", "check"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Track Event",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventType\": \"lesson_started\",\n  \"eventData\": {\n    \"lessonId\": \"{{lessonId}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/analytics/track",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "track"]
+            }
+          }
+        },
+        {
+          "name": "Get My Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/me?days=30",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "me"],
+              "query": [
+                {"key": "days", "value": "30"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/leaderboard?limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "leaderboard"],
+              "query": [
+                {"key": "limit", "value": "50"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verses",
+      "item": [
+        {
+          "name": "Get Verses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/verses?page=1&limit=20&surahNumber=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["verses"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"},
+                {"key": "surahNumber", "value": "1"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Verses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/verses/search?query=الرحمن&searchType=text",
+              "host": ["{{baseUrl}}"],
+              "path": ["verses", "search"],
+              "query": [
+                {"key": "query", "value": "الرحمن"},
+                {"key": "searchType", "value": "text"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Verse by Surah and Number",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/verses/1/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["verses", "1", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Verses by Grammar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/verses/grammar?posType=noun&irabCase=genitive",
+              "host": ["{{baseUrl}}"],
+              "path": ["verses", "grammar"],
+              "query": [
+                {"key": "posType", "value": "noun"},
+                {"key": "irabCase", "value": "genitive"}
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
