@@ -22,15 +22,18 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   // Relations
-  progress       UserProgress?
-  exercises      UserExercise[]
-  achievements   UserAchievement[]
-  lessonProgress UserLessonProgress[]
-  bookmarks      Bookmark[]
-  refreshTokens  RefreshToken[]
-  quizAttempts   QuizAttempt[]
-  examAttempts   ExamAttempt[]
-  grammarStats   UserGrammarStats[]
+  progress           UserProgress?
+  exercises          UserExercise[]
+  achievements       UserAchievement[]
+  lessonProgress     UserLessonProgress[]
+  bookmarks          Bookmark[]
+  refreshTokens      RefreshToken[]
+  quizAttempts       QuizAttempt[]
+  examAttempts       ExamAttempt[]
+  grammarStats       UserGrammarStats[]
+  srsCards           SRSCard[]
+  leaderboardEntries LeaderboardEntry[]
+  dailyChallenges    UserDailyChallenge[]
 
   @@index([email])
   @@map("users")
@@ -59,6 +62,8 @@ model RefreshToken {
   @@index([familyId])
   @@index([tokenHash])
   @@index([expiresAt])
+  @@index([isRevoked])
+  @@index([isUsed])
   @@map("refresh_tokens")
 }
 
@@ -88,6 +93,8 @@ model UserProgress {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
+  @@index([userId])
+  @@index([currentLevel])
   @@map("user_progress")
 }
 
@@ -122,6 +129,8 @@ model Lesson {
 
   @@index([track, stage, order])
   @@index([grammarTopic])
+  @@index([isPublished])
+  @@index([difficulty])
   @@map("lessons")
 }
 
@@ -251,6 +260,8 @@ model UserExercise {
 
   @@index([userId, exerciseId])
   @@index([userId, completedAt])
+  @@index([isCorrect])
+  @@index([exerciseId])
   @@map("user_exercises")
 }
 
@@ -277,6 +288,7 @@ model QuranVerse {
 
   @@unique([surahNumber, verseNumber])
   @@index([surahNumber])
+  @@index([verseNumber])
   @@map("quran_verses")
 }
 
@@ -330,6 +342,10 @@ model VerseWord {
   @@index([posType])
   @@index([parentWordId])
   @@index([syntacticRole])
+  @@index([irabCase])
+  @@index([gender])
+  @@index([number])
+  @@index([definiteness])
   @@map("verse_words")
 }
 
@@ -375,6 +391,20 @@ enum AchievementRarity {
   LEGENDARY
 }
 
+enum SRSState {
+  NEW
+  LEARNING
+  REVIEW
+  RELEARNING
+}
+
+enum LeaderboardType {
+  GLOBAL
+  WEEKLY
+  FRIENDS
+  GRAMMAR
+}
+
 model UserAchievement {
   id            String @id @default(uuid()) @db.Uuid
   userId        String @map("user_id") @db.Uuid
@@ -403,6 +433,8 @@ model Bookmark {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@unique([userId, verseId])
+  @@index([userId, createdAt])
+  @@index([verseId])
   @@map("bookmarks")
 }
 
@@ -426,6 +458,8 @@ model UserEvent {
   @@index([userId, timestamp])
   @@index([eventType])
   @@index([lessonId])
+  @@index([timestamp])
+  @@index([eventType, timestamp])
   @@map("user_events")
 }
 
@@ -456,6 +490,8 @@ model Quiz {
 
   @@index([type, stage])
   @@index([lessonId])
+  @@index([isPublished])
+  @@index([type, isPublished])
   @@map("quizzes")
 }
 
@@ -511,6 +547,9 @@ model QuizAttempt {
 
   @@index([userId, quizId])
   @@index([userId, completedAt])
+  @@index([quizId])
+  @@index([quizId, score])
+  @@index([passed])
   @@map("quiz_attempts")
 }
 
@@ -543,6 +582,8 @@ model Exam {
 
   @@index([type, stage])
   @@index([track, stage])
+  @@index([isPublished])
+  @@index([type, isPublished])
   @@map("exams")
 }
 
@@ -598,6 +639,10 @@ model ExamAttempt {
 
   @@index([userId, examId])
   @@index([userId, completedAt])
+  @@index([examId])
+  @@index([examId, score])
+  @@index([passed])
+  @@index([completedAt])
   @@map("exam_attempts")
 }
 
@@ -621,5 +666,175 @@ model UserGrammarStats {
   @@unique([userId, grammarFocus])
   @@index([userId, accuracy])
   @@index([grammarFocus])
+  @@index([accuracy])
+  @@index([lastPracticed])
   @@map("user_grammar_stats")
+}
+
+// Spaced Repetition System (SRS)
+model SRSCard {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  contentType String @map("content_type") @db.VarChar(50) // "grammar_rule", "verse_word", "exercise"
+  contentId   String @map("content_id") @db.Uuid // Links to grammar_rules, verse_words, or exercises
+
+  // SM-2 Algorithm fields
+  easeFactor   Decimal @default(2.50) @map("ease_factor") @db.Decimal(4, 2) // 1.30 - 3.00
+  intervalDays Int     @default(1) @map("interval_days") // 1 to 365
+  repetitions  Int     @default(0) // Number of successful reviews
+
+  state        SRSState  @default(NEW)
+  dueDate      DateTime  @map("due_date") @db.Timestamptz
+  lastReviewed DateTime? @map("last_reviewed") @db.Timestamptz
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  reviews SRSReview[]
+
+  @@unique([userId, contentType, contentId])
+  @@index([userId, dueDate])
+  @@index([userId, state])
+  @@index([state, dueDate])
+  @@index([contentType, contentId])
+  @@map("srs_cards")
+}
+
+model SRSReview {
+  id     String  @id @default(uuid()) @db.Uuid
+  cardId String  @map("card_id") @db.Uuid
+  card   SRSCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  quality   Int @db.SmallInt // 0-5 (SM-2 quality rating)
+  timeSpent Int @map("time_spent") // seconds
+
+  // Pre-review state
+  oldEaseFactor Decimal @map("old_ease_factor") @db.Decimal(4, 2)
+  oldInterval   Int     @map("old_interval")
+
+  // Post-review state
+  newEaseFactor Decimal @map("new_ease_factor") @db.Decimal(4, 2)
+  newInterval   Int     @map("new_interval")
+
+  reviewedAt DateTime @default(now()) @map("reviewed_at") @db.Timestamptz
+
+  @@index([cardId, reviewedAt])
+  @@map("srs_reviews")
+}
+
+// Grammar Rules Reference Library
+model GrammarRule {
+  id     String @id @default(uuid()) @db.Uuid
+  ruleId String @unique @map("rule_id") @db.VarChar(50) // e.g., "L1_HARAKAT_FATHA"
+
+  title       String @db.VarChar(255)
+  titleArabic String @map("title_arabic") @db.VarChar(255)
+
+  level    Int    @db.SmallInt // 1-10 (curriculum level)
+  order    Int    @db.SmallInt // Display order within level
+  category String @db.VarChar(50) // "morphology", "syntax", "phonology"
+
+  // Content for different proficiency levels
+  explanationBeginner     String  @map("explanation_beginner") @db.Text
+  explanationIntermediate String? @map("explanation_intermediate") @db.Text
+  explanationAdvanced     String? @map("explanation_advanced") @db.Text
+
+  // Quranic examples (array of verse references)
+  examples Json // [{ verseRef: "1:1", wordPosition: 3, highlight: "explanation" }, ...]
+
+  // Cross-references
+  prerequisiteRules String[] @map("prerequisite_rules") // Array of ruleIds
+  relatedRules      String[] @map("related_rules")
+
+  // Metadata
+  tags          String[]
+  difficulty    Difficulty
+  estimatedTime Int        @map("estimated_time") @db.SmallInt // minutes to learn
+
+  isPublished Boolean @default(false) @map("is_published")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([level, order])
+  @@index([category])
+  @@index([ruleId])
+  @@map("grammar_rules")
+}
+
+// Leaderboard System
+model LeaderboardEntry {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  boardType LeaderboardType @map("board_type")
+  period    String          @db.VarChar(20) // "2025-W45", "2025-11", "all-time"
+
+  score Int // Total XP for the period
+  rank  Int // User's rank on this board
+
+  // Cached user data for display
+  userName  String @map("user_name") @db.VarChar(255)
+  userLevel Int    @map("user_level")
+
+  calculatedAt DateTime @default(now()) @map("calculated_at") @db.Timestamptz
+
+  @@unique([userId, boardType, period])
+  @@index([boardType, period, rank])
+  @@index([userId, boardType])
+  @@map("leaderboard_entries")
+}
+
+// Daily Challenge System
+model DailyChallenge {
+  id String @id @default(uuid()) @db.Uuid
+
+  date DateTime @unique @db.Date
+
+  title       String  @db.VarChar(255)
+  titleArabic String? @map("title_arabic") @db.VarChar(255)
+  description String  @db.Text
+
+  grammarFocus String     @map("grammar_focus") @db.VarChar(50)
+  difficulty   Difficulty
+
+  // Challenge definition
+  questions Json // Array of challenge questions
+
+  xpReward Int @default(30) @map("xp_reward")
+  bonusXP  Int @default(20) @map("bonus_xp") // Bonus for perfect score
+
+  // Relations
+  attempts UserDailyChallenge[]
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([date])
+  @@map("daily_challenges")
+}
+
+model UserDailyChallenge {
+  id          String         @id @default(uuid()) @db.Uuid
+  userId      String         @map("user_id") @db.Uuid
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challengeId String         @map("challenge_id") @db.Uuid
+  challenge   DailyChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  score     Int  @db.SmallInt // 0-100
+  answers   Json
+  timeSpent Int  @map("time_spent")
+  xpEarned  Int  @map("xp_earned")
+
+  completed    Boolean @default(false)
+  perfectScore Boolean @default(false) @map("perfect_score")
+
+  completedAt DateTime @default(now()) @map("completed_at") @db.Timestamptz
+
+  @@unique([userId, challengeId])
+  @@index([userId, completedAt])
+  @@map("user_daily_challenges")
 }

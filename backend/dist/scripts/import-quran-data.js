@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuranDataImporter = void 0;
 const client_1 = require("@prisma/client");
-const path = require("path");
 const quran_corpus_mapper_1 = require("./mappers/quran-corpus-mapper");
 const quran_corpus_fetcher_1 = require("./fetchers/quran-corpus-fetcher");
 const quran_corpus_types_1 = require("./types/quran-corpus.types");
@@ -13,9 +12,6 @@ class QuranTextMismatchError extends Error {
     }
 }
 const prisma = new client_1.PrismaClient();
-const CONFIG = {
-    MERGED_DATA_FILE: path.join(__dirname, '../../data/processed/quran-complete-merged.json'),
-};
 class ImportLogger {
     constructor() {
         this.startTime = Date.now();
@@ -119,7 +115,7 @@ class QuranDataImporter {
                     logger.warn(`Verse ${verse.surahNumber}:${verse.verseNumber} already exists, skipping`);
                     continue;
                 }
-                const createdVerse = await tx.quranVerse.create({
+                await tx.quranVerse.create({
                     data: {
                         surahNumber: verse.surahNumber,
                         verseNumber: verse.verseNumber,

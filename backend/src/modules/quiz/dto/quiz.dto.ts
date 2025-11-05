@@ -7,9 +7,7 @@ import {
   IsEnum,
   IsArray,
   IsBoolean,
-  IsNumber,
   ValidateNested,
-  IsObject,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';

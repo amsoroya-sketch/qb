@@ -54,7 +54,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         if (!user) {
             throw new common_1.UnauthorizedException('User not found');
         }
-        const { password, ...sanitizedUser } = user;
+        const { password: _password, ...sanitizedUser } = user;
         return { ...sanitizedUser, sub: payload.sub };
     }
 };

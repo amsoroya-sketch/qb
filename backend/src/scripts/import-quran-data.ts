@@ -9,7 +9,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import * as fs from 'fs';
+
 import * as path from 'path';
 import { QuranCorpusMapper } from './mappers/quran-corpus-mapper';
 import { QuranCorpusFetcher } from './fetchers/quran-corpus-fetcher';
@@ -28,9 +28,6 @@ const prisma = new PrismaClient();
 /**
  * Configuration
  */
-const CONFIG = {
-  MERGED_DATA_FILE: path.join(__dirname, '../../data/processed/quran-complete-merged.json'),
-};
 
 /**
  * Logger
@@ -186,7 +183,7 @@ export class QuranDataImporter {
         }
 
         // Insert verse with words
-        const createdVerse = await tx.quranVerse.create({
+        await tx.quranVerse.create({
           data: {
             surahNumber: verse.surahNumber,
             verseNumber: verse.verseNumber,

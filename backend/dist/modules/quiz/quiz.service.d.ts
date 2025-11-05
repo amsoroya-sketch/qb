@@ -1,10 +1,13 @@
 import { PrismaService } from '../../prisma/prisma.service';
 import { ExerciseGeneratorService } from '../exercises/exercise-generator.service';
+import { CacheService } from '../../common/cache/cache.service';
 import { CreateQuizDto, UpdateQuizDto, QuizDetailDto, QuizListDto, StartQuizDto, SubmitQuizAnswerDto, QuizResultDto, CompleteQuizDto, QuizAttemptDto, QuizQuestionDto, GenerateQuizDto, FindQuizzesDto, LeaderboardEntryDto, CreateQuizQuestionDto } from './dto/quiz.dto';
 export declare class QuizService {
     private prisma;
     private exerciseGenerator;
-    constructor(prisma: PrismaService, exerciseGenerator: ExerciseGeneratorService);
+    private cacheService;
+    private readonly LEADERBOARD_CACHE_TTL;
+    constructor(prisma: PrismaService, exerciseGenerator: ExerciseGeneratorService, cacheService: CacheService);
     create(dto: CreateQuizDto): Promise<QuizDetailDto>;
     update(id: string, dto: UpdateQuizDto): Promise<QuizDetailDto>;
     delete(id: string): Promise<void>;

@@ -42,7 +42,7 @@ let RefreshTokenService = class RefreshTokenService {
     }
     async validateAndRotateToken(token) {
         try {
-            const payload = this.jwtService.verify(token, {
+            const _payload = this.jwtService.verify(token, {
                 secret: this.config.get('JWT_REFRESH_SECRET'),
             });
             const tokenHash = this.hashToken(token);

@@ -3,11 +3,11 @@ export declare class AchievementsService {
     private prisma;
     constructor(prisma: PrismaService);
     findAll(): Promise<{
-        description: string;
         id: string;
         name: string;
-        xpReward: number;
         createdAt: Date;
+        description: string;
+        xpReward: number;
         nameArabic: string;
         icon: string;
         category: string;
@@ -15,11 +15,11 @@ export declare class AchievementsService {
         requirement: import("@prisma/client/runtime/library").JsonValue;
     }[]>;
     findOne(id: string): Promise<{
-        description: string;
         id: string;
         name: string;
-        xpReward: number;
         createdAt: Date;
+        description: string;
+        xpReward: number;
         nameArabic: string;
         icon: string;
         category: string;
@@ -28,11 +28,11 @@ export declare class AchievementsService {
     }>;
     getUserAchievements(userId: string): Promise<({
         achievement: {
-            description: string;
             id: string;
             name: string;
-            xpReward: number;
             createdAt: Date;
+            description: string;
+            xpReward: number;
             nameArabic: string;
             icon: string;
             category: string;
@@ -46,11 +46,11 @@ export declare class AchievementsService {
         progressRequired: number;
     } | {
         achievement: {
-            description: string;
             id: string;
             name: string;
-            xpReward: number;
             createdAt: Date;
+            description: string;
+            xpReward: number;
             nameArabic: string;
             icon: string;
             category: string;
@@ -65,11 +65,11 @@ export declare class AchievementsService {
     })[]>;
     checkAndUnlockAchievements(userId: string): Promise<{
         achievement: {
-            description: string;
             id: string;
             name: string;
-            xpReward: number;
             createdAt: Date;
+            description: string;
+            xpReward: number;
             nameArabic: string;
             icon: string;
             category: string;
@@ -84,11 +84,11 @@ export declare class AchievementsService {
     private calculateProgress;
     private checkRequirement;
     getAchievementsByCategory(category: string): Promise<{
-        description: string;
         id: string;
         name: string;
-        xpReward: number;
         createdAt: Date;
+        description: string;
+        xpReward: number;
         nameArabic: string;
         icon: string;
         category: string;
@@ -111,11 +111,11 @@ export declare class AchievementsService {
             _count: {
                 userAchievements: number;
             };
-            description: string;
             id: string;
             name: string;
-            xpReward: number;
             createdAt: Date;
+            description: string;
+            xpReward: number;
             nameArabic: string;
             icon: string;
             category: string;

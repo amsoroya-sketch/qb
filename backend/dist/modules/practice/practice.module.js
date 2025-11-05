@@ -12,12 +12,13 @@ const practice_controller_1 = require("./practice.controller");
 const practice_service_1 = require("./practice.service");
 const prisma_module_1 = require("../../prisma/prisma.module");
 const exercises_module_1 = require("../exercises/exercises.module");
+const cache_module_1 = require("../../common/cache/cache.module");
 let PracticeModule = class PracticeModule {
 };
 exports.PracticeModule = PracticeModule;
 exports.PracticeModule = PracticeModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, exercises_module_1.ExercisesModule],
+        imports: [prisma_module_1.PrismaModule, exercises_module_1.ExercisesModule, cache_module_1.CacheModule],
         controllers: [practice_controller_1.PracticeController],
         providers: [practice_service_1.PracticeService],
         exports: [practice_service_1.PracticeService],

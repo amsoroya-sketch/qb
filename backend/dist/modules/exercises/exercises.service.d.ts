@@ -1,20 +1,27 @@
 import { PrismaService } from '../../prisma/prisma.service';
+import { CacheService } from '../../common/cache/cache.service';
 import { FindExercisesDto, SubmitExerciseDto } from './dto';
 export declare class ExercisesService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private cache;
+    private readonly EXERCISE_CACHE_TTL;
+    private readonly LIST_CACHE_TTL;
+    constructor(prisma: PrismaService, cache: CacheService);
     findAll(query: FindExercisesDto): Promise<{
         data: ({
             lesson: {
                 id: string;
                 title: string;
                 titleArabic: string;
-                stage: number;
                 track: import(".prisma/client").$Enums.Track;
+                stage: number;
             };
         } & {
-            type: import(".prisma/client").$Enums.ExerciseType;
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            type: import(".prisma/client").$Enums.ExerciseType;
+            lessonId: string;
             title: string;
             question: string;
             questionArabic: string | null;
@@ -22,11 +29,8 @@ export declare class ExercisesService {
             correctAnswer: string;
             explanation: string | null;
             order: number;
-            xpReward: number;
-            createdAt: Date;
-            updatedAt: Date;
-            lessonId: string;
             difficulty: import(".prisma/client").$Enums.Difficulty;
+            xpReward: number;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
         })[];
         meta: {
@@ -36,75 +40,34 @@ export declare class ExercisesService {
             totalPages: number;
         };
     }>;
-    findOne(id: string): Promise<{
-        lesson: {
-            id: string;
-            title: string;
-            titleArabic: string;
-            stage: number;
-            track: import(".prisma/client").$Enums.Track;
-            difficulty: import(".prisma/client").$Enums.Difficulty;
-        };
-    } & {
-        type: import(".prisma/client").$Enums.ExerciseType;
-        id: string;
-        title: string;
-        question: string;
-        questionArabic: string | null;
-        options: import("@prisma/client/runtime/library").JsonValue | null;
-        correctAnswer: string;
-        explanation: string | null;
-        order: number;
-        xpReward: number;
-        createdAt: Date;
-        updatedAt: Date;
-        lessonId: string;
-        difficulty: import(".prisma/client").$Enums.Difficulty;
-        metadata: import("@prisma/client/runtime/library").JsonValue | null;
-    }>;
-    findByLesson(lessonId: string): Promise<{
-        type: import(".prisma/client").$Enums.ExerciseType;
-        id: string;
-        title: string;
-        question: string;
-        questionArabic: string | null;
-        options: import("@prisma/client/runtime/library").JsonValue | null;
-        correctAnswer: string;
-        explanation: string | null;
-        order: number;
-        xpReward: number;
-        createdAt: Date;
-        updatedAt: Date;
-        lessonId: string;
-        difficulty: import(".prisma/client").$Enums.Difficulty;
-        metadata: import("@prisma/client/runtime/library").JsonValue | null;
-    }[]>;
+    findOne(id: string): Promise<any>;
+    findByLesson(lessonId: string): Promise<any>;
     submit(userId: string, exerciseId: string, dto: SubmitExerciseDto): Promise<{
-        correctAnswer: string;
-        explanation: string | null;
+        correctAnswer: any;
+        explanation: any;
         isCorrect: boolean;
-        xpEarned: number;
+        xpEarned: any;
         timeBonus: number;
         id: string;
-        timeSpent: number;
-        completedAt: Date;
         userId: string;
         userAnswer: string;
-        exerciseId: string;
         accuracy: import("@prisma/client/runtime/library").Decimal;
+        timeSpent: number;
         attemptNumber: number;
+        completedAt: Date;
+        exerciseId: string;
     }>;
     getUserExercises(userId: string, exerciseId: string): Promise<{
         id: string;
-        xpEarned: number;
-        timeSpent: number;
-        completedAt: Date;
         userId: string;
         userAnswer: string;
         isCorrect: boolean;
-        exerciseId: string;
         accuracy: import("@prisma/client/runtime/library").Decimal;
+        timeSpent: number;
+        xpEarned: number;
         attemptNumber: number;
+        completedAt: Date;
+        exerciseId: string;
     }[]>;
     getExerciseStats(exerciseId: string): Promise<{
         totalAttempts: number;

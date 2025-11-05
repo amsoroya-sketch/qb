@@ -6,22 +6,22 @@ export declare class LessonsService {
     private prisma;
     constructor(prisma: PrismaService);
     create(dto: CreateLessonDto): Promise<{
-        description: string | null;
-        content: string;
         id: string;
-        title: string;
-        order: number;
-        titleArabic: string;
-        stage: number;
-        track: import(".prisma/client").$Enums.Track;
-        xpReward: number;
-        isPublished: boolean;
         createdAt: Date;
         updatedAt: Date;
-        contentArabic: string | null;
-        grammarTopic: string;
+        description: string | null;
+        content: string;
+        title: string;
+        order: number;
         difficulty: import(".prisma/client").$Enums.Difficulty;
+        xpReward: number;
+        titleArabic: string;
+        contentArabic: string | null;
+        track: import(".prisma/client").$Enums.Track;
+        stage: number;
+        grammarTopic: string;
         estimatedTime: number;
+        isPublished: boolean;
     }>;
     findAll(query: FindLessonsDto): Promise<{
         data: ({
@@ -29,22 +29,22 @@ export declare class LessonsService {
                 exercises: number;
             };
         } & {
-            description: string | null;
-            content: string;
             id: string;
-            title: string;
-            order: number;
-            titleArabic: string;
-            stage: number;
-            track: import(".prisma/client").$Enums.Track;
-            xpReward: number;
-            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            contentArabic: string | null;
-            grammarTopic: string;
+            description: string | null;
+            content: string;
+            title: string;
+            order: number;
             difficulty: import(".prisma/client").$Enums.Difficulty;
+            xpReward: number;
+            titleArabic: string;
+            contentArabic: string | null;
+            track: import(".prisma/client").$Enums.Track;
+            stage: number;
+            grammarTopic: string;
             estimatedTime: number;
+            isPublished: boolean;
         })[];
         meta: {
             page: number;
@@ -55,8 +55,11 @@ export declare class LessonsService {
     }>;
     findOne(id: string): Promise<{
         exercises: {
-            type: import(".prisma/client").$Enums.ExerciseType;
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            type: import(".prisma/client").$Enums.ExerciseType;
+            lessonId: string;
             title: string;
             question: string;
             questionArabic: string | null;
@@ -64,11 +67,8 @@ export declare class LessonsService {
             correctAnswer: string;
             explanation: string | null;
             order: number;
-            xpReward: number;
-            createdAt: Date;
-            updatedAt: Date;
-            lessonId: string;
             difficulty: import(".prisma/client").$Enums.Difficulty;
+            xpReward: number;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
         }[];
         verses: ({
@@ -86,75 +86,75 @@ export declare class LessonsService {
             };
         } & {
             id: string;
-            order: number;
             lessonId: string;
+            order: number;
             verseId: string;
             notes: string | null;
         })[];
     } & {
-        description: string | null;
-        content: string;
         id: string;
-        title: string;
-        order: number;
-        titleArabic: string;
-        stage: number;
-        track: import(".prisma/client").$Enums.Track;
-        xpReward: number;
-        isPublished: boolean;
         createdAt: Date;
         updatedAt: Date;
-        contentArabic: string | null;
-        grammarTopic: string;
+        description: string | null;
+        content: string;
+        title: string;
+        order: number;
         difficulty: import(".prisma/client").$Enums.Difficulty;
+        xpReward: number;
+        titleArabic: string;
+        contentArabic: string | null;
+        track: import(".prisma/client").$Enums.Track;
+        stage: number;
+        grammarTopic: string;
         estimatedTime: number;
+        isPublished: boolean;
     }>;
     update(id: string, dto: UpdateLessonDto): Promise<{
-        description: string | null;
-        content: string;
         id: string;
-        title: string;
-        order: number;
-        titleArabic: string;
-        stage: number;
-        track: import(".prisma/client").$Enums.Track;
-        xpReward: number;
-        isPublished: boolean;
         createdAt: Date;
         updatedAt: Date;
-        contentArabic: string | null;
-        grammarTopic: string;
+        description: string | null;
+        content: string;
+        title: string;
+        order: number;
         difficulty: import(".prisma/client").$Enums.Difficulty;
+        xpReward: number;
+        titleArabic: string;
+        contentArabic: string | null;
+        track: import(".prisma/client").$Enums.Track;
+        stage: number;
+        grammarTopic: string;
         estimatedTime: number;
+        isPublished: boolean;
     }>;
     remove(id: string): Promise<{
         message: string;
     }>;
     getUserLessonProgress(userId: string, lessonId: string): Promise<{
         id: string;
-        startedAt: Date | null;
-        timeSpent: number;
-        completedAt: Date | null;
         userId: string;
         lessonId: string;
+        timeSpent: number;
+        completedAt: Date | null;
+        startedAt: Date | null;
         status: import(".prisma/client").$Enums.LessonStatus;
     }>;
     startLesson(userId: string, lessonId: string): Promise<{
         id: string;
-        startedAt: Date | null;
-        timeSpent: number;
-        completedAt: Date | null;
         userId: string;
         lessonId: string;
+        timeSpent: number;
+        completedAt: Date | null;
+        startedAt: Date | null;
         status: import(".prisma/client").$Enums.LessonStatus;
     }>;
     completeLesson(userId: string, lessonId: string, timeSpent: number): Promise<{
         id: string;
-        startedAt: Date | null;
-        timeSpent: number;
-        completedAt: Date | null;
         userId: string;
         lessonId: string;
+        timeSpent: number;
+        completedAt: Date | null;
+        startedAt: Date | null;
         status: import(".prisma/client").$Enums.LessonStatus;
     }>;
 }

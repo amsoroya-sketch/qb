@@ -457,6 +457,7 @@ __decorate([
         },
         description: 'Map of questionId -> userAnswer',
     }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
 ], SubmitExamDto.prototype, "answers", void 0);
 class ExamResultDto {
@@ -570,6 +571,7 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 1, minimum: 1, maximum: 10 }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsInt)(),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.Min)(1),
     (0, class_validator_1.Max)(10),
     __metadata("design:type", Number)
@@ -584,6 +586,7 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: true, description: 'Only published exams' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
+    (0, class_transformer_1.Type)(() => Boolean),
     __metadata("design:type", Boolean)
 ], FindExamsDto.prototype, "isPublished", void 0);
 class CanRetakeExamDto {

@@ -12,13 +12,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.VersesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const cache_service_1 = require("../../common/cache/cache.service");
 let VersesService = class VersesService {
-    constructor(prisma) {
+    constructor(prisma, cache) {
         this.prisma = prisma;
+        this.cache = cache;
+        this.VERSE_CACHE_TTL = 3600;
+        this.LIST_CACHE_TTL = 300;
     }
     async findAll(query) {
         const { page = 1, limit = 20, surahNumber } = query;
         const skip = (page - 1) * limit;
+        const cacheKey = `verses:list:${surahNumber || 'all'}:${page}:${limit}`;
+        const cached = await this.cache.get(cacheKey);
+        if (cached) {
+            return JSON.parse(cached);
+        }
         const where = {};
         if (surahNumber)
             where.surahNumber = surahNumber;
@@ -36,7 +45,7 @@ let VersesService = class VersesService {
             }),
             this.prisma.quranVerse.count({ where }),
         ]);
-        return {
+        const result = {
             data: verses,
             meta: {
                 page,
@@ -45,8 +54,15 @@ let VersesService = class VersesService {
                 totalPages: Math.ceil(total / limit),
             },
         };
+        await this.cache.set(cacheKey, JSON.stringify(result), this.LIST_CACHE_TTL);
+        return result;
     }
     async findOne(surahNumber, verseNumber) {
+        const cacheKey = `verse:${surahNumber}:${verseNumber}`;
+        const cached = await this.cache.get(cacheKey);
+        if (cached) {
+            return JSON.parse(cached);
+        }
         const verse = await this.prisma.quranVerse.findUnique({
             where: {
                 surahNumber_verseNumber: {
@@ -63,9 +79,15 @@ let VersesService = class VersesService {
         if (!verse) {
             throw new common_1.NotFoundException(`Verse ${surahNumber}:${verseNumber} not found`);
         }
+        await this.cache.set(cacheKey, JSON.stringify(verse), this.VERSE_CACHE_TTL);
         return verse;
     }
     async getWordAnalysis(wordId) {
+        const cacheKey = `word:analysis:${wordId}`;
+        const cached = await this.cache.get(cacheKey);
+        if (cached) {
+            return JSON.parse(cached);
+        }
         const word = await this.prisma.verseWord.findUnique({
             where: { id: wordId },
             include: {
@@ -81,7 +103,7 @@ let VersesService = class VersesService {
         if (!word) {
             throw new common_1.NotFoundException(`Word with ID ${wordId} not found`);
         }
-        return {
+        const result = {
             ...word,
             grammaticalAnalysis: {
                 partOfSpeech: word.posType,
@@ -93,6 +115,8 @@ let VersesService = class VersesService {
                 structure: word.structureType,
             },
         };
+        await this.cache.set(cacheKey, JSON.stringify(result), this.VERSE_CACHE_TTL);
+        return result;
     }
     async search(dto) {
         const { query, searchType = 'text', page = 1, limit = 20 } = dto;
@@ -462,6 +486,7 @@ let VersesService = class VersesService {
 exports.VersesService = VersesService;
 exports.VersesService = VersesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        cache_service_1.CacheService])
 ], VersesService);
 //# sourceMappingURL=verses.service.js.map

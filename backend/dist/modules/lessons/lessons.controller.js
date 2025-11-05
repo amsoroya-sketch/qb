@@ -16,6 +16,8 @@ exports.LessonsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const roles_guard_1 = require("../auth/guards/roles.guard");
+const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 const current_user_decorator_1 = require("../auth/decorators/current-user.decorator");
 const lessons_service_1 = require("./lessons.service");
 const create_lesson_dto_1 = require("./dto/create-lesson.dto");
@@ -136,6 +138,8 @@ __decorate([
 ], LessonsController.prototype, "completeLesson", null);
 __decorate([
     (0, common_1.Post)(),
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMIN'),
     (0, swagger_1.ApiOperation)({ summary: 'Create new lesson (Admin only)' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Lesson created' }),
     __param(0, (0, common_1.Body)()),
@@ -145,6 +149,8 @@ __decorate([
 ], LessonsController.prototype, "create", null);
 __decorate([
     (0, common_1.Put)(':id'),
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMIN'),
     (0, swagger_1.ApiOperation)({ summary: 'Update lesson (Admin only)' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Lesson updated' }),
     __param(0, (0, common_1.Param)('id')),
@@ -155,6 +161,8 @@ __decorate([
 ], LessonsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMIN'),
     (0, swagger_1.ApiOperation)({ summary: 'Delete lesson (Admin only)' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Lesson deleted' }),
     __param(0, (0, common_1.Param)('id')),

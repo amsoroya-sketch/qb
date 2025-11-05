@@ -1,10 +1,14 @@
 import { PrismaService } from '../../prisma/prisma.service';
 import { ExerciseGeneratorService } from '../exercises/exercise-generator.service';
+import { CacheService } from '../../common/cache/cache.service';
 import { GetPracticeSetDto, SubmitPracticeAnswerDto, PracticeSetResponseDto, PracticeResultDto } from './dto/practice.dto';
 export declare class PracticeService {
     private prisma;
     private exerciseGenerator;
-    constructor(prisma: PrismaService, exerciseGenerator: ExerciseGeneratorService);
+    private cacheService;
+    private readonly VERSE_CACHE_TTL;
+    private readonly EXERCISE_CACHE_TTL;
+    constructor(prisma: PrismaService, exerciseGenerator: ExerciseGeneratorService, cacheService: CacheService);
     getPracticeSet(userId: string, dto: GetPracticeSetDto): Promise<PracticeSetResponseDto>;
     getQuickPractice(userId: string, count?: number, grammarFocus?: string): Promise<PracticeSetResponseDto>;
     getGrammarDrills(userId: string, grammarFocus: string, count?: number): Promise<PracticeSetResponseDto>;

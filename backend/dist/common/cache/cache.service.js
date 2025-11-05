@@ -38,6 +38,26 @@ let CacheService = class CacheService {
             await this.client.set(key, value);
         }
     }
+    async getJson(key) {
+        const value = await this.client.get(key);
+        if (!value)
+            return null;
+        try {
+            return JSON.parse(value);
+        }
+        catch {
+            return null;
+        }
+    }
+    async setJson(key, value, ttl) {
+        const jsonString = JSON.stringify(value);
+        if (ttl) {
+            await this.client.setex(key, ttl, jsonString);
+        }
+        else {
+            await this.client.set(key, jsonString);
+        }
+    }
     async del(key) {
         await this.client.del(key);
     }
@@ -46,6 +66,10 @@ let CacheService = class CacheService {
         if (keys.length > 0) {
             await this.client.del(...keys);
         }
+    }
+    async exists(key) {
+        const result = await this.client.exists(key);
+        return result === 1;
     }
 };
 exports.CacheService = CacheService;

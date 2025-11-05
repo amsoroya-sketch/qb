@@ -59,7 +59,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User not found');
     }
 
-    const { password, ...sanitizedUser } = user;
+    const { password: _password, ...sanitizedUser } = user;
     // Add 'sub' property for compatibility with @CurrentUser('sub') decorator
     return { ...sanitizedUser, sub: payload.sub };
   }

@@ -13,11 +13,14 @@ exports.QuizService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const exercise_generator_service_1 = require("../exercises/exercise-generator.service");
+const cache_service_1 = require("../../common/cache/cache.service");
 const client_1 = require("@prisma/client");
 let QuizService = class QuizService {
-    constructor(prisma, exerciseGenerator) {
+    constructor(prisma, exerciseGenerator, cacheService) {
         this.prisma = prisma;
         this.exerciseGenerator = exerciseGenerator;
+        this.cacheService = cacheService;
+        this.LEADERBOARD_CACHE_TTL = 300;
     }
     async create(dto) {
         const quizData = {
@@ -158,7 +161,8 @@ let QuizService = class QuizService {
     }
     async generateQuizFromGrammar(dto) {
         const questionCount = dto.questionCount ?? 10;
-        const title = dto.title ?? `${dto.grammarFocus.charAt(0).toUpperCase() + dto.grammarFocus.slice(1)} Practice Quiz`;
+        const title = dto.title ??
+            `${dto.grammarFocus.charAt(0).toUpperCase() + dto.grammarFocus.slice(1)} Practice Quiz`;
         const quiz = await this.prisma.quiz.create({
             data: {
                 title,
@@ -264,16 +268,17 @@ let QuizService = class QuizService {
         if (quiz.questions.length === 0) {
             throw new common_1.BadRequestException('Quiz has no questions');
         }
-        const existingAttempt = await this.prisma.$queryRaw `
-      SELECT id FROM quiz_attempts
-      WHERE user_id = ${userId}::uuid
-      AND quiz_id = ${quizId}::uuid
-      AND completed_at > NOW() - INTERVAL '1 hour'
-      AND score = 0
-      ORDER BY completed_at DESC
-      LIMIT 1
-    `;
-        if (existingAttempt.length > 0) {
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+        const existingAttempt = await this.prisma.quizAttempt.findFirst({
+            where: {
+                userId,
+                quizId,
+                completedAt: { gt: oneHourAgo },
+                score: 0,
+            },
+            orderBy: { completedAt: 'desc' },
+        });
+        if (existingAttempt) {
             throw new common_1.BadRequestException('You have an in-progress quiz attempt. Please complete or abandon it first.');
         }
         const attempt = await this.prisma.quizAttempt.create({
@@ -343,7 +348,6 @@ let QuizService = class QuizService {
             },
         });
         const answeredQuestions = Object.keys(currentAnswers).length;
-        const totalCorrect = Object.values(currentAnswers).filter((a) => a.isCorrect).length;
         let totalPointsEarned = 0;
         for (const answer of Object.values(currentAnswers)) {
             totalPointsEarned += Number(answer.pointsEarned) || 0;
@@ -410,6 +414,7 @@ let QuizService = class QuizService {
         });
         if (passed) {
             await this.updateUserProgress(userId, xpEarned, timeSpent);
+            await this.cacheService.delPattern(`leaderboard:${attempt.quiz.id}:*`);
         }
         const detailedAnswers = attempt.quiz.questions.map((question) => {
             const userAnswer = answers[question.id];
@@ -476,35 +481,64 @@ let QuizService = class QuizService {
         }));
     }
     async getLeaderboard(quizId, limit = 10) {
+        const cacheKey = `leaderboard:${quizId}:${limit}`;
+        const cached = await this.cacheService.getJson(cacheKey);
+        if (cached) {
+            return cached;
+        }
         const quiz = await this.prisma.quiz.findUnique({
             where: { id: quizId },
         });
         if (!quiz) {
             throw new common_1.NotFoundException(`Quiz ${quizId} not found`);
         }
-        const attempts = await this.prisma.$queryRaw `
-      SELECT
-        qa.user_id,
-        u.name as user_name,
-        MAX(qa.score) as score,
-        MIN(qa.time_spent) as time_spent,
-        MAX(qa.completed_at) as completed_at
-      FROM quiz_attempts qa
-      JOIN users u ON u.id = qa.user_id
-      WHERE qa.quiz_id = ${quizId}::uuid
-      AND qa.score > 0
-      GROUP BY qa.user_id, u.name
-      ORDER BY score DESC, time_spent ASC
-      LIMIT ${limit}
-    `;
-        return attempts.map((attempt, index) => ({
-            userId: attempt.user_id,
-            userName: attempt.user_name,
-            score: Number(attempt.score),
-            timeSpent: Number(attempt.time_spent),
-            completedAt: new Date(attempt.completed_at),
+        const attempts = await this.prisma.quizAttempt.findMany({
+            where: {
+                quizId,
+                score: { gt: 0 },
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+            },
+            orderBy: [{ score: 'desc' }, { timeSpent: 'asc' }],
+        });
+        const userBestAttempts = new Map();
+        for (const attempt of attempts) {
+            const userId = attempt.userId;
+            const existing = userBestAttempts.get(userId);
+            const entry = {
+                userId: attempt.userId,
+                userName: attempt.user.name,
+                score: attempt.score,
+                timeSpent: attempt.timeSpent,
+                completedAt: attempt.completedAt,
+                rank: 0,
+            };
+            if (!existing ||
+                entry.score > existing.score ||
+                (entry.score === existing.score && entry.timeSpent < existing.timeSpent)) {
+                userBestAttempts.set(userId, entry);
+            }
+        }
+        const leaderboard = Array.from(userBestAttempts.values())
+            .sort((a, b) => {
+            if (b.score !== a.score) {
+                return b.score - a.score;
+            }
+            return a.timeSpent - b.timeSpent;
+        })
+            .slice(0, limit)
+            .map((entry, index) => ({
+            ...entry,
             rank: index + 1,
         }));
+        await this.cacheService.setJson(cacheKey, leaderboard, this.LEADERBOARD_CACHE_TTL);
+        return leaderboard;
     }
     async generateQuestionsFromGrammar(grammarFocus, questionCount) {
         const verses = await this.selectRandomVerses(questionCount * 3);
@@ -622,8 +656,7 @@ let QuizService = class QuizService {
             const userArray = Array.isArray(userAnswer)
                 ? userAnswer
                 : userAnswer.split(',').map((s) => s.trim());
-            return (correctArray.length === userArray.length &&
-                correctArray.every((c) => userArray.includes(c)));
+            return (correctArray.length === userArray.length && correctArray.every((c) => userArray.includes(c)));
         }
         return normalizedUser === normalizedCorrect;
     }
@@ -663,7 +696,7 @@ let QuizService = class QuizService {
         const bestScore = userId && quiz.attempts?.length > 0
             ? Math.max(...quiz.attempts.map((a) => a.score))
             : undefined;
-        const attemptCount = userId ? quiz.attempts?.length ?? 0 : undefined;
+        const attemptCount = userId ? (quiz.attempts?.length ?? 0) : undefined;
         return {
             id: quiz.id,
             title: quiz.title,
@@ -708,6 +741,7 @@ exports.QuizService = QuizService;
 exports.QuizService = QuizService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        exercise_generator_service_1.ExerciseGeneratorService])
+        exercise_generator_service_1.ExerciseGeneratorService,
+        cache_service_1.CacheService])
 ], QuizService);
 //# sourceMappingURL=quiz.service.js.map

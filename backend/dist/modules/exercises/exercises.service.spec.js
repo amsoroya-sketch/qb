@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const testing_1 = require("@nestjs/testing");
 const exercises_service_1 = require("./exercises.service");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const cache_service_1 = require("../../common/cache/cache.service");
 const common_1 = require("@nestjs/common");
 describe('ExercisesService', () => {
     let service;
@@ -22,6 +23,12 @@ describe('ExercisesService', () => {
             update: jest.fn(),
         },
     };
+    const mockCacheService = {
+        get: jest.fn(),
+        set: jest.fn(),
+        del: jest.fn(),
+        delPattern: jest.fn(),
+    };
     beforeEach(async () => {
         const module = await testing_1.Test.createTestingModule({
             providers: [
@@ -30,6 +37,10 @@ describe('ExercisesService', () => {
                     provide: prisma_service_1.PrismaService,
                     useValue: mockPrismaService,
                 },
+                {
+                    provide: cache_service_1.CacheService,
+                    useValue: mockCacheService,
+                },
             ],
         }).compile();
         service = module.get(exercises_service_1.ExercisesService);
@@ -37,6 +48,7 @@ describe('ExercisesService', () => {
     });
     afterEach(() => {
         jest.clearAllMocks();
+        mockCacheService.get.mockResolvedValue(null);
     });
     it('should be defined', () => {
         expect(service).toBeDefined();

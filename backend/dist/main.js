@@ -6,7 +6,65 @@ const swagger_1 = require("@nestjs/swagger");
 const app_module_1 = require("./app.module");
 const helmet_1 = require("helmet");
 const cookieParser = require("cookie-parser");
+function validateJwtSecrets() {
+    const jwtSecret = process.env.JWT_SECRET;
+    const refreshSecret = process.env.REFRESH_TOKEN_SECRET;
+    const nodeEnv = process.env.NODE_ENV || 'development';
+    const isProduction = nodeEnv === 'production';
+    const weakSecrets = [
+        'your-secret-key',
+        'secret',
+        'changeme',
+        'password',
+        '123456',
+        'default',
+        'test',
+    ];
+    if (!jwtSecret) {
+        console.error('❌ FATAL ERROR: JWT_SECRET environment variable is not set!');
+        console.error('   Set JWT_SECRET in your .env file');
+        process.exit(1);
+    }
+    if (!refreshSecret) {
+        console.error('❌ FATAL ERROR: REFRESH_TOKEN_SECRET environment variable is not set!');
+        console.error('   Set REFRESH_TOKEN_SECRET in your .env file');
+        process.exit(1);
+    }
+    if (weakSecrets.some(weak => jwtSecret.toLowerCase().includes(weak))) {
+        console.error('❌ FATAL ERROR: JWT_SECRET appears to be a weak or default value!');
+        console.error('   Generate a strong secret using: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+        process.exit(1);
+    }
+    if (weakSecrets.some(weak => refreshSecret.toLowerCase().includes(weak))) {
+        console.error('❌ FATAL ERROR: REFRESH_TOKEN_SECRET appears to be a weak or default value!');
+        console.error('   Generate a strong secret using: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+        process.exit(1);
+    }
+    const minLength = isProduction ? 32 : 16;
+    if (jwtSecret.length < minLength) {
+        console.error(`❌ FATAL ERROR: JWT_SECRET is too short! Minimum ${minLength} characters required (${isProduction ? 'production' : 'development'} mode)`);
+        console.error('   Generate a strong secret using: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+        process.exit(1);
+    }
+    if (refreshSecret.length < minLength) {
+        console.error(`❌ FATAL ERROR: REFRESH_TOKEN_SECRET is too short! Minimum ${minLength} characters required (${isProduction ? 'production' : 'development'} mode)`);
+        console.error('   Generate a strong secret using: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+        process.exit(1);
+    }
+    if (jwtSecret === refreshSecret) {
+        console.error('❌ FATAL ERROR: JWT_SECRET and REFRESH_TOKEN_SECRET must be different!');
+        console.error('   Generate two different secrets');
+        process.exit(1);
+    }
+    if (isProduction) {
+        console.log('✅ JWT secrets validated successfully (production mode)');
+    }
+    else {
+        console.log('✅ JWT secrets validated successfully (development mode)');
+    }
+}
 async function bootstrap() {
+    validateJwtSecrets();
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.use(cookieParser());
     app.use((0, helmet_1.default)({

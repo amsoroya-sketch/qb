@@ -7,15 +7,15 @@ export declare class AnalyticsController {
         eventData?: any;
     }): Promise<{
         id: string;
-        xpEarned: number | null;
-        timeSpent: number | null;
         userId: string;
         lessonId: string | null;
+        metadata: import("@prisma/client/runtime/library").JsonValue | null;
+        accuracy: import("@prisma/client/runtime/library").Decimal | null;
+        timeSpent: number | null;
+        xpEarned: number | null;
+        exerciseId: string | null;
         eventType: string;
         timestamp: Date;
-        metadata: import("@prisma/client/runtime/library").JsonValue | null;
-        exerciseId: string | null;
-        accuracy: import("@prisma/client/runtime/library").Decimal | null;
     }>;
     getMyAnalytics(userId: string, days?: number): Promise<{
         totalEvents: number;

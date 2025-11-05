@@ -119,7 +119,7 @@ let AuthService = class AuthService {
         return { accessToken, refreshToken, familyId: tokenFamilyId };
     }
     sanitizeUser(user) {
-        const { password, ...sanitized } = user;
+        const { password: _password, ...sanitized } = user;
         return sanitized;
     }
     async logout(token) {

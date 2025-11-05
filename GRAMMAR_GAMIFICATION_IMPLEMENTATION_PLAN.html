@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Gamification Implementation Plan - arQ Platform</title>
+    <style>
+        :root {
+            /* Brand Colors */
+            --primary: #036635;
+            --secondary: #D4AF37;
+
+            /* Grammar Color Coding */
+            --noun: #4169E1;
+            --verb: #2E8B57;
+            --particle: #FF8C00;
+
+            /* Status Colors */
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+            --info: #3B82F6;
+
+            /* Neutrals */
+            --bg-light: #F9FAFB;
+            --bg-dark: #1F2937;
+            --text-dark: #111827;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: var(--bg-light);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #024d26 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Navigation */
+        nav {
+            background: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        nav a {
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+        }
+
+        nav a:hover {
+            background: var(--bg-light);
+            transform: translateY(-2px);
+        }
+
+        /* Sections */
+        section {
+            background: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--secondary);
+        }
+
+        h3 {
+            color: var(--text-dark);
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        h4 {
+            color: var(--text-dark);
+            font-size: 1.25rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: var(--bg-light);
+        }
+
+        /* Wireframes */
+        .wireframe {
+            background: #f5f5f5;
+            border: 2px solid #333;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            overflow-x: auto;
+        }
+
+        .wireframe-mobile {
+            max-width: 400px;
+            margin: 1.5rem auto;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        code {
+            font-family: 'Courier New', Consolas, Monaco, monospace;
+        }
+
+        /* Badges/Pills */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .badge-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .badge-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .badge-info {
+            background: var(--info);
+            color: white;
+        }
+
+        .badge-error {
+            background: var(--error);
+            color: white;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        /* Flow Diagram */
+        .flow-diagram {
+            background: white;
+            border: 2px solid var(--border);
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .flow-step {
+            background: var(--info);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            display: inline-block;
+            margin: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .flow-arrow {
+            font-size: 2rem;
+            color: var(--text-light);
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        /* Status Indicators */
+        .status-check {
+            color: var(--success);
+            margin-right: 0.5rem;
+        }
+
+        .status-x {
+            color: var(--error);
+            margin-right: 0.5rem;
+        }
+
+        /* Collapsible Sections */
+        details {
+            margin: 1.5rem 0;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            user-select: none;
+            padding: 0.5rem;
+        }
+
+        summary:hover {
+            background: var(--bg-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.75rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+            }
+
+            .wireframe {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+            }
+
+            nav {
+                display: none;
+            }
+
+            section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🎮 Grammar Gamification Implementation Plan</h1>
+            <p>arQ Platform Enhancement - Comprehensive Technical Specification</p>
+            <div style="margin-top: 1rem;">
+                <span class="badge badge-info">Version 1.0</span>
+                <span class="badge badge-success">Implementation Ready</span>
+                <span class="badge badge-warning">8-10 Weeks</span>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#executive-summary">Executive Summary</a></li>
+                <li><a href="#current-state">Current State</a></li>
+                <li><a href="#new-features">New Features</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#database">Database Schema</a></li>
+                <li><a href="#wireframes">Wireframes</a></li>
+                <li><a href="#implementation">Implementation</a></li>
+                <li><a href="#testing">Testing</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- EXECUTIVE SUMMARY -->
+        <section id="executive-summary">
+            <h2>1. Executive Summary</h2>
+
+            <h3>1.1 Objective</h3>
+            <p>Enhance the existing arQ Quranic Arabic Learning Platform with a comprehensive <strong>Grammar Gamification System</strong> that makes grammar learning engaging through spaced repetition (SRS), motivates students with badges and leaderboards, and provides a comprehensive Grammar Reference Library.</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>🔄 Spaced Repetition System</h4>
+                    <p>SM-2 algorithm for optimal review scheduling</p>
+                    <span class="badge badge-success">+60% retention</span>
+                </div>
+                <div class="card">
+                    <h4>🏆 Leaderboards</h4>
+                    <p>Global, weekly, and category rankings</p>
+                    <span class="badge badge-success">+40% engagement</span>
+                </div>
+                <div class="card">
+                    <h4>📚 Grammar Library</h4>
+                    <p>70-rule comprehensive reference</p>
+                    <span class="badge badge-info">Quick access</span>
+                </div>
+                <div class="card">
+                    <h4>🎖️ Enhanced Badges</h4>
+                    <p>25+ achievement categories</p>
+                    <span class="badge badge-warning">Motivation</span>
+                </div>
+            </div>
+
+            <h3>1.2 Integration Strategy</h3>
+            <div class="flow-diagram">
+                <div class="flow-step">Existing arQ Platform</div>
+                <div class="flow-step" style="background: var(--primary);">Track A (Lessons)</div>
+                <div class="flow-step" style="background: var(--primary);">Track B (Verses)</div>
+                <div class="flow-step" style="background: var(--primary);">Quizzes & Exams</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step" style="background: var(--secondary); color: var(--text-dark);">
+                    <strong>NEW GAMIFICATION LAYER</strong><br>
+                    SRS · Grammar Library · Leaderboards · Enhanced Badges
+                </div>
+            </div>
+        </section>
+
+        <!-- CURRENT STATE ANALYSIS -->
+        <section id="current-state">
+            <h2>2. Current State Analysis</h2>
+
+            <h3>2.1 Existing Database Schema</h3>
+            <p><span class="status-check">✅</span> <strong>Already Built and Working:</strong></p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Table Name</th>
+                        <th>Purpose</th>
+                        <th>Key Features</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>users</code></td>
+                        <td>User Management</td>
+                        <td>XP, levels, roles</td>
+                    </tr>
+                    <tr>
+                        <td><code>user_progress</code></td>
+                        <td>Gamification Metrics</td>
+                        <td>Streaks, accuracy, time spent</td>
+                    </tr>
+                    <tr>
+                        <td><code>lessons</code></td>
+                        <td>Track A/B Curriculum</td>
+                        <td>10 stages, grammar topics</td>
+                    </tr>
+                    <tr>
+                        <td><code>exercises</code></td>
+                        <td>Practice System</td>
+                        <td>13 types incl. morphological</td>
+                    </tr>
+                    <tr>
+                        <td><code>quizzes</code></td>
+                        <td>Assessment</td>
+                        <td>4 types, grammar focus tracking</td>
+                    </tr>
+                    <tr>
+                        <td><code>achievements</code></td>
+                        <td>Badge System</td>
+                        <td>Rarity levels (common→legendary)</td>
+                    </tr>
+                    <tr>
+                        <td><code>quran_verses</code></td>
+                        <td>Quranic Data</td>
+                        <td>6,236 verses with translation</td>
+                    </tr>
+                    <tr>
+                        <td><code>verse_words</code></td>
+                        <td>Word-level POS</td>
+                        <td>77,429 words analyzed</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2.2 What's Missing (Gaps to Fill)</h3>
+            <p><span class="status-x">❌</span> <strong>Not Yet Implemented:</strong></p>
+
+            <details open>
+                <summary>Missing Feature 1: Spaced Repetition System (SRS)</summary>
+                <ul>
+                    <li>No <code>srs_cards</code> table for review scheduling</li>
+                    <li>No SM-2 algorithm implementation</li>
+                    <li>No daily review workflow UI</li>
+                    <li>No review history tracking</li>
+                </ul>
+            </details>
+
+            <details open>
+                <summary>Missing Feature 2: Leaderboards</summary>
+                <ul>
+                    <li>No leaderboard calculation system</li>
+                    <li>No ranking tables</li>
+                    <li>No weekly/monthly reset mechanism</li>
+                    <li>No leaderboard UI</li>
+                </ul>
+            </details>
+
+            <details open>
+                <summary>Missing Feature 3: Grammar Reference Library</summary>
+                <ul>
+                    <li>No <code>grammar_rules</code> table</li>
+                    <li>No 70-rule taxonomy organization</li>
+                    <li>No quick reference pages</li>
+                    <li>No cross-linking between library and lessons</li>
+                </ul>
+            </details>
+
+            <details open>
+                <summary>Missing Feature 4: Enhanced Badge Categories</summary>
+                <ul>
+                    <li>Achievements exist but no category organization</li>
+                    <li>No milestone/skill/streak/challenge types</li>
+                    <li>No tiered badge system (bronze→platinum)</li>
+                </ul>
+            </details>
+        </section>
+
+        <!-- NEW FEATURES -->
+        <section id="new-features">
+            <h2>3. What We're Adding</h2>
+
+            <h3>3.1 Spaced Repetition System (SRS)</h3>
+            <h4>Concept</h4>
+            <p>Every grammar rule learned becomes an <strong>SRS card</strong> that's reviewed at scientifically-optimized intervals using the SM-2 algorithm.</p>
+
+            <div class="flow-diagram">
+                <div style="text-align: left; max-width: 600px; margin: 0 auto;">
+                    <div class="flow-step" style="width: 100%;">Learn Rule</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step" style="width: 100%;">Review after 1 day</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step" style="width: 100%;">Review after 3 days</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step" style="width: 100%;">Review after 7 days</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step" style="width: 100%;">Review after 14 days</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step" style="width: 100%;">Review after 30 days</div>
+                </div>
+            </div>
+
+            <h4>SM-2 Algorithm</h4>
+            <pre><code>IF response = "Again" (failed):
+    interval = 1 day
+    ease_factor -= 0.20
+    state = 'relearning'
+
+IF response = "Hard":
+    interval = current_interval * 1.2
+    ease_factor -= 0.15
+
+IF response = "Good":
+    interval = current_interval * ease_factor
+
+IF response = "Easy":
+    interval = current_interval * ease_factor * 1.3
+    ease_factor += 0.15
+
+// Constraints
+ease_factor: min 1.30, max 3.00
+interval: min 1 day, max 365 days</code></pre>
+
+            <h3>3.2 Leaderboard System</h3>
+            <h4>Leaderboard Types</h4>
+            <div class="card-grid">
+                <div class="card">
+                    <h4>🌍 Global</h4>
+                    <p>All users, all time</p>
+                </div>
+                <div class="card">
+                    <h4>📅 Weekly</h4>
+                    <p>Resets every Monday</p>
+                </div>
+                <div class="card">
+                    <h4>👥 Friends</h4>
+                    <p>Personal friend group</p>
+                </div>
+                <div class="card">
+                    <h4>🎯 Grammar Masters</h4>
+                    <p>Top per category</p>
+                </div>
+            </div>
+
+            <h4>Ranking Formula</h4>
+            <pre><code>score = (XP earned * 1.0) +
+        (Average accuracy * 5.0) +
+        (Streak days * 10) +
+        (Reviews completed * 2.0)
+
+Example:
+User: Ahmed M.
+- XP: 850
+- Accuracy: 94%
+- Streak: 21 days
+- Reviews: 156
+
+Score = (850 * 1.0) + (94 * 5.0) + (21 * 10) + (156 * 2.0)
+      = 850 + 470 + 210 + 312
+      = 1,842 points</code></pre>
+
+            <h3>3.3 Grammar Reference Library</h3>
+            <h4>70-Rule Taxonomy</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Level</th>
+                        <th>Category</th>
+                        <th>Rule Count</th>
+                        <th>Examples</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Level 1</strong><br>Foundations</td>
+                        <td>
+                            • Harakat (5)<br>
+                            • Parts of Speech (3)<br>
+                            • I'rab Cases (3)<br>
+                            • Gender & Number (4)
+                        </td>
+                        <td>15 rules</td>
+                        <td>Fatha, Kasra, Damma, Noun, Verb, Marfu'</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Level 2</strong><br>Intermediate</td>
+                        <td>
+                            • Sentence Types (2)<br>
+                            • Verb System (8)<br>
+                            • Adjectives (5)<br>
+                            • Particles (6)<br>
+                            • Adverbials (4)
+                        </td>
+                        <td>25 rules</td>
+                        <td>Jumla Ismiyyah, Fi'l Madhi, Idafa, Harf Jar</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Level 3</strong><br>Advanced</td>
+                        <td>
+                            • Advanced Verbs (10)<br>
+                            • Complex Syntax (8)<br>
+                            • Morphology (8)<br>
+                            • Rhetoric (6)
+                        </td>
+                        <td>30+ rules</td>
+                        <td>Forms II-X, Conditional, Broken Plurals, Majaz</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- WIREFRAMES -->
+        <section id="wireframes">
+            <h2>4. UI/UX Wireframes</h2>
+
+            <h3>4.1 Daily Review Session (Desktop)</h3>
+            <div class="wireframe">
+┌─────────────────────────────────────────────────────────────┐
+│  DAILY REVIEW SESSION                                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  📅 Reviews Due Today: 12 cards                            │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 75%                        │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐  │
+│  │  CARD 9/12                                          │  │
+│  │                                                     │  │
+│  │  📖 Grammar Rule: Nominative Case (المرفوع)        │  │
+│  │                                                     │  │
+│  │  QUESTION:                                          │  │
+│  │  What is the grammatical case of "الْحَمْدُ" in    │  │
+│  │  Surah Al-Fatiha (1:2)?                            │  │
+│  │                                                     │  │
+│  │  [Show Answer ▼]                                    │  │
+│  └─────────────────────────────────────────────────────┘  │
+│                                                             │
+│  ─────────── AFTER CLICKING "Show Answer" ───────────      │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐  │
+│  │  ✓ ANSWER: Nominative (مرفوع)                      │  │
+│  │                                                     │  │
+│  │  الْحَمْدُ is the subject (مبتدأ) of a nominal    │  │
+│  │  sentence, so it takes the nominative case.        │  │
+│  │                                                     │  │
+│  │  Sign: Damma (ُ) at the end                        │  │
+│  │                                                     │  │
+│  │  [📚 Full Rule Page →]                             │  │
+│  └─────────────────────────────────────────────────────┘  │
+│                                                             │
+│  HOW WELL DID YOU KNOW THIS?                               │
+│                                                             │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐     │
+│  │  Again   │ │   Hard   │ │   Good   │ │   Easy   │     │
+│  │  < 1m    │ │   < 6m   │ │   3 days │ │  7 days  │     │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘     │
+│                                                             │
+│  ──────────────────────────────────────────────────────── │
+│                                                             │
+│  📊 Today's Progress:                                      │
+│  • Reviewed: 9/12 cards                                    │
+│  • Accuracy: 78% (7 correct, 2 hard)                      │
+│  • Time spent: 8 minutes                                   │
+│  • XP earned: +90                                          │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+            </div>
+
+            <h3>4.2 SRS Review Session (Mobile)</h3>
+            <div class="wireframe wireframe-mobile">
+┌─────────────────────────────┐
+│ arQ Review         [X Close]│
+├─────────────────────────────┤
+│                             │
+│  Card 5/12                  │
+│  ━━━━━━━━━━━━━━━━━━━ 42%  │
+│                             │
+│  📖 Nominative Case         │
+│                             │
+│  ───────────────────────── │
+│                             │
+│  QUESTION:                  │
+│                             │
+│  What case is "الْحَمْدُ"  │
+│  in this verse?             │
+│                             │
+│  ٱلْحَمْدُ لِلَّهِ          │
+│                             │
+│  ───────────────────────── │
+│                             │
+│  Hint: It's the subject     │
+│  of the sentence            │
+│                             │
+│  ┌───────────────────────┐ │
+│  │ [Show Answer ▼]       │ │
+│  └───────────────────────┘ │
+│                             │
+│  ───────────────────────── │
+│                             │
+│  ⏱️ Time: 0:12              │
+│  📊 Today: 4/12 done        │
+│  ✓ Correct: 75%             │
+│                             │
+└─────────────────────────────┘
+
+(After clicking "Show Answer")
+
+┌─────────────────────────────┐
+│ arQ Review         [X Close]│
+├─────────────────────────────┤
+│                             │
+│  ANSWER:                    │
+│                             │
+│  ✓ Nominative (مرفوع)      │
+│                             │
+│  ───────────────────────── │
+│                             │
+│  الْحَمْدُ is the subject  │
+│  (مبتدأ) of a nominal      │
+│  sentence, so it takes the  │
+│  nominative case.           │
+│                             │
+│  Sign: Damma (ُ)            │
+│                             │
+│  [📚 Full Rule →]          │
+│                             │
+│  ───────────────────────── │
+│                             │
+│  HOW WELL DID YOU KNOW IT?  │
+│                             │
+│  ┌───────┐ ┌───────┐       │
+│  │ Again │ │ Hard  │       │
+│  │ <1m   │ │ <10m  │       │
+│  └───────┘ └───────┘       │
+│  ┌───────┐ ┌───────┐       │
+│  │ Good  │ │ Easy  │       │
+│  │ 3d    │ │ 7d    │       │
+│  └───────┘ └───────┘       │
+│                             │
+└─────────────────────────────┘
+            </div>
+
+            <h3>4.3 Grammar Reference Library - Browse View</h3>
+            <div class="wireframe">
+┌─────────────────────────────────────────────────────────────┐
+│  GRAMMAR REFERENCE LIBRARY                      [🔍 Search] │
+├─────────────────────────────────────────────────────────────┤
+│  [All Levels ▼] [All Categories ▼] [Bookmarked Only ☐]     │
+│                                                             │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                             │
+│  LEVEL 1: FOUNDATIONS (15 rules)                           │
+│                                                             │
+│  Harakat (Vowel Marks) ━━━━━━━━━━━━━━━━━━━━━━━━ 100% ✓   │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐     │
+│  │ ●Fatha   │ │ ●Kasra   │ │ ●Damma   │ │ ●Sukun   │     │
+│  │ الفتحة   │ │ الكسرة   │ │ الضمة    │ │ السكون   │     │
+│  │ 5 min    │ │ 5 min    │ │ 5 min    │ │ 4 min    │     │
+│  │ ✓Mastered│ │ ✓Mastered│ │ ✓Mastered│ │ ✓Mastered│     │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘     │
+│  ┌──────────┐                                              │
+│  │ ●Tanwin  │                                              │
+│  │ التنوين  │                                              │
+│  │ 6 min    │                                              │
+│  │ ✓Mastered│                                              │
+│  └──────────┘                                              │
+│                                                             │
+│  Parts of Speech ━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 67% ✓      │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐                   │
+│  │ ●Noun    │ │ ●Verb    │ │ ○Particle│                   │
+│  │ الاسم    │ │ الفعل    │ │ الحرف    │                   │
+│  │ 8 min    │ │ 10 min   │ │ 7 min    │                   │
+│  │ ✓Mastered│ │ ✓Mastered│ │ Not Start│                   │
+│  └──────────┘ └──────────┘ └──────────┘                   │
+│                                                             │
+│  I'rab (Grammatical Cases) ━━━━━━━━━━━━━━━━━━━ 0%         │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐                   │
+│  │ ○Nominat.│ │ ○Accusat.│ │ ○Genitive│                   │
+│  │ المرفوع  │ │ المنصوب  │ │ المجرور  │                   │
+│  │ 12 min   │ │ 12 min   │ │ 12 min   │                   │
+│  │ 🔒Locked │ │ 🔒Locked │ │ 🔒Locked │                   │
+│  └──────────┘ └──────────┘ └──────────┘                   │
+│                                                             │
+│  [Unlock by completing "Noun" and "Verb"]                  │
+│                                                             │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                             │
+│  LEVEL 2: INTERMEDIATE (25 rules)                          │
+│  🔒 Complete Level 1 to unlock                             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+Legend:
+● = Available    ○ = Locked    ✓ = Mastered
+            </div>
+
+            <h3>4.4 Leaderboard - Desktop View</h3>
+            <div class="wireframe">
+┌─────────────────────────────────────────────────────────────────────────┐
+│  LEADERBOARDS                                             🏆  [Share]   │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  [Global] [Weekly ●] [Monthly] [Friends] [Grammar Masters]             │
+│                                                                         │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ │
+│                                                                         │
+│  WEEKLY LEADERBOARD                             Resets in: 3d 14h 23m  │
+│                                                                         │
+│  ┌─────────────────────────────────────────────────────────────────┐  │
+│  │ Rank  Player           Level  Score   Streak  Reviews  Accuracy │  │
+│  ├─────────────────────────────────────────────────────────────────┤  │
+│  │ 🥇 1  Ahmed M.          7     2,850    21🔥    156      94%     │  │
+│  │       "I'rab Champion"  ⭐⭐⭐                                    │  │
+│  ├─────────────────────────────────────────────────────────────────┤  │
+│  │ 🥈 2  Fatima K.         6     2,720    18🔥    142      91%     │  │
+│  │       "Verb Virtuoso"   ⭐⭐                                      │  │
+│  ├─────────────────────────────────────────────────────────────────┤  │
+│  │ 🥉 3  Omar S.           6     2,650    15🔥    138      89%     │  │
+│  │       "Harakat Expert"  ⭐⭐                                      │  │
+│  ├─────────────────────────────────────────────────────────────────┤  │
+│  │    4  Aisha R.          5     2,540    12🔥    129      88%     │  │
+│  │    5  Yusuf A.          5     2,480    10🔥    125      87%     │  │
+│  │    6  Khadija H.        5     2,420     9🔥    121      85%     │  │
+│  │   ...                                                           │  │
+│  │   40  Bilal M.          3     1,920     5🔥     95      79%     │  │
+│  │   41  Zainab T.         3     1,880     6🔥     91      80%     │  │
+│  ├─────────────────────────────────────────────────────────────────┤  │
+│  │ ★ 42  YOU               3     1,850     7🔥     89      82%     │  │
+│  │       "Rising Star"     ⭐                                       │  │
+│  ├─────────────────────────────────────────────────────────────────┤  │
+│  │   43  Hassan A.         3     1,820     4🔥     87      78%     │  │
+│  │   44  Maryam K.         3     1,800     8🔥     85      81%     │  │
+│  │   ...                                                           │  │
+│  │  100  Salma R.          2     1,250     3🔥     62      75%     │  │
+│  └─────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ │
+│                                                                         │
+│  YOUR WEEKLY STATS                                                      │
+│  ┌───────────────┬───────────────┬───────────────┬─────────────────┐  │
+│  │ XP Gained     │ Reviews Done  │ Avg. Accuracy │ Rank Change     │  │
+│  │   +850 ⭐     │     89 📝     │     82% ✓     │   ▲ 12 🚀      │  │
+│  └───────────────┴───────────────┴───────────────┴─────────────────┘  │
+│                                                                         │
+│  💡 Tip: Complete 8 more reviews at 85%+ accuracy to reach rank 35!    │
+│                                                                         │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ │
+│                                                                         │
+│  GRAMMAR MASTERS (Top performers by category)                          │
+│  ┌──────────────┬──────────────┬──────────────┬──────────────────┐   │
+│  │ Harakat      │ I'rab        │ Morphology   │ Syntax           │   │
+│  │ Ahmed M.     │ Fatima K.    │ Omar S.      │ Aisha R.         │   │
+│  │ 98% accuracy │ 96% accuracy │ 94% accuracy │ 92% accuracy     │   │
+│  └──────────────┴──────────────┴──────────────┴──────────────────┘   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+            </div>
+        </section>
+
+        <!-- DATABASE SCHEMA -->
+        <section id="database">
+            <h2>5. Database Schema Extensions</h2>
+
+            <h3>5.1 New Tables Overview</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Table Name</th>
+                        <th>Purpose</th>
+                        <th>Key Columns</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>srs_cards</code></td>
+                        <td>SRS flashcards</td>
+                        <td>user_id, grammar_rule_id, ease_factor, interval_days, due_date</td>
+                    </tr>
+                    <tr>
+                        <td><code>srs_reviews</code></td>
+                        <td>Review history</td>
+                        <td>card_id, response, old_ease, new_ease, reviewed_at</td>
+                    </tr>
+                    <tr>
+                        <td><code>grammar_rules</code></td>
+                        <td>Reference library</td>
+                        <td>rule_id, title_en, title_ar, level, category, examples (JSONB)</td>
+                    </tr>
+                    <tr>
+                        <td><code>leaderboard_entries</code></td>
+                        <td>Rankings</td>
+                        <td>user_id, board_type, rank, score, period_start, period_end</td>
+                    </tr>
+                    <tr>
+                        <td><code>daily_challenges</code></td>
+                        <td>Daily tasks</td>
+                        <td>challenge_date, type, requirement (JSONB), xp_reward</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>5.2 SRS Cards Table Structure</h3>
+            <pre><code>CREATE TABLE srs_cards (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+    -- Card content
+    card_type VARCHAR(20) NOT NULL,   -- 'grammar_rule', 'vocabulary'
+    content_id UUID NOT NULL,          -- References grammar_rules.id
+
+    -- SRS State
+    state VARCHAR(20) NOT NULL DEFAULT 'new',
+    -- 'new', 'learning', 'review', 'relearning', 'suspended'
+
+    -- SM-2 Algorithm fields
+    ease_factor DECIMAL(4,2) NOT NULL DEFAULT 2.50,
+    interval_days INT NOT NULL DEFAULT 1,
+    repetitions INT NOT NULL DEFAULT 0,
+
+    -- Scheduling
+    due_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_reviewed_at TIMESTAMPTZ,
+
+    -- Statistics
+    total_reviews INT DEFAULT 0,
+    correct_reviews INT DEFAULT 0,
+    accuracy DECIMAL(5,2) DEFAULT 0,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT unique_user_content UNIQUE(user_id, card_type, content_id)
+);
+
+CREATE INDEX idx_srs_cards_user_due
+    ON srs_cards(user_id, due_date)
+    WHERE state != 'suspended';</code></pre>
+
+            <h3>5.3 Grammar Rules Table Structure</h3>
+            <pre><code>CREATE TABLE grammar_rules (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    rule_id VARCHAR(50) UNIQUE NOT NULL,
+
+    -- Metadata
+    title_en VARCHAR(255) NOT NULL,
+    title_ar VARCHAR(255) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    level INT NOT NULL,              -- 1-10
+    difficulty VARCHAR(20) NOT NULL, -- 'beginner', 'intermediate', 'advanced'
+
+    -- Content (multilevel explanations)
+    definition_en TEXT NOT NULL,
+    definition_ar TEXT NOT NULL,
+
+    explanation_beginner TEXT NOT NULL,
+    explanation_intermediate TEXT,
+    explanation_advanced TEXT,
+    explanation_expert TEXT,
+
+    -- Visual aids
+    infographic_url TEXT,
+    color_code VARCHAR(7),
+
+    -- Examples (JSONB for flexibility)
+    examples JSONB,
+    -- Example: [{"verse_ref": "1:2", "word": "الْحَمْدُ", "explanation": "..."}]
+
+    -- Cross-linking
+    related_lesson_ids UUID[],
+    related_rule_ids UUID[],
+    prerequisite_rule_ids UUID[],
+
+    -- Metadata
+    estimated_read_time INT NOT NULL DEFAULT 5,
+    usage_frequency VARCHAR(20),
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_grammar_rules_category
+    ON grammar_rules(category, level);</code></pre>
+        </section>
+
+        <!-- IMPLEMENTATION PHASES -->
+        <section id="implementation">
+            <h2>6. Implementation Phases</h2>
+
+            <h3>Phase 1: Foundation (Weeks 1-2)</h3>
+            <div class="card">
+                <h4>Goal</h4>
+                <p>Set up database and core algorithms</p>
+
+                <h4>Tasks</h4>
+                <ul>
+                    <li>✅ Extend Prisma schema with new tables</li>
+                    <li>✅ Run database migrations</li>
+                    <li>✅ Implement SM-2 SRS algorithm (pure function)</li>
+                    <li>✅ Create API endpoints for SRS</li>
+                    <li>✅ Create API endpoints for Grammar Rules</li>
+                    <li>✅ Write unit tests for SRS algorithm</li>
+                </ul>
+
+                <h4>Deliverables</h4>
+                <ul>
+                    <li>Prisma schema extended</li>
+                    <li>Migration scripts ready</li>
+                    <li>SRS algorithm tested (100+ test cases)</li>
+                    <li>API endpoints documented</li>
+                    <li>Postman collection updated</li>
+                </ul>
+            </div>
+
+            <h3>Phase 2: SRS UI (Weeks 3-4)</h3>
+            <div class="card">
+                <h4>Goal</h4>
+                <p>Build review session interface</p>
+
+                <h4>Tasks</h4>
+                <ul>
+                    <li>✅ Create <code>SRSCard</code> component</li>
+                    <li>✅ Create <code>ReviewSession</code> page</li>
+                    <li>✅ Build response button UI (Again/Hard/Good/Easy)</li>
+                    <li>✅ Add progress indicators</li>
+                    <li>✅ Implement session summary</li>
+                    <li>✅ Add confetti animation for streaks</li>
+                </ul>
+
+                <h4>Deliverables</h4>
+                <ul>
+                    <li><code>/app/review</code> route functional</li>
+                    <li>Mobile-responsive design</li>
+                    <li>Smooth transitions between cards</li>
+                    <li>Session analytics dashboard</li>
+                    <li>Playwright tests (E2E)</li>
+                </ul>
+            </div>
+
+            <h3>Phase 3: Grammar Reference Library (Weeks 5-6)</h3>
+            <h3>Phase 4: Leaderboards (Weeks 7-8)</h3>
+            <h3>Phase 5: Enhanced Badges (Week 9)</h3>
+            <h3>Phase 6: Integration & Polish (Week 10)</h3>
+
+            <details>
+                <summary>View Full Phase Breakdown</summary>
+                <p>Each phase includes detailed task lists, deliverables, and expert agent delegation instructions. See the markdown version for complete details.</p>
+            </details>
+        </section>
+
+        <!-- TESTING STRATEGY -->
+        <section id="testing">
+            <h2>7. Testing Strategy</h2>
+
+            <h3>7.1 Unit Tests (100% coverage for critical algorithms)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Test Count</th>
+                        <th>Coverage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>SM-2 Algorithm</td>
+                        <td>20+ tests</td>
+                        <td>100%</td>
+                    </tr>
+                    <tr>
+                        <td>API Endpoints</td>
+                        <td>30+ tests</td>
+                        <td>95%</td>
+                    </tr>
+                    <tr>
+                        <td>Leaderboard Calculation</td>
+                        <td>15+ tests</td>
+                        <td>100%</td>
+                    </tr>
+                    <tr>
+                        <td>Badge Unlock Logic</td>
+                        <td>25+ tests</td>
+                        <td>100%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>7.2 Integration Tests (Playwright E2E)</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <h4>SRS Review Flow</h4>
+                    <p>Complete session from start to finish</p>
+                </div>
+                <div class="card">
+                    <h4>Grammar Library</h4>
+                    <p>Browse, read, add to SRS</p>
+                </div>
+                <div class="card">
+                    <h4>Leaderboard</h4>
+                    <p>View rankings, check own rank</p>
+                </div>
+                <div class="card">
+                    <h4>Badge Unlock</h4>
+                    <p>Trigger and verify achievements</p>
+                </div>
+            </div>
+
+            <h3>7.3 Performance Tests</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Target</th>
+                        <th>Tool</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Page Load Time</td>
+                        <td>&lt; 2s</td>
+                        <td>Lighthouse CI</td>
+                    </tr>
+                    <tr>
+                        <td>API Response Time</td>
+                        <td>&lt; 100ms (p95)</td>
+                        <td>k6 load testing</td>
+                    </tr>
+                    <tr>
+                        <td>Leaderboard Query</td>
+                        <td>&lt; 200ms</td>
+                        <td>PostgreSQL EXPLAIN</td>
+                    </tr>
+                    <tr>
+                        <td>Concurrent Users</td>
+                        <td>1,000+</td>
+                        <td>Artillery.io</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SUCCESS METRICS -->
+        <section id="success-metrics">
+            <h2>8. Success Metrics</h2>
+
+            <h3>8.1 Key Performance Indicators (KPIs)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Baseline</th>
+                        <th>Target</th>
+                        <th>Measurement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>7-Day Retention Rate</td>
+                        <td>30%</td>
+                        <td>50%</td>
+                        <td>Users active 7 days after signup</td>
+                    </tr>
+                    <tr>
+                        <td>Daily Active Users</td>
+                        <td>-</td>
+                        <td>500+</td>
+                        <td>Daily login count</td>
+                    </tr>
+                    <tr>
+                        <td>SRS Review Completion</td>
+                        <td>-</td>
+                        <td>70%+</td>
+                        <td>Reviews done / reviews due</td>
+                    </tr>
+                    <tr>
+                        <td>Average Accuracy</td>
+                        <td>-</td>
+                        <td>75%+</td>
+                        <td>Correct SRS responses</td>
+                    </tr>
+                    <tr>
+                        <td>Grammar Rule Mastery</td>
+                        <td>-</td>
+                        <td>80%+</td>
+                        <td>Rules with 90%+ accuracy</td>
+                    </tr>
+                    <tr>
+                        <td>Leaderboard Engagement</td>
+                        <td>-</td>
+                        <td>30%+</td>
+                        <td>Weekly leaderboard views</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>8.2 User Satisfaction Goals</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <h4>📈 Engagement</h4>
+                    <p>Average 10+ reviews per day per active user</p>
+                </div>
+                <div class="card">
+                    <h4>🔥 Streaks</h4>
+                    <p>Average streak length: 7+ days</p>
+                </div>
+                <div class="card">
+                    <h4>⭐ Rating</h4>
+                    <p>4.5+ stars on feedback surveys</p>
+                </div>
+                <div class="card">
+                    <h4>🐛 Bugs</h4>
+                    <p>Zero critical bugs in production</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONCLUSION -->
+        <section id="conclusion">
+            <h2>9. Conclusion & Next Steps</h2>
+
+            <p>This comprehensive implementation plan provides a complete roadmap for integrating grammar gamification features into the arQ platform. The phased approach ensures systematic development with continuous testing and validation.</p>
+
+            <h3>Immediate Next Steps</h3>
+            <ol>
+                <li><strong>Week 1</strong>: Review and approve this plan with stakeholders</li>
+                <li><strong>Week 1</strong>: Assemble expert agent team (Backend, Frontend, Content specialists)</li>
+                <li><strong>Week 2-3</strong>: Phase 1 - Database schema extensions and core algorithms</li>
+                <li><strong>Week 4-5</strong>: Phase 2 - SRS UI implementation</li>
+                <li><strong>Week 6-7</strong>: Phase 3 - Grammar Reference Library</li>
+                <li><strong>Week 8-9</strong>: Phase 4 - Leaderboards and enhanced badges</li>
+                <li><strong>Week 10</strong>: Phase 5 - Integration, testing, and polish</li>
+                <li><strong>Week 11</strong>: Beta launch with 50 users</li>
+                <li><strong>Week 12</strong>: Full production rollout</li>
+            </ol>
+
+            <h3>Success Definition</h3>
+            <ul>
+                <li>✅ 50%+ increase in 7-day retention rate</li>
+                <li>✅ 500+ daily active users within 3 months</li>
+                <li>✅ 70%+ review completion rate</li>
+                <li>✅ 4.5+ star user satisfaction rating</li>
+                <li>✅ Zero critical bugs in production</li>
+                <li>✅ <2s average page load time</li>
+            </ul>
+
+            <div class="card" style="background: var(--bg-light); margin-top: 2rem;">
+                <h4>📚 Additional Resources</h4>
+                <ul>
+                    <li><strong>PROJECT_CONSTRAINTS.md</strong> - Technical patterns and constraints</li>
+                    <li><strong>CURRICULUM_ARCHITECTURE.md</strong> - Dual-track learning system details</li>
+                    <li><strong>COMPLETE_UI_UX_WIREFRAMES_AND_INTERACTIONS.md</strong> - Full UI specifications</li>
+                    <li><strong>DATA_ARCHITECTURE.md</strong> - Database and API architecture</li>
+                </ul>
+            </div>
+
+            <div class="card" style="background: linear-gradient(135deg, var(--primary) 0%, #024d26 100%); color: white; margin-top: 2rem;">
+                <h3 style="color: white; border: none;">Ready to Begin Implementation!</h3>
+                <p style="font-size: 1.1rem;">This plan is comprehensive, actionable, and ready for immediate execution. Let's build an engaging, gamified grammar learning experience that helps millions understand the Quran in Arabic.</p>
+            </div>
+        </section>
+    </div>
+
+    <footer style="background: var(--text-dark); color: white; padding: 2rem 0; margin-top: 4rem;">
+        <div class="container" style="text-align: center;">
+            <p><strong>arQ - Quranic Arabic Grammar Gamification Implementation Plan</strong></p>
+            <p style="margin-top: 0.5rem; opacity: 0.8;">Version 1.0 | November 2025 | Implementation Ready</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -23,11 +23,11 @@ export declare class ProgressController {
             };
         } & {
             id: string;
-            startedAt: Date | null;
-            timeSpent: number;
-            completedAt: Date | null;
             userId: string;
             lessonId: string;
+            timeSpent: number;
+            completedAt: Date | null;
+            startedAt: Date | null;
             status: import(".prisma/client").$Enums.LessonStatus;
         })[];
     }>;
@@ -35,28 +35,28 @@ export declare class ProgressController {
         lesson: {
             id: string;
             title: string;
-            titleArabic: string;
-            stage: number;
-            track: import(".prisma/client").$Enums.Track;
-            xpReward: number;
             difficulty: import(".prisma/client").$Enums.Difficulty;
+            xpReward: number;
+            titleArabic: string;
+            track: import(".prisma/client").$Enums.Track;
+            stage: number;
         };
     } & {
         id: string;
-        startedAt: Date | null;
-        timeSpent: number;
-        completedAt: Date | null;
         userId: string;
         lessonId: string;
+        timeSpent: number;
+        completedAt: Date | null;
+        startedAt: Date | null;
         status: import(".prisma/client").$Enums.LessonStatus;
     })[]>;
     getMyAchievements(userId: string): Promise<{
         unlocked: {
-            description: string;
             id: string;
             name: string;
-            xpReward: number;
             createdAt: Date;
+            description: string;
+            xpReward: number;
             nameArabic: string;
             icon: string;
             category: string;
@@ -64,11 +64,11 @@ export declare class ProgressController {
             requirement: import("@prisma/client/runtime/library").JsonValue;
         }[];
         locked: {
-            description: string;
             id: string;
             name: string;
-            xpReward: number;
             createdAt: Date;
+            description: string;
+            xpReward: number;
             nameArabic: string;
             icon: string;
             category: string;
@@ -83,7 +83,6 @@ export declare class ProgressController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         currentXP: number;
         currentLevel: number;
         currentStreak: number;
@@ -93,6 +92,7 @@ export declare class ProgressController {
         exercisesCompleted: number;
         totalTimeSpent: number;
         averageAccuracy: import("@prisma/client/runtime/library").Decimal;
+        userId: string;
     }>;
     getMyAnalytics(userId: string): Promise<import("./dto").AnalyticsResponseDto>;
     getMyTopicMastery(userId: string): Promise<import("./dto").TopicMasteryResponseDto>;

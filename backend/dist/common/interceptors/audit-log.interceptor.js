@@ -74,7 +74,7 @@ let AuditLogInterceptor = class AuditLogInterceptor {
             throw error;
         }));
     }
-    isSecurityRelevantEndpoint(url, method) {
+    isSecurityRelevantEndpoint(url, _method) {
         const securityEndpoints = [
             '/api/v1/auth/login',
             '/api/v1/auth/register',

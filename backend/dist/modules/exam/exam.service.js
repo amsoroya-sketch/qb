@@ -442,8 +442,7 @@ let ExamService = class ExamService {
             const userArray = Array.isArray(userAnswer)
                 ? userAnswer
                 : userAnswer.split(',').map((s) => s.trim());
-            return (correctArray.length === userArray.length &&
-                correctArray.every((c) => userArray.includes(c)));
+            return (correctArray.length === userArray.length && correctArray.every((c) => userArray.includes(c)));
         }
         return normalizedUser === normalizedCorrect;
     }
@@ -498,7 +497,7 @@ let ExamService = class ExamService {
         const bestScore = userId && exam.attempts?.length > 0
             ? Math.max(...exam.attempts.map((a) => a.score))
             : undefined;
-        const attemptCount = userId ? exam.attempts?.length ?? 0 : undefined;
+        const attemptCount = userId ? (exam.attempts?.length ?? 0) : undefined;
         const canRetake = exam.canRetake ?? true;
         return {
             id: exam.id,

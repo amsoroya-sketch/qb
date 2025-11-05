@@ -12,9 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExercisesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const cache_service_1 = require("../../common/cache/cache.service");
 let ExercisesService = class ExercisesService {
-    constructor(prisma) {
+    constructor(prisma, cache) {
         this.prisma = prisma;
+        this.cache = cache;
+        this.EXERCISE_CACHE_TTL = 1800;
+        this.LIST_CACHE_TTL = 300;
     }
     async findAll(query) {
         const { page = 1, limit = 50, lessonId, type, difficulty } = query;
@@ -57,6 +61,11 @@ let ExercisesService = class ExercisesService {
         };
     }
     async findOne(id) {
+        const cacheKey = `exercise:${id}`;
+        const cached = await this.cache.get(cacheKey);
+        if (cached) {
+            return JSON.parse(cached);
+        }
         const exercise = await this.prisma.exercise.findUnique({
             where: { id },
             include: {
@@ -75,13 +84,20 @@ let ExercisesService = class ExercisesService {
         if (!exercise) {
             throw new common_1.NotFoundException(`Exercise with ID ${id} not found`);
         }
+        await this.cache.set(cacheKey, JSON.stringify(exercise), this.EXERCISE_CACHE_TTL);
         return exercise;
     }
     async findByLesson(lessonId) {
+        const cacheKey = `exercises:lesson:${lessonId}`;
+        const cached = await this.cache.get(cacheKey);
+        if (cached) {
+            return JSON.parse(cached);
+        }
         const exercises = await this.prisma.exercise.findMany({
             where: { lessonId },
             orderBy: { order: 'asc' },
         });
+        await this.cache.set(cacheKey, JSON.stringify(exercises), this.LIST_CACHE_TTL);
         return exercises;
     }
     async submit(userId, exerciseId, dto) {
@@ -194,6 +210,7 @@ let ExercisesService = class ExercisesService {
 exports.ExercisesService = ExercisesService;
 exports.ExercisesService = ExercisesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        cache_service_1.CacheService])
 ], ExercisesService);
 //# sourceMappingURL=exercises.service.js.map

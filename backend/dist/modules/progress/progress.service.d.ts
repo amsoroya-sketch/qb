@@ -11,7 +11,6 @@ export declare class ProgressService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         currentXP: number;
         currentLevel: number;
         currentStreak: number;
@@ -21,12 +20,12 @@ export declare class ProgressService {
         exercisesCompleted: number;
         totalTimeSpent: number;
         averageAccuracy: import("@prisma/client/runtime/library").Decimal;
+        userId: string;
     }>;
     updateStreak(userId: string): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         currentXP: number;
         currentLevel: number;
         currentStreak: number;
@@ -36,33 +35,34 @@ export declare class ProgressService {
         exercisesCompleted: number;
         totalTimeSpent: number;
         averageAccuracy: import("@prisma/client/runtime/library").Decimal;
+        userId: string;
     }>;
     getLessonProgress(userId: string): Promise<({
         lesson: {
             id: string;
             title: string;
-            titleArabic: string;
-            stage: number;
-            track: import(".prisma/client").$Enums.Track;
-            xpReward: number;
             difficulty: import(".prisma/client").$Enums.Difficulty;
+            xpReward: number;
+            titleArabic: string;
+            track: import(".prisma/client").$Enums.Track;
+            stage: number;
         };
     } & {
         id: string;
-        startedAt: Date | null;
-        timeSpent: number;
-        completedAt: Date | null;
         userId: string;
         lessonId: string;
+        timeSpent: number;
+        completedAt: Date | null;
+        startedAt: Date | null;
         status: import(".prisma/client").$Enums.LessonStatus;
     })[]>;
     getAchievementProgress(userId: string): Promise<{
         unlocked: {
-            description: string;
             id: string;
             name: string;
-            xpReward: number;
             createdAt: Date;
+            description: string;
+            xpReward: number;
             nameArabic: string;
             icon: string;
             category: string;
@@ -70,11 +70,11 @@ export declare class ProgressService {
             requirement: import("@prisma/client/runtime/library").JsonValue;
         }[];
         locked: {
-            description: string;
             id: string;
             name: string;
-            xpReward: number;
             createdAt: Date;
+            description: string;
+            xpReward: number;
             nameArabic: string;
             icon: string;
             category: string;
@@ -105,11 +105,11 @@ export declare class ProgressService {
             };
         } & {
             id: string;
-            startedAt: Date | null;
-            timeSpent: number;
-            completedAt: Date | null;
             userId: string;
             lessonId: string;
+            timeSpent: number;
+            completedAt: Date | null;
+            startedAt: Date | null;
             status: import(".prisma/client").$Enums.LessonStatus;
         })[];
     }>;

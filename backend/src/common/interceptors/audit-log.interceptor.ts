@@ -82,7 +82,7 @@ export class AuditLogInterceptor implements NestInterceptor {
   /**
    * Determine if endpoint is security-relevant and should be logged
    */
-  private isSecurityRelevantEndpoint(url: string, method: string): boolean {
+  private isSecurityRelevantEndpoint(url: string, _method: string): boolean {
     const securityEndpoints = [
       '/api/v1/auth/login',
       '/api/v1/auth/register',

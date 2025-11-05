@@ -79,7 +79,7 @@ export class RefreshTokenService {
   async validateAndRotateToken(token: string): Promise<TokenValidationResult> {
     try {
       // Verify JWT signature and expiration
-      const payload = this.jwtService.verify(token, {
+      const _payload = this.jwtService.verify(token, {
         secret: this.config.get('JWT_REFRESH_SECRET'),
       });
 
