@@ -1,10 +1,18 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { FindExercisesDto, SubmitExerciseDto, ExerciseAttemptDto } from './dto';
+import { CacheService } from '../../common/cache/cache.service';
+import { FindExercisesDto, SubmitExerciseDto } from './dto';
 
 @Injectable()
 export class ExercisesService {
-  constructor(private prisma: PrismaService) {}
+  // Cache TTLs in seconds
+  private readonly EXERCISE_CACHE_TTL = 1800; // 30 minutes - exercises rarely change
+  private readonly LIST_CACHE_TTL = 300; // 5 minutes - lesson exercises may be updated
+
+  constructor(
+    private prisma: PrismaService,
+    private cache: CacheService,
+  ) {}
 
   async findAll(query: FindExercisesDto) {
     const { page = 1, limit = 50, lessonId, type, difficulty } = query;
@@ -48,6 +56,15 @@ export class ExercisesService {
   }
 
   async findOne(id: string) {
+    // Cache individual exercises
+    const cacheKey = `exercise:${id}`;
+
+    // Try cache first
+    const cached = await this.cache.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
     const exercise = await this.prisma.exercise.findUnique({
       where: { id },
       include: {
@@ -68,14 +85,29 @@ export class ExercisesService {
       throw new NotFoundException(`Exercise with ID ${id} not found`);
     }
 
+    // Cache the exercise
+    await this.cache.set(cacheKey, JSON.stringify(exercise), this.EXERCISE_CACHE_TTL);
+
     return exercise;
   }
 
   async findByLesson(lessonId: string) {
+    // Cache lesson exercises (frequently accessed when user enters lesson)
+    const cacheKey = `exercises:lesson:${lessonId}`;
+
+    // Try cache first
+    const cached = await this.cache.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
     const exercises = await this.prisma.exercise.findMany({
       where: { lessonId },
       orderBy: { order: 'asc' },
     });
+
+    // Cache the lesson exercises
+    await this.cache.set(cacheKey, JSON.stringify(exercises), this.LIST_CACHE_TTL);
 
     return exercises;
   }

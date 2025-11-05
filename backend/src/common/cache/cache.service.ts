@@ -32,6 +32,31 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  /**
+   * Get JSON object from cache
+   */
+  async getJson<T>(key: string): Promise<T | null> {
+    const value = await this.client.get(key);
+    if (!value) return null;
+    try {
+      return JSON.parse(value) as T;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Set JSON object in cache
+   */
+  async setJson<T>(key: string, value: T, ttl?: number): Promise<void> {
+    const jsonString = JSON.stringify(value);
+    if (ttl) {
+      await this.client.setex(key, ttl, jsonString);
+    } else {
+      await this.client.set(key, jsonString);
+    }
+  }
+
   async del(key: string): Promise<void> {
     await this.client.del(key);
   }
@@ -41,5 +66,13 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
     if (keys.length > 0) {
       await this.client.del(...keys);
     }
+  }
+
+  /**
+   * Check if key exists in cache
+   */
+  async exists(key: string): Promise<boolean> {
+    const result = await this.client.exists(key);
+    return result === 1;
   }
 }

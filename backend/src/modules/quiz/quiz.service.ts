@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ExerciseGeneratorService } from '../exercises/exercise-generator.service';
+import { CacheService } from '../../common/cache/cache.service';
 import {
   CreateQuizDto,
   UpdateQuizDto,
@@ -33,12 +34,17 @@ import { Prisma, QuizType, Track } from '@prisma/client';
  * - Quiz-taking flow with attempt tracking
  * - Scoring and XP calculation
  * - Leaderboard functionality
+ *
+ * PERFORMANCE: Uses Redis caching for leaderboard results
  */
 @Injectable()
 export class QuizService {
+  private readonly LEADERBOARD_CACHE_TTL = 300; // 5 minutes - leaderboards change frequently
+
   constructor(
     private prisma: PrismaService,
     private exerciseGenerator: ExerciseGeneratorService,
+    private cacheService: CacheService,
   ) {}
 
   // ==================== Admin Methods ====================
@@ -371,18 +377,19 @@ export class QuizService {
       throw new BadRequestException('Quiz has no questions');
     }
 
-    // Check for existing in-progress attempt
-    const existingAttempt = await this.prisma.$queryRaw<any[]>`
-      SELECT id FROM quiz_attempts
-      WHERE user_id = ${userId}::uuid
-      AND quiz_id = ${quizId}::uuid
-      AND completed_at > NOW() - INTERVAL '1 hour'
-      AND score = 0
-      ORDER BY completed_at DESC
-      LIMIT 1
-    `;
+    // Check for existing in-progress attempt using Prisma
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const existingAttempt = await this.prisma.quizAttempt.findFirst({
+      where: {
+        userId,
+        quizId,
+        completedAt: { gt: oneHourAgo },
+        score: 0,
+      },
+      orderBy: { completedAt: 'desc' },
+    });
 
-    if (existingAttempt.length > 0) {
+    if (existingAttempt) {
       throw new BadRequestException(
         'You have an in-progress quiz attempt. Please complete or abandon it first.',
       );
@@ -484,7 +491,6 @@ export class QuizService {
 
     // Calculate current progress
     const answeredQuestions = Object.keys(currentAnswers).length;
-    const totalCorrect = Object.values(currentAnswers).filter((a: any) => a.isCorrect).length;
 
     // Calculate total points earned so far
     let totalPointsEarned = 0;
@@ -576,6 +582,8 @@ export class QuizService {
     // Update user progress if passed
     if (passed) {
       await this.updateUserProgress(userId, xpEarned, timeSpent);
+      // Invalidate leaderboard cache when a new score is submitted
+      await this.cacheService.delPattern(`leaderboard:${attempt.quiz.id}:*`);
     }
 
     // Build detailed answers array
@@ -657,8 +665,18 @@ export class QuizService {
 
   /**
    * Get leaderboard for a quiz
+   * SECURITY: Rewritten to use Prisma query builder instead of raw SQL to prevent SQL injection
+   * CACHED: Leaderboard results are cached for 5 minutes
    */
   async getLeaderboard(quizId: string, limit: number = 10): Promise<LeaderboardEntryDto[]> {
+    const cacheKey = `leaderboard:${quizId}:${limit}`;
+
+    // Try to get from cache first
+    const cached = await this.cacheService.getJson<LeaderboardEntryDto[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const quiz = await this.prisma.quiz.findUnique({
       where: { id: quizId },
     });
@@ -667,31 +685,67 @@ export class QuizService {
       throw new NotFoundException(`Quiz ${quizId} not found`);
     }
 
-    // Get best attempts per user
-    const attempts = await this.prisma.$queryRaw<any[]>`
-      SELECT
-        qa.user_id,
-        u.name as user_name,
-        MAX(qa.score) as score,
-        MIN(qa.time_spent) as time_spent,
-        MAX(qa.completed_at) as completed_at
-      FROM quiz_attempts qa
-      JOIN users u ON u.id = qa.user_id
-      WHERE qa.quiz_id = ${quizId}::uuid
-      AND qa.score > 0
-      GROUP BY qa.user_id, u.name
-      ORDER BY score DESC, time_spent ASC
-      LIMIT ${limit}
-    `;
+    // Get all attempts for this quiz with score > 0, using Prisma query builder
+    const attempts = await this.prisma.quizAttempt.findMany({
+      where: {
+        quizId,
+        score: { gt: 0 },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: [{ score: 'desc' }, { timeSpent: 'asc' }],
+    });
 
-    return attempts.map((attempt, index) => ({
-      userId: attempt.user_id,
-      userName: attempt.user_name,
-      score: Number(attempt.score),
-      timeSpent: Number(attempt.time_spent),
-      completedAt: new Date(attempt.completed_at),
-      rank: index + 1,
-    }));
+    // Group by user and get best attempt per user
+    const userBestAttempts = new Map<string, LeaderboardEntryDto>();
+
+    for (const attempt of attempts) {
+      const userId = attempt.userId;
+      const existing = userBestAttempts.get(userId);
+
+      const entry: LeaderboardEntryDto = {
+        userId: attempt.userId,
+        userName: attempt.user.name,
+        score: attempt.score,
+        timeSpent: attempt.timeSpent,
+        completedAt: attempt.completedAt,
+        rank: 0, // Will be set later
+      };
+
+      // Keep best score, or if scores are equal, keep faster time
+      if (
+        !existing ||
+        entry.score > existing.score ||
+        (entry.score === existing.score && entry.timeSpent < existing.timeSpent)
+      ) {
+        userBestAttempts.set(userId, entry);
+      }
+    }
+
+    // Sort by score (desc) then time (asc) and assign ranks
+    const leaderboard = Array.from(userBestAttempts.values())
+      .sort((a, b) => {
+        if (b.score !== a.score) {
+          return b.score - a.score;
+        }
+        return a.timeSpent - b.timeSpent;
+      })
+      .slice(0, limit)
+      .map((entry, index) => ({
+        ...entry,
+        rank: index + 1,
+      }));
+
+    // Cache the leaderboard results
+    await this.cacheService.setJson(cacheKey, leaderboard, this.LEADERBOARD_CACHE_TTL);
+
+    return leaderboard;
   }
 
   // ==================== Helper Methods ====================

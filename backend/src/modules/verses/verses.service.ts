@@ -1,14 +1,31 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CacheService } from '../../common/cache/cache.service';
 import { FindVersesDto, SearchVersesDto } from './dto';
 
 @Injectable()
 export class VersesService {
-  constructor(private prisma: PrismaService) {}
+  // Cache TTLs in seconds
+  private readonly VERSE_CACHE_TTL = 3600; // 1 hour - verses don't change
+  private readonly LIST_CACHE_TTL = 300; // 5 minutes - paginated lists
+
+  constructor(
+    private prisma: PrismaService,
+    private cache: CacheService,
+  ) {}
 
   async findAll(query: FindVersesDto) {
     const { page = 1, limit = 20, surahNumber } = query;
     const skip = (page - 1) * limit;
+
+    // Cache key includes pagination params
+    const cacheKey = `verses:list:${surahNumber || 'all'}:${page}:${limit}`;
+
+    // Try cache first
+    const cached = await this.cache.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
 
     const where: any = {};
     if (surahNumber) where.surahNumber = surahNumber;
@@ -28,7 +45,7 @@ export class VersesService {
       this.prisma.quranVerse.count({ where }),
     ]);
 
-    return {
+    const result = {
       data: verses,
       meta: {
         page,
@@ -37,9 +54,23 @@ export class VersesService {
         totalPages: Math.ceil(total / limit),
       },
     };
+
+    // Cache the result
+    await this.cache.set(cacheKey, JSON.stringify(result), this.LIST_CACHE_TTL);
+
+    return result;
   }
 
   async findOne(surahNumber: number, verseNumber: number) {
+    // Cache individual verses (these are read-heavy, never change)
+    const cacheKey = `verse:${surahNumber}:${verseNumber}`;
+
+    // Try cache first
+    const cached = await this.cache.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
     const verse = await this.prisma.quranVerse.findUnique({
       where: {
         surahNumber_verseNumber: {
@@ -58,10 +89,22 @@ export class VersesService {
       throw new NotFoundException(`Verse ${surahNumber}:${verseNumber} not found`);
     }
 
+    // Cache the verse (long TTL since verses don't change)
+    await this.cache.set(cacheKey, JSON.stringify(verse), this.VERSE_CACHE_TTL);
+
     return verse;
   }
 
   async getWordAnalysis(wordId: string) {
+    // Cache word analysis (frequently accessed for grammar exercises)
+    const cacheKey = `word:analysis:${wordId}`;
+
+    // Try cache first
+    const cached = await this.cache.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
     const word = await this.prisma.verseWord.findUnique({
       where: { id: wordId },
       include: {
@@ -79,7 +122,7 @@ export class VersesService {
       throw new NotFoundException(`Word with ID ${wordId} not found`);
     }
 
-    return {
+    const result = {
       ...word,
       grammaticalAnalysis: {
         partOfSpeech: word.posType,
@@ -91,6 +134,11 @@ export class VersesService {
         structure: word.structureType,
       },
     };
+
+    // Cache the analysis
+    await this.cache.set(cacheKey, JSON.stringify(result), this.VERSE_CACHE_TTL);
+
+    return result;
   }
 
   async search(dto: SearchVersesDto) {
@@ -274,7 +322,7 @@ export class VersesService {
 
     if (sentenceType === 'verbal') {
       // Find verb (should be first word)
-      const verb = words.find((w) => w.posType === 'V');
+      const verb = words.find((w: any) => w.posType === 'V');
       if (verb) {
         components.verb = {
           word: verb.arabicText,
@@ -285,7 +333,7 @@ export class VersesService {
 
       // Find subject (typically after verb with nominative case or syntactic role)
       const subject = words.find(
-        (w, idx) => idx > 0 && (w.irabCase === 'Nominative' || w.syntacticRole === 'subject'),
+        (w: any, idx) => idx > 0 && (w.irabCase === 'Nominative' || w.syntacticRole === 'subject'),
       );
       if (subject) {
         components.subject = {
@@ -296,7 +344,7 @@ export class VersesService {
       }
 
       // Find object (accusative case)
-      const object = words.find((w) => w.irabCase === 'Accusative');
+      const object = words.find((w: any) => w.irabCase === 'Accusative');
       if (object) {
         components.object = {
           word: object.arabicText,
@@ -307,7 +355,7 @@ export class VersesService {
     } else {
       // Nominal sentence: find subject (mubtada) and predicate (khabar)
       const subject = words.find(
-        (w, idx) =>
+        (w: any, idx) =>
           idx === 0 || w.syntacticRole === 'subject_nominal' || w.irabCase === 'Nominative',
       );
       if (subject) {
@@ -321,7 +369,7 @@ export class VersesService {
 
       // Predicate is typically the second element or marked explicitly
       const predicate = words.find(
-        (w) => w.syntacticRole === 'predicate' || (w.position > 0 && w !== subject),
+        (w: any) => w.syntacticRole === 'predicate' || (w.position > 0 && w !== subject),
       );
       if (predicate) {
         components.predicate = {
@@ -420,7 +468,7 @@ export class VersesService {
    */
   async getWordAgreements(surahNumber: number, verseNumber: number, position: number) {
     const verse = await this.findOne(surahNumber, verseNumber);
-    const word = verse.words.find((w) => w.position === position);
+    const word = verse.words.find((w: any) => w.position === position);
 
     if (!word) {
       throw new NotFoundException(`Word at position ${position} not found`);
@@ -513,7 +561,7 @@ export class VersesService {
     if (word.posType === 'ADJ') {
       // Look for previous noun
       for (let i = word.position - 1; i >= 0; i--) {
-        const prevWord = allWords.find((w) => w.position === i);
+        const prevWord = allWords.find((w: any) => w.position === i);
         if (prevWord && (prevWord.posType === 'N' || prevWord.posType === 'PN')) {
           return prevWord;
         }
@@ -522,12 +570,12 @@ export class VersesService {
 
     // Check for parent word relationship
     if (word.parentWordId) {
-      return allWords.find((w) => w.id === word.parentWordId) || null;
+      return allWords.find((w: any) => w.id === word.parentWordId) || null;
     }
 
     // For nouns, check if next word is an adjective
     if (word.posType === 'N' || word.posType === 'PN') {
-      const nextWord = allWords.find((w) => w.position === word.position + 1);
+      const nextWord = allWords.find((w: any) => w.position === word.position + 1);
       if (nextWord && nextWord.posType === 'ADJ') {
         return nextWord;
       }

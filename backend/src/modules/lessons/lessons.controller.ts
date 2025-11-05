@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { LessonsService } from './lessons.service';
 import { CreateLessonDto } from './dto/create-lesson.dto';
@@ -76,6 +78,8 @@ export class LessonsController {
   }
 
   @Post()
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Create new lesson (Admin only)' })
   @ApiResponse({ status: 201, description: 'Lesson created' })
   async create(@Body() dto: CreateLessonDto) {
@@ -87,6 +91,8 @@ export class LessonsController {
   }
 
   @Put(':id')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Update lesson (Admin only)' })
   @ApiResponse({ status: 200, description: 'Lesson updated' })
   async update(@Param('id') id: string, @Body() dto: UpdateLessonDto) {
@@ -98,6 +104,8 @@ export class LessonsController {
   }
 
   @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Delete lesson (Admin only)' })
   @ApiResponse({ status: 200, description: 'Lesson deleted' })
   async remove(@Param('id') id: string) {

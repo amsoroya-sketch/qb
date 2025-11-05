@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ExerciseGeneratorService } from '../exercises/exercise-generator.service';
+import { CacheService } from '../../common/cache/cache.service';
 import {
   GetPracticeSetDto,
   SubmitPracticeAnswerDto,
@@ -24,12 +25,19 @@ import { Prisma } from '@prisma/client';
  *
  * All exercises are generated using ExerciseGeneratorService
  * from corpus.quran.com data (zero inference policy)
+ *
+ * PERFORMANCE: Uses Redis caching for verse selection and exercise generation
  */
 @Injectable()
 export class PracticeService {
+  // Cache TTLs
+  private readonly VERSE_CACHE_TTL = 3600; // 1 hour - verses don't change often
+  private readonly EXERCISE_CACHE_TTL = 1800; // 30 minutes - exercises are deterministic
+
   constructor(
     private prisma: PrismaService,
     private exerciseGenerator: ExerciseGeneratorService,
+    private cacheService: CacheService,
   ) {}
 
   /**
@@ -85,24 +93,15 @@ export class PracticeService {
     // Define exercise generation methods to cycle through
     const generatorMethods = ['aspect', 'case', 'root', 'sentence_type', 'syntactic_role'];
 
-    let methodIndex = 0;
+    // OPTIMIZED: Generate exercises in parallel instead of sequentially
+    const exercisePromises = verses.map((verse, index) => {
+      const method = grammarFocus || generatorMethods[index % generatorMethods.length];
+      return this.generateExerciseForVerse(verse, method).catch(() => null);
+    });
 
-    for (const verse of verses) {
-      if (exercises.length >= count) break;
-
-      const method = grammarFocus || generatorMethods[methodIndex % generatorMethods.length];
-      methodIndex++;
-
-      try {
-        const exercise = await this.generateExerciseForVerse(verse, method);
-        if (exercise) {
-          exercises.push(exercise);
-        }
-      } catch (error) {
-        // Skip if generation fails, continue to next verse
-        continue;
-      }
-    }
+    const generatedExercises = await Promise.all(exercisePromises);
+    const validExercises = generatedExercises.filter((ex) => ex !== null) as PracticeExerciseDto[];
+    exercises.push(...validExercises.slice(0, count));
 
     return {
       mode: PracticeModeEnum.QUICK_PRACTICE,
@@ -141,21 +140,16 @@ export class PracticeService {
 
     // Get more verses than needed to ensure we can generate enough exercises
     const verses = await this.selectRandomVerses(null, count * 4);
-    const exercises: PracticeExerciseDto[] = [];
 
-    for (const verse of verses) {
-      if (exercises.length >= count) break;
+    // OPTIMIZED: Generate exercises in parallel instead of sequentially
+    const exercisePromises = verses.map((verse) =>
+      this.generateExerciseForVerse(verse, grammarFocus).catch(() => null),
+    );
 
-      try {
-        const exercise = await this.generateExerciseForVerse(verse, grammarFocus);
-        if (exercise) {
-          exercises.push(exercise);
-        }
-      } catch (error) {
-        // Skip if generation fails, continue to next verse
-        continue;
-      }
-    }
+    const generatedExercises = await Promise.all(exercisePromises);
+    const exercises = generatedExercises
+      .filter((ex) => ex !== null)
+      .slice(0, count) as PracticeExerciseDto[];
 
     if (exercises.length === 0) {
       throw new NotFoundException(
@@ -193,26 +187,18 @@ export class PracticeService {
       throw new NotFoundException(`No verses found for Surah ${surahNumber}`);
     }
 
-    const exercises: PracticeExerciseDto[] = [];
     const grammarTopics = ['aspect', 'case', 'root', 'sentence_type'];
-    let topicIndex = 0;
 
-    for (const verse of verses) {
-      if (exercises.length >= count) break;
+    // OPTIMIZED: Generate exercises in parallel instead of sequentially
+    const exercisePromises = verses.map((verse, index) => {
+      const topic = grammarTopics[index % grammarTopics.length];
+      return this.generateExerciseForVerse(verse, topic).catch(() => null);
+    });
 
-      const topic = grammarTopics[topicIndex % grammarTopics.length];
-      topicIndex++;
-
-      try {
-        const exercise = await this.generateExerciseForVerse(verse, topic);
-        if (exercise) {
-          exercises.push(exercise);
-        }
-      } catch (error) {
-        // Skip if generation fails
-        continue;
-      }
-    }
+    const generatedExercises = await Promise.all(exercisePromises);
+    const exercises = generatedExercises
+      .filter((ex) => ex !== null)
+      .slice(0, count) as PracticeExerciseDto[];
 
     return {
       mode: PracticeModeEnum.VERSE_BASED,
@@ -241,27 +227,17 @@ export class PracticeService {
     }
 
     const verses = await this.selectRandomVerses(null, count * 3);
-    const exercises: PracticeExerciseDto[] = [];
 
-    // Cycle through weak topics
-    let topicIndex = 0;
+    // OPTIMIZED: Generate exercises in parallel, cycling through weak topics
+    const exercisePromises = verses.map((verse, index) => {
+      const topic = weakTopics[index % weakTopics.length];
+      return this.generateExerciseForVerse(verse, topic).catch(() => null);
+    });
 
-    for (const verse of verses) {
-      if (exercises.length >= count) break;
-
-      const topic = weakTopics[topicIndex % weakTopics.length];
-      topicIndex++;
-
-      try {
-        const exercise = await this.generateExerciseForVerse(verse, topic);
-        if (exercise) {
-          exercises.push(exercise);
-        }
-      } catch (error) {
-        // Skip if generation fails
-        continue;
-      }
-    }
+    const generatedExercises = await Promise.all(exercisePromises);
+    const exercises = generatedExercises
+      .filter((ex) => ex !== null)
+      .slice(0, count) as PracticeExerciseDto[];
 
     return {
       mode: PracticeModeEnum.SPACED_REPETITION,
@@ -280,31 +256,25 @@ export class PracticeService {
    */
   async getChallengeMode(userId: string, count: number = 10): Promise<PracticeSetResponseDto> {
     const verses = await this.selectRandomVerses(null, count * 4);
-    const exercises: PracticeExerciseDto[] = [];
 
     // Advanced topics only
     const advancedTopics = ['morpheme', 'agreement', 'syntactic_role'];
-    let topicIndex = 0;
 
-    for (const verse of verses) {
-      if (exercises.length >= count) break;
+    // OPTIMIZED: Generate exercises in parallel instead of sequentially
+    const exercisePromises = verses.map((verse, index) => {
+      const topic = advancedTopics[index % advancedTopics.length];
+      return this.generateExerciseForVerse(verse, topic).catch(() => null);
+    });
 
-      const topic = advancedTopics[topicIndex % advancedTopics.length];
-      topicIndex++;
+    const generatedExercises = await Promise.all(exercisePromises);
+    const validExercises = generatedExercises.filter((ex) => ex !== null) as PracticeExerciseDto[];
 
-      try {
-        const exercise = await this.generateExerciseForVerse(verse, topic);
-        if (exercise) {
-          // Boost XP for challenge mode
-          exercise.xpReward = Math.floor(exercise.xpReward * 1.5);
-          exercise.difficulty = 'ADVANCED';
-          exercises.push(exercise);
-        }
-      } catch (error) {
-        // Skip if generation fails
-        continue;
-      }
-    }
+    // Boost XP for challenge mode
+    const exercises = validExercises.slice(0, count).map((exercise) => ({
+      ...exercise,
+      xpReward: Math.floor(exercise.xpReward * 1.5),
+      difficulty: 'ADVANCED' as const,
+    }));
 
     return {
       mode: PracticeModeEnum.CHALLENGE,
@@ -338,68 +308,54 @@ export class PracticeService {
     // 1. Weak topics exercises
     if (weakTopics.length > 0) {
       const weakVerses = await this.selectRandomVerses(null, weakCount * 2);
-      let topicIndex = 0;
 
-      for (const verse of weakVerses) {
-        if (exercises.length >= weakCount) break;
+      // OPTIMIZED: Generate weak topic exercises in parallel
+      const weakPromises = weakVerses.map((verse, index) => {
+        const topic = weakTopics[index % weakTopics.length];
+        return this.generateExerciseForVerse(verse, topic).catch(() => null);
+      });
 
-        const topic = weakTopics[topicIndex % weakTopics.length];
-        topicIndex++;
-
-        try {
-          const exercise = await this.generateExerciseForVerse(verse, topic);
-          if (exercise) {
-            exercises.push(exercise);
-          }
-        } catch (error) {
-          continue;
-        }
-      }
+      const weakExercises = await Promise.all(weakPromises);
+      exercises.push(
+        ...(weakExercises.filter((ex) => ex !== null).slice(0, weakCount) as PracticeExerciseDto[]),
+      );
     }
 
     // 2. Random mixed exercises
     const randomVerses = await this.selectRandomVerses(null, randomCount * 2);
     const allTopics = ['aspect', 'case', 'root', 'sentence_type', 'syntactic_role'];
-    let randomTopicIndex = 0;
 
-    for (const verse of randomVerses) {
-      if (exercises.length >= weakCount + randomCount) break;
+    // OPTIMIZED: Generate random exercises in parallel
+    const randomPromises = randomVerses.map((verse, index) => {
+      const topic = allTopics[index % allTopics.length];
+      return this.generateExerciseForVerse(verse, topic).catch(() => null);
+    });
 
-      const topic = allTopics[randomTopicIndex % allTopics.length];
-      randomTopicIndex++;
-
-      try {
-        const exercise = await this.generateExerciseForVerse(verse, topic);
-        if (exercise) {
-          exercises.push(exercise);
-        }
-      } catch (error) {
-        continue;
-      }
-    }
+    const randomExercises = await Promise.all(randomPromises);
+    exercises.push(
+      ...(randomExercises
+        .filter((ex) => ex !== null)
+        .slice(0, randomCount) as PracticeExerciseDto[]),
+    );
 
     // 3. Review exercises (same as weak topics if available)
     const reviewVerses = await this.selectRandomVerses(null, reviewCount * 2);
-    let reviewTopicIndex = 0;
 
-    for (const verse of reviewVerses) {
-      if (exercises.length >= totalCount) break;
-
+    // OPTIMIZED: Generate review exercises in parallel
+    const reviewPromises = reviewVerses.map((verse, index) => {
       const topic =
         weakTopics.length > 0
-          ? weakTopics[reviewTopicIndex % weakTopics.length]
-          : allTopics[reviewTopicIndex % allTopics.length];
-      reviewTopicIndex++;
+          ? weakTopics[index % weakTopics.length]
+          : allTopics[index % allTopics.length];
+      return this.generateExerciseForVerse(verse, topic).catch(() => null);
+    });
 
-      try {
-        const exercise = await this.generateExerciseForVerse(verse, topic);
-        if (exercise) {
-          exercises.push(exercise);
-        }
-      } catch (error) {
-        continue;
-      }
-    }
+    const reviewExercises = await Promise.all(reviewPromises);
+    exercises.push(
+      ...(reviewExercises
+        .filter((ex) => ex !== null)
+        .slice(0, reviewCount) as PracticeExerciseDto[]),
+    );
 
     // Shuffle to mix the categories
     const shuffledExercises = this.shuffleArray(exercises);
@@ -485,6 +441,7 @@ export class PracticeService {
 
   /**
    * Select random verses from database
+   * OPTIMIZED: Uses single query with IN instead of N+1 queries
    * @param surahNumber - Optional surah filter, null for all surahs
    * @param count - Number of verses to select
    */
@@ -505,24 +462,35 @@ export class PracticeService {
       offsets.push(randomOffset);
     }
 
-    // Fetch verses at random offsets
-    const verses = await Promise.all(
+    // Fetch verse IDs at random offsets (lightweight query)
+    const verseIds = await Promise.all(
       offsets.map(async (offset) => {
-        const verse = await this.prisma.quranVerse.findMany({
+        const result = await this.prisma.quranVerse.findMany({
           where,
           skip: offset,
           take: 1,
-          include: {
-            words: {
-              orderBy: { position: 'asc' },
-            },
-          },
+          select: { id: true },
         });
-        return verse[0];
+        return result[0]?.id;
       }),
     );
 
-    return verses.filter((v) => v !== undefined);
+    // Filter out undefined IDs
+    const validIds = verseIds.filter((id) => id !== undefined) as string[];
+
+    // Single query to fetch all verses with words (fixes N+1 problem)
+    const verses = await this.prisma.quranVerse.findMany({
+      where: {
+        id: { in: validIds },
+      },
+      include: {
+        words: {
+          orderBy: { position: 'asc' },
+        },
+      },
+    });
+
+    return verses;
   }
 
   /**
@@ -568,11 +536,21 @@ export class PracticeService {
 
   /**
    * Generate exercise for a specific verse and grammar focus
+   * CACHED: Results are cached for 30 minutes to reduce generation overhead
    */
   private async generateExerciseForVerse(
     verse: any,
     grammarFocus: string,
   ): Promise<PracticeExerciseDto | null> {
+    // Generate cache key based on verse ID and grammar focus
+    const cacheKey = `exercise:${verse.id}:${grammarFocus}`;
+
+    // Try to get from cache first
+    const cached = await this.cacheService.getJson<PracticeExerciseDto>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     try {
       let generatorOutput;
 
@@ -671,7 +649,14 @@ export class PracticeService {
           return null;
       }
 
-      return this.mapGeneratorOutputToDto(generatorOutput, grammarFocus);
+      const exercise = this.mapGeneratorOutputToDto(generatorOutput, grammarFocus);
+
+      // Cache the generated exercise
+      if (exercise) {
+        await this.cacheService.setJson(cacheKey, exercise, this.EXERCISE_CACHE_TTL);
+      }
+
+      return exercise;
     } catch (error) {
       // Exercise generation failed for this verse, return null
       return null;

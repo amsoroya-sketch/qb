@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { VersesService } from './verses.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CacheService } from '../../common/cache/cache.service';
 import { NotFoundException } from '@nestjs/common';
 
 describe('VersesService', () => {
@@ -23,6 +24,13 @@ describe('VersesService', () => {
     },
   };
 
+  const mockCacheService = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+    delPattern: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -30,6 +38,10 @@ describe('VersesService', () => {
         {
           provide: PrismaService,
           useValue: mockPrismaService,
+        },
+        {
+          provide: CacheService,
+          useValue: mockCacheService,
         },
       ],
     }).compile();
@@ -40,6 +52,7 @@ describe('VersesService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    mockCacheService.get.mockResolvedValue(null); // Reset cache to always miss by default
   });
 
   it('should be defined', () => {
