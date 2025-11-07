@@ -257,8 +257,9 @@ export class PracticeService {
   async getChallengeMode(userId: string, count: number = 10): Promise<PracticeSetResponseDto> {
     const verses = await this.selectRandomVerses(null, count * 4);
 
-    // Advanced topics only
-    const advancedTopics = ['morpheme', 'agreement', 'syntactic_role'];
+    // Use topics that work with current data (root, sentence_type are reliable)
+    // TODO: Add morpheme, agreement, syntactic_role when detailed grammar data is available
+    const advancedTopics = ['root', 'sentence_type', 'root'];
 
     // OPTIMIZED: Generate exercises in parallel instead of sequentially
     const exercisePromises = verses.map((verse, index) => {

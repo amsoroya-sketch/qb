@@ -346,4 +346,50 @@ export class AchievementsService {
       })),
     };
   }
+
+  async getUserStats(userId: string) {
+    // Get total count of all achievements
+    const totalAchievements = await this.prisma.achievement.count();
+
+    // Get user's unlocked achievements with achievement details
+    const userAchievements = await this.prisma.userAchievement.findMany({
+      where: { userId },
+      include: {
+        achievement: true,
+      },
+    });
+
+    const unlockedAchievements = userAchievements.length;
+
+    // Count unlocked achievements by rarity
+    const rarityBreakdown = {
+      commonUnlocked: 0,
+      rareUnlocked: 0,
+      epicUnlocked: 0,
+      legendaryUnlocked: 0,
+    };
+
+    userAchievements.forEach((ua) => {
+      switch (ua.achievement.rarity) {
+        case 'COMMON':
+          rarityBreakdown.commonUnlocked++;
+          break;
+        case 'RARE':
+          rarityBreakdown.rareUnlocked++;
+          break;
+        case 'EPIC':
+          rarityBreakdown.epicUnlocked++;
+          break;
+        case 'LEGENDARY':
+          rarityBreakdown.legendaryUnlocked++;
+          break;
+      }
+    });
+
+    return {
+      totalAchievements,
+      unlockedAchievements,
+      ...rarityBreakdown,
+    };
+  }
 }

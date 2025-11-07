@@ -46,6 +46,15 @@ export class AchievementsController {
     return this.achievementsService.findOne(id);
   }
 
+  @Get('me/stats')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get user achievement statistics' })
+  @ApiResponse({ status: 200, description: 'Returns user achievement stats with rarity breakdown' })
+  async getMyStats(@CurrentUser('sub') userId: string) {
+    return this.achievementsService.getUserStats(userId);
+  }
+
   @Get('me/unlocked')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
