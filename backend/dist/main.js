@@ -30,25 +30,25 @@ function validateJwtSecrets() {
         console.error('   Set REFRESH_TOKEN_SECRET in your .env file');
         process.exit(1);
     }
-    if (weakSecrets.some(weak => jwtSecret.toLowerCase().includes(weak))) {
+    if (weakSecrets.some((weak) => jwtSecret.toLowerCase().includes(weak))) {
         console.error('❌ FATAL ERROR: JWT_SECRET appears to be a weak or default value!');
-        console.error('   Generate a strong secret using: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+        console.error("   Generate a strong secret using: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"");
         process.exit(1);
     }
-    if (weakSecrets.some(weak => refreshSecret.toLowerCase().includes(weak))) {
+    if (weakSecrets.some((weak) => refreshSecret.toLowerCase().includes(weak))) {
         console.error('❌ FATAL ERROR: REFRESH_TOKEN_SECRET appears to be a weak or default value!');
-        console.error('   Generate a strong secret using: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+        console.error("   Generate a strong secret using: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"");
         process.exit(1);
     }
     const minLength = isProduction ? 32 : 16;
     if (jwtSecret.length < minLength) {
         console.error(`❌ FATAL ERROR: JWT_SECRET is too short! Minimum ${minLength} characters required (${isProduction ? 'production' : 'development'} mode)`);
-        console.error('   Generate a strong secret using: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+        console.error("   Generate a strong secret using: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"");
         process.exit(1);
     }
     if (refreshSecret.length < minLength) {
         console.error(`❌ FATAL ERROR: REFRESH_TOKEN_SECRET is too short! Minimum ${minLength} characters required (${isProduction ? 'production' : 'development'} mode)`);
-        console.error('   Generate a strong secret using: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+        console.error("   Generate a strong secret using: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"");
         process.exit(1);
     }
     if (jwtSecret === refreshSecret) {

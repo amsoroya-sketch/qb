@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
+import * as crypto from 'crypto';
 
 export interface LockoutStatus {
   isLocked: boolean;
@@ -175,7 +176,6 @@ export class AccountLockoutService {
    */
   private getAttemptsKey(identifier: string): string {
     // Hash identifier for privacy
-    const crypto = require('crypto');
     const hash = crypto.createHash('sha256').update(identifier).digest('hex');
     return `lockout:attempts:${hash}`;
   }
@@ -184,7 +184,6 @@ export class AccountLockoutService {
    * Generate Redis key for lockout flag
    */
   private getLockKey(identifier: string): string {
-    const crypto = require('crypto');
     const hash = crypto.createHash('sha256').update(identifier).digest('hex');
     return `lockout:lock:${hash}`;
   }

@@ -25,36 +25,36 @@ export declare class ProgressController {
             id: string;
             userId: string;
             lessonId: string;
-            timeSpent: number;
-            completedAt: Date | null;
-            startedAt: Date | null;
             status: import(".prisma/client").$Enums.LessonStatus;
+            startedAt: Date | null;
+            completedAt: Date | null;
+            timeSpent: number;
         })[];
     }>;
     getMyLessonProgress(userId: string): Promise<({
         lesson: {
             id: string;
             title: string;
-            difficulty: import(".prisma/client").$Enums.Difficulty;
-            xpReward: number;
             titleArabic: string;
             track: import(".prisma/client").$Enums.Track;
             stage: number;
+            difficulty: import(".prisma/client").$Enums.Difficulty;
+            xpReward: number;
         };
     } & {
         id: string;
         userId: string;
         lessonId: string;
-        timeSpent: number;
-        completedAt: Date | null;
-        startedAt: Date | null;
         status: import(".prisma/client").$Enums.LessonStatus;
+        startedAt: Date | null;
+        completedAt: Date | null;
+        timeSpent: number;
     })[]>;
     getMyAchievements(userId: string): Promise<{
         unlocked: {
             id: string;
-            name: string;
             createdAt: Date;
+            name: string;
             description: string;
             xpReward: number;
             nameArabic: string;
@@ -65,8 +65,8 @@ export declare class ProgressController {
         }[];
         locked: {
             id: string;
-            name: string;
             createdAt: Date;
+            name: string;
             description: string;
             xpReward: number;
             nameArabic: string;
@@ -79,10 +79,9 @@ export declare class ProgressController {
         totalAchievements: number;
         completionPercentage: number;
     }>;
-    updateMyStreak(userId: string): Promise<{
+    updateMyStreak(userId: string): Promise<import("./dto").UserProgressResponseDto | {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         currentXP: number;
         currentLevel: number;
         currentStreak: number;
@@ -92,7 +91,8 @@ export declare class ProgressController {
         exercisesCompleted: number;
         totalTimeSpent: number;
         averageAccuracy: import("@prisma/client/runtime/library").Decimal;
-        userId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     getMyAnalytics(userId: string): Promise<import("./dto").AnalyticsResponseDto>;
     getMyTopicMastery(userId: string): Promise<import("./dto").TopicMasteryResponseDto>;

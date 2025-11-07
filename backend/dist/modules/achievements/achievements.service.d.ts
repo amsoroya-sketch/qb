@@ -5,39 +5,39 @@ export declare class AchievementsService {
     findAll(): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
-        description: string;
-        xpReward: number;
         nameArabic: string;
+        description: string;
         icon: string;
         category: string;
         rarity: import(".prisma/client").$Enums.AchievementRarity;
         requirement: import("@prisma/client/runtime/library").JsonValue;
+        xpReward: number;
+        createdAt: Date;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
-        description: string;
-        xpReward: number;
         nameArabic: string;
+        description: string;
         icon: string;
         category: string;
         rarity: import(".prisma/client").$Enums.AchievementRarity;
         requirement: import("@prisma/client/runtime/library").JsonValue;
+        xpReward: number;
+        createdAt: Date;
     }>;
     getUserAchievements(userId: string): Promise<({
         achievement: {
             id: string;
             name: string;
-            createdAt: Date;
-            description: string;
-            xpReward: number;
             nameArabic: string;
+            description: string;
             icon: string;
             category: string;
             rarity: import(".prisma/client").$Enums.AchievementRarity;
             requirement: import("@prisma/client/runtime/library").JsonValue;
+            xpReward: number;
+            createdAt: Date;
         };
         isUnlocked: boolean;
         unlockedAt: Date | undefined;
@@ -48,14 +48,14 @@ export declare class AchievementsService {
         achievement: {
             id: string;
             name: string;
-            createdAt: Date;
-            description: string;
-            xpReward: number;
             nameArabic: string;
+            description: string;
             icon: string;
             category: string;
             rarity: import(".prisma/client").$Enums.AchievementRarity;
             requirement: import("@prisma/client/runtime/library").JsonValue;
+            xpReward: number;
+            createdAt: Date;
         };
         isUnlocked: boolean;
         unlockedAt: null;
@@ -67,14 +67,14 @@ export declare class AchievementsService {
         achievement: {
             id: string;
             name: string;
-            createdAt: Date;
-            description: string;
-            xpReward: number;
             nameArabic: string;
+            description: string;
             icon: string;
             category: string;
             rarity: import(".prisma/client").$Enums.AchievementRarity;
             requirement: import("@prisma/client/runtime/library").JsonValue;
+            xpReward: number;
+            createdAt: Date;
         };
         id: string;
         userId: string;
@@ -86,14 +86,14 @@ export declare class AchievementsService {
     getAchievementsByCategory(category: string): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
-        description: string;
-        xpReward: number;
         nameArabic: string;
+        description: string;
         icon: string;
         category: string;
         rarity: import(".prisma/client").$Enums.AchievementRarity;
         requirement: import("@prisma/client/runtime/library").JsonValue;
+        xpReward: number;
+        createdAt: Date;
     }[]>;
     getAchievementCategories(): Promise<string[]>;
     getAchievementStats(): Promise<{
@@ -113,14 +113,14 @@ export declare class AchievementsService {
             };
             id: string;
             name: string;
-            createdAt: Date;
-            description: string;
-            xpReward: number;
             nameArabic: string;
+            description: string;
             icon: string;
             category: string;
             rarity: import(".prisma/client").$Enums.AchievementRarity;
             requirement: import("@prisma/client/runtime/library").JsonValue;
+            xpReward: number;
+            createdAt: Date;
         }[];
         commonUnlocked: number;
         rareUnlocked: number;
@@ -128,5 +128,13 @@ export declare class AchievementsService {
         legendaryUnlocked: number;
         totalAchievements: number;
         totalUnlocked: number;
+    }>;
+    getUserStats(userId: string): Promise<{
+        commonUnlocked: number;
+        rareUnlocked: number;
+        epicUnlocked: number;
+        legendaryUnlocked: number;
+        totalAchievements: number;
+        unlockedAchievements: number;
     }>;
 }

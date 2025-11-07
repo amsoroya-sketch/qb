@@ -75,7 +75,6 @@ async function importQuranData() {
         logger.success('Cleared existing data');
         logger.info('\nImporting verses and words...');
         let totalVerses = 0;
-        let totalWords = 0;
         for (const verse of verses) {
             const verseText = verse.words.map((w) => w.arabicUthmani).join(' ');
             const createdVerse = await prisma.quranVerse.create({
@@ -132,7 +131,6 @@ async function importQuranData() {
             }));
             await prisma.verseWord.createMany({ data: wordData });
             totalVerses++;
-            totalWords += verse.words.length;
             logger.progress(totalVerses, verses.length, `Verse ${verse.verseKey}`);
         }
         logger.info('\n=== IMPORT COMPLETE ===');

@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -16,6 +17,9 @@ import { QuizModule } from './modules/quiz/quiz.module';
 import { ExamModule } from './modules/exam/exam.module';
 import { CacheModule } from './common/cache/cache.module';
 import { AuditLogModule } from './common/middleware/audit-log.module';
+import { HealthModule } from './health/health.module';
+import { RedisModule } from './redis/redis.module';
+import { LoggerModule } from './common/logger/logger.module';
 
 @Module({
   imports: [
@@ -35,8 +39,11 @@ import { AuditLogModule } from './common/middleware/audit-log.module';
 
     // Core modules
     PrismaModule,
+    RedisModule,
+    LoggerModule,
     CacheModule,
     AuditLogModule,
+    HealthModule,
 
     // Feature modules
     AuthModule,
@@ -53,4 +60,8 @@ import { AuditLogModule } from './common/middleware/audit-log.module';
     ExamModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(HttpLoggerMiddleware).forRoutes('*');
+  }
+}

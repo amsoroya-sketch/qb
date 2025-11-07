@@ -10,7 +10,6 @@
 
 import { PrismaClient } from '@prisma/client';
 
-import * as path from 'path';
 import { QuranCorpusMapper } from './mappers/quran-corpus-mapper';
 import { QuranCorpusFetcher } from './fetchers/quran-corpus-fetcher';
 import { MVP_SURAHS, CorpusVerseData } from './types/quran-corpus.types';

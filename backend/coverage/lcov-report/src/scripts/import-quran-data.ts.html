@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/127</span>
+                <span class='fraction'>0/125</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/125</span>
+                <span class='fraction'>0/123</span>
             </div>
         
             
@@ -447,8 +447,7 @@
 <a name='L382'></a><a href='#L382'>382</a>
 <a name='L383'></a><a href='#L383'>383</a>
 <a name='L384'></a><a href='#L384'>384</a>
-<a name='L385'></a><a href='#L385'>385</a>
-<a name='L386'></a><a href='#L386'>386</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L385'></a><a href='#L385'>385</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -463,18 +462,12 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -488,7 +481,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -588,6 +580,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -683,6 +677,10 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -844,8 +842,7 @@
  */
 &nbsp;
 <span class="cstat-no" title="statement not covered" >import { PrismaClient } from '@prisma/client';</span>
-import * as fs from 'fs';
-<span class="cstat-no" title="statement not covered" >import * as path from 'path';</span>
+&nbsp;
 <span class="cstat-no" title="statement not covered" >import { QuranCorpusMapper } from './mappers/quran-corpus-mapper';</span>
 <span class="cstat-no" title="statement not covered" >import { QuranCorpusFetcher } from './fetchers/quran-corpus-fetcher';</span>
 <span class="cstat-no" title="statement not covered" >import { MVP_SURAHS, CorpusVerseData } from './types/quran-corpus.types';</span>
@@ -863,12 +860,6 @@ const prisma = <span class="cstat-no" title="statement not covered" >new PrismaC
 /**
  * Configuration
  */
-const CONFIG = <span class="cstat-no" title="statement not covered" >{</span>
-  MERGED_DATA_FILE: path.join(
-    __dirname,
-    '../../data/processed/quran-complete-merged.json'
-  ),
-};
 &nbsp;
 /**
  * Logger
@@ -972,7 +963,9 @@ const logger = <span class="cstat-no" title="statement not covered" >new ImportL
 <span class="cstat-no" title="statement not covered" >        totalVerses += stats.versesImported;</span>
 <span class="cstat-no" title="statement not covered" >        totalWords += stats.wordsImported;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        logger.success(`✓ Imported Surah ${surah.number}: ${stats.versesImported} verses, ${stats.wordsImported} words`);</span>
+<span class="cstat-no" title="statement not covered" >        logger.success(</span>
+          `✓ Imported Surah ${surah.number}: ${stats.versesImported} verses, ${stats.wordsImported} words`,
+        );
       } catch (error) {
 <span class="cstat-no" title="statement not covered" >        logger.error(`Failed to import Surah ${surah.number}`, error as Error);</span>
 <span class="cstat-no" title="statement not covered" >        throw error; </span>// Fail fast for data integrity
@@ -989,7 +982,7 @@ const logger = <span class="cstat-no" title="statement not covered" >new ImportL
   private <span class="fstat-no" title="function not covered" >async </span>importSurah(
     surahNumber: number,
     corpusVerses: CorpusVerseData[],
-    validate: boolean
+    validate: boolean,
   ): Promise&lt;{ versesImported: number; wordsImported: number }&gt; {
     let versesImported = <span class="cstat-no" title="statement not covered" >0;</span>
     let wordsImported = <span class="cstat-no" title="statement not covered" >0;</span>
@@ -1022,7 +1015,7 @@ const logger = <span class="cstat-no" title="statement not covered" >new ImportL
         }
 &nbsp;
         // Insert verse with words
-        const createdVerse = <span class="cstat-no" title="statement not covered" >await tx.quranVerse.create({</span>
+<span class="cstat-no" title="statement not covered" >        await tx.quranVerse.create({</span>
           data: {
             surahNumber: verse.surahNumber,
             verseNumber: verse.verseNumber,
@@ -1067,7 +1060,11 @@ const logger = <span class="cstat-no" title="statement not covered" >new ImportL
 <span class="cstat-no" title="statement not covered" >        versesImported++;</span>
 <span class="cstat-no" title="statement not covered" >        wordsImported += words.length;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        logger.progress(versesImported, corpusVerses.length, `Verse ${verse.surahNumber}:${verse.verseNumber}`);</span>
+<span class="cstat-no" title="statement not covered" >        logger.progress(</span>
+          versesImported,
+          corpusVerses.length,
+          `Verse ${verse.surahNumber}:${verse.verseNumber}`,
+        );
       }
     });
 &nbsp;
@@ -1142,7 +1139,7 @@ const logger = <span class="cstat-no" title="statement not covered" >new ImportL
           verses: sc._count.id,
           words: wordCount,
         };
-      })
+      }),
     );
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    return {</span>
@@ -1225,7 +1222,7 @@ const logger = <span class="cstat-no" title="statement not covered" >new ImportL
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-04T15:50:39.525Z
+                at 2025-11-06T17:25:31.783Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

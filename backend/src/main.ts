@@ -41,31 +41,43 @@ function validateJwtSecrets() {
   }
 
   // Check JWT_SECRET is not a weak/default value
-  if (weakSecrets.some(weak => jwtSecret.toLowerCase().includes(weak))) {
+  if (weakSecrets.some((weak) => jwtSecret.toLowerCase().includes(weak))) {
     console.error('❌ FATAL ERROR: JWT_SECRET appears to be a weak or default value!');
-    console.error('   Generate a strong secret using: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+    console.error(
+      "   Generate a strong secret using: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
+    );
     process.exit(1);
   }
 
   // Check REFRESH_TOKEN_SECRET is not a weak/default value
-  if (weakSecrets.some(weak => refreshSecret.toLowerCase().includes(weak))) {
+  if (weakSecrets.some((weak) => refreshSecret.toLowerCase().includes(weak))) {
     console.error('❌ FATAL ERROR: REFRESH_TOKEN_SECRET appears to be a weak or default value!');
-    console.error('   Generate a strong secret using: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+    console.error(
+      "   Generate a strong secret using: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
+    );
     process.exit(1);
   }
 
   // Check JWT_SECRET length (minimum 32 characters in production, 16 in dev)
   const minLength = isProduction ? 32 : 16;
   if (jwtSecret.length < minLength) {
-    console.error(`❌ FATAL ERROR: JWT_SECRET is too short! Minimum ${minLength} characters required (${isProduction ? 'production' : 'development'} mode)`);
-    console.error('   Generate a strong secret using: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+    console.error(
+      `❌ FATAL ERROR: JWT_SECRET is too short! Minimum ${minLength} characters required (${isProduction ? 'production' : 'development'} mode)`,
+    );
+    console.error(
+      "   Generate a strong secret using: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
+    );
     process.exit(1);
   }
 
   // Check REFRESH_TOKEN_SECRET length
   if (refreshSecret.length < minLength) {
-    console.error(`❌ FATAL ERROR: REFRESH_TOKEN_SECRET is too short! Minimum ${minLength} characters required (${isProduction ? 'production' : 'development'} mode)`);
-    console.error('   Generate a strong secret using: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+    console.error(
+      `❌ FATAL ERROR: REFRESH_TOKEN_SECRET is too short! Minimum ${minLength} characters required (${isProduction ? 'production' : 'development'} mode)`,
+    );
+    console.error(
+      "   Generate a strong secret using: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
+    );
     process.exit(1);
   }
 

@@ -10,6 +10,7 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const throttler_1 = require("@nestjs/throttler");
+const http_logger_middleware_1 = require("./common/middleware/http-logger.middleware");
 const prisma_module_1 = require("./prisma/prisma.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 const users_module_1 = require("./modules/users/users.module");
@@ -25,7 +26,13 @@ const quiz_module_1 = require("./modules/quiz/quiz.module");
 const exam_module_1 = require("./modules/exam/exam.module");
 const cache_module_1 = require("./common/cache/cache.module");
 const audit_log_module_1 = require("./common/middleware/audit-log.module");
+const health_module_1 = require("./health/health.module");
+const redis_module_1 = require("./redis/redis.module");
+const logger_module_1 = require("./common/logger/logger.module");
 let AppModule = class AppModule {
+    configure(consumer) {
+        consumer.apply(http_logger_middleware_1.HttpLoggerMiddleware).forRoutes('*');
+    }
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
@@ -42,8 +49,11 @@ exports.AppModule = AppModule = __decorate([
                 },
             ]),
             prisma_module_1.PrismaModule,
+            redis_module_1.RedisModule,
+            logger_module_1.LoggerModule,
             cache_module_1.CacheModule,
             audit_log_module_1.AuditLogModule,
+            health_module_1.HealthModule,
             auth_module_1.AuthModule,
             users_module_1.UsersModule,
             lessons_module_1.LessonsModule,

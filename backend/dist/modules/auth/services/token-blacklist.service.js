@@ -13,6 +13,7 @@ exports.TokenBlacklistService = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const ioredis_1 = require("ioredis");
+const crypto = require("crypto");
 let TokenBlacklistService = class TokenBlacklistService {
     constructor(config) {
         this.config = config;
@@ -58,7 +59,6 @@ let TokenBlacklistService = class TokenBlacklistService {
         };
     }
     getBlacklistKey(token) {
-        const crypto = require('crypto');
         const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
         return `blacklist:token:${tokenHash}`;
     }

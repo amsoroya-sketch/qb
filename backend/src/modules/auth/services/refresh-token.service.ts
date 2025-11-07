@@ -79,6 +79,7 @@ export class RefreshTokenService {
   async validateAndRotateToken(token: string): Promise<TokenValidationResult> {
     try {
       // Verify JWT signature and expiration
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const _payload = this.jwtService.verify(token, {
         secret: this.config.get('JWT_REFRESH_SECRET'),
       });

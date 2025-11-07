@@ -5,7 +5,6 @@ const analytics_service_1 = require("./analytics.service");
 const prisma_service_1 = require("../../prisma/prisma.service");
 describe('AnalyticsService', () => {
     let service;
-    let prismaService;
     const mockPrismaService = {
         userEvent: {
             create: jest.fn(),
@@ -41,7 +40,6 @@ describe('AnalyticsService', () => {
             ],
         }).compile();
         service = module.get(analytics_service_1.AnalyticsService);
-        prismaService = module.get(prisma_service_1.PrismaService);
     });
     afterEach(() => {
         jest.clearAllMocks();

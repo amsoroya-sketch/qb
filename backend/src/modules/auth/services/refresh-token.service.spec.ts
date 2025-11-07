@@ -7,8 +7,6 @@ import { PrismaService } from '../../../prisma/prisma.service';
 
 describe('RefreshTokenService', () => {
   let service: RefreshTokenService;
-  let prismaService: PrismaService;
-  let jwtService: JwtService;
 
   const mockPrismaService = {
     refreshToken: {
@@ -56,8 +54,6 @@ describe('RefreshTokenService', () => {
     }).compile();
 
     service = module.get<RefreshTokenService>(RefreshTokenService);
-    prismaService = module.get<PrismaService>(PrismaService);
-    jwtService = module.get<JwtService>(JwtService);
   });
 
   afterEach(() => {

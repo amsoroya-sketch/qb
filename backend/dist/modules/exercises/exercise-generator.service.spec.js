@@ -6,7 +6,6 @@ const prisma_service_1 = require("../../prisma/prisma.service");
 const client_1 = require("@prisma/client");
 describe('ExerciseGeneratorService', () => {
     let service;
-    let prismaService;
     const mockPrismaService = {
         quranVerse: {
             findUnique: jest.fn(),
@@ -26,7 +25,6 @@ describe('ExerciseGeneratorService', () => {
             ],
         }).compile();
         service = module.get(exercise_generator_service_1.ExerciseGeneratorService);
-        prismaService = module.get(prisma_service_1.PrismaService);
     });
     afterEach(() => {
         jest.clearAllMocks();

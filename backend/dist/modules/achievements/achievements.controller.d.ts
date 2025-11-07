@@ -5,14 +5,14 @@ export declare class AchievementsController {
     findAll(): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
-        description: string;
-        xpReward: number;
         nameArabic: string;
+        description: string;
         icon: string;
         category: string;
         rarity: import(".prisma/client").$Enums.AchievementRarity;
         requirement: import("@prisma/client/runtime/library").JsonValue;
+        xpReward: number;
+        createdAt: Date;
     }[]>;
     getStats(): Promise<{
         categoriesBreakdown: Record<string, {
@@ -31,14 +31,14 @@ export declare class AchievementsController {
             };
             id: string;
             name: string;
-            createdAt: Date;
-            description: string;
-            xpReward: number;
             nameArabic: string;
+            description: string;
             icon: string;
             category: string;
             rarity: import(".prisma/client").$Enums.AchievementRarity;
             requirement: import("@prisma/client/runtime/library").JsonValue;
+            xpReward: number;
+            createdAt: Date;
         }[];
         commonUnlocked: number;
         rareUnlocked: number;
@@ -51,39 +51,47 @@ export declare class AchievementsController {
     getAchievementsByCategory(category: string): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
-        description: string;
-        xpReward: number;
         nameArabic: string;
+        description: string;
         icon: string;
         category: string;
         rarity: import(".prisma/client").$Enums.AchievementRarity;
         requirement: import("@prisma/client/runtime/library").JsonValue;
+        xpReward: number;
+        createdAt: Date;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
-        description: string;
-        xpReward: number;
         nameArabic: string;
+        description: string;
         icon: string;
         category: string;
         rarity: import(".prisma/client").$Enums.AchievementRarity;
         requirement: import("@prisma/client/runtime/library").JsonValue;
+        xpReward: number;
+        createdAt: Date;
+    }>;
+    getMyStats(userId: string): Promise<{
+        commonUnlocked: number;
+        rareUnlocked: number;
+        epicUnlocked: number;
+        legendaryUnlocked: number;
+        totalAchievements: number;
+        unlockedAchievements: number;
     }>;
     getMyAchievements(userId: string): Promise<({
         achievement: {
             id: string;
             name: string;
-            createdAt: Date;
-            description: string;
-            xpReward: number;
             nameArabic: string;
+            description: string;
             icon: string;
             category: string;
             rarity: import(".prisma/client").$Enums.AchievementRarity;
             requirement: import("@prisma/client/runtime/library").JsonValue;
+            xpReward: number;
+            createdAt: Date;
         };
         isUnlocked: boolean;
         unlockedAt: Date | undefined;
@@ -94,14 +102,14 @@ export declare class AchievementsController {
         achievement: {
             id: string;
             name: string;
-            createdAt: Date;
-            description: string;
-            xpReward: number;
             nameArabic: string;
+            description: string;
             icon: string;
             category: string;
             rarity: import(".prisma/client").$Enums.AchievementRarity;
             requirement: import("@prisma/client/runtime/library").JsonValue;
+            xpReward: number;
+            createdAt: Date;
         };
         isUnlocked: boolean;
         unlockedAt: null;
@@ -113,14 +121,14 @@ export declare class AchievementsController {
         achievement: {
             id: string;
             name: string;
-            createdAt: Date;
-            description: string;
-            xpReward: number;
             nameArabic: string;
+            description: string;
             icon: string;
             category: string;
             rarity: import(".prisma/client").$Enums.AchievementRarity;
             requirement: import("@prisma/client/runtime/library").JsonValue;
+            xpReward: number;
+            createdAt: Date;
         };
         id: string;
         userId: string;

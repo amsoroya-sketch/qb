@@ -502,7 +502,20 @@
 <a name='L437'></a><a href='#L437'>437</a>
 <a name='L438'></a><a href='#L438'>438</a>
 <a name='L439'></a><a href='#L439'>439</a>
-<a name='L440'></a><a href='#L440'>440</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L440'></a><a href='#L440'>440</a>
+<a name='L441'></a><a href='#L441'>441</a>
+<a name='L442'></a><a href='#L442'>442</a>
+<a name='L443'></a><a href='#L443'>443</a>
+<a name='L444'></a><a href='#L444'>444</a>
+<a name='L445'></a><a href='#L445'>445</a>
+<a name='L446'></a><a href='#L446'>446</a>
+<a name='L447'></a><a href='#L447'>447</a>
+<a name='L448'></a><a href='#L448'>448</a>
+<a name='L449'></a><a href='#L449'>449</a>
+<a name='L450'></a><a href='#L450'>450</a>
+<a name='L451'></a><a href='#L451'>451</a>
+<a name='L452'></a><a href='#L452'>452</a>
+<a name='L453'></a><a href='#L453'>453</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -638,6 +651,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -723,7 +737,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -758,6 +776,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -777,6 +796,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -858,6 +880,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -931,6 +955,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -958,7 +984,7 @@
 &nbsp;
 <span class="cstat-no" title="statement not covered" >import * as fs from 'fs';</span>
 <span class="cstat-no" title="statement not covered" >import * as path from 'path';</span>
-<span class="cstat-no" title="statement not covered" >import { CorpusVerseData, CorpusWordData, SurahMetadata, MVP_SURAHS } from '../types/quran-corpus.types';</span>
+<span class="cstat-no" title="statement not covered" >import { CorpusVerseData, CorpusWordData, MVP_SURAHS } from '../types/quran-corpus.types';</span>
 &nbsp;
 /**
  * Fetcher Configuration
@@ -1077,7 +1103,8 @@ class HttpClient {
 <span class="cstat-no" title="statement not covered" >          throw error;</span>
         }
 &nbsp;
-        const delay = <span class="cstat-no" title="statement not covered" >CONFIG.INITIAL_RETRY_DELAY_MS * Math.pow(CONFIG.RETRY_BACKOFF_MULTIPLIER, attempt - 1);</span>
+        const delay =
+<span class="cstat-no" title="statement not covered" >          CONFIG.INITIAL_RETRY_DELAY_MS * Math.pow(CONFIG.RETRY_BACKOFF_MULTIPLIER, attempt - 1);</span>
 <span class="cstat-no" title="statement not covered" >        logger.warn(`Attempt ${attempt}/${retries} failed for ${url}. Retrying in ${delay}ms...`);</span>
 <span class="cstat-no" title="statement not covered" >        await this.sleep(delay);</span>
       }
@@ -1161,7 +1188,11 @@ const fileStorage = <span class="cstat-no" title="statement not covered" >new Fi
     const verses: CorpusVerseData[] = <span class="cstat-no" title="statement not covered" >[];</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    for (let verseNumber = <span class="cstat-no" title="statement not covered" >1;</span> verseNumber &lt;= surahMetadata.totalVerses; verseNumber++) {</span>
-<span class="cstat-no" title="statement not covered" >      logger.progress(verseNumber, surahMetadata.totalVerses, `Verse ${surahNumber}:${verseNumber}`);</span>
+<span class="cstat-no" title="statement not covered" >      logger.progress(</span>
+        verseNumber,
+        surahMetadata.totalVerses,
+        `Verse ${surahNumber}:${verseNumber}`,
+      );
 &nbsp;
       const verseData = <span class="cstat-no" title="statement not covered" >await this.fetchVerse(surahNumber, verseNumber);</span>
 <span class="cstat-no" title="statement not covered" >      verses.push(verseData);</span>
@@ -1214,7 +1245,11 @@ const fileStorage = <span class="cstat-no" title="statement not covered" >new Fi
    * approach and provide placeholders. For production, you would integrate with
    * the Quranic Corpus XML data or a specialized morphology API.
    */
-  private <span class="fstat-no" title="function not covered" >async </span>fetchVerseWords(surahNumber: number, verseNumber: number, verseText: string): Promise&lt;CorpusWordData[]&gt; {
+  private <span class="fstat-no" title="function not covered" >async </span>fetchVerseWords(
+    surahNumber: number,
+    verseNumber: number,
+    verseText: string,
+  ): Promise&lt;CorpusWordData[]&gt; {
     // Split verse into words (basic tokenization)
     const arabicWords = <span class="cstat-no" title="statement not covered" >verseText.split(/\s+/).filter(<span class="fstat-no" title="function not covered" >(w</span>) =&gt; <span class="cstat-no" title="statement not covered" >w.length &gt; 0)</span>;</span>
 &nbsp;
@@ -1295,7 +1330,9 @@ const fileStorage = <span class="cstat-no" title="statement not covered" >new Fi
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    for (let i = <span class="cstat-no" title="statement not covered" >0;</span> i &lt; MVP_SURAHS.length; i++) {</span>
       const surah = <span class="cstat-no" title="statement not covered" >MVP_SURAHS[i];</span>
-<span class="cstat-no" title="statement not covered" >      logger.info(`\n=== Fetching Surah ${i + 1}/${MVP_SURAHS.length}: ${surah.name} (${surah.nameArabic}) ===`);</span>
+<span class="cstat-no" title="statement not covered" >      logger.info(</span>
+        `\n=== Fetching Surah ${i + 1}/${MVP_SURAHS.length}: ${surah.name} (${surah.nameArabic}) ===`,
+      );
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      try {</span>
         const verses = <span class="cstat-no" title="statement not covered" >await this.fetchSurah(surah.number, useCache);</span>
@@ -1369,7 +1406,9 @@ const fileStorage = <span class="cstat-no" title="statement not covered" >new Fi
 <span class="cstat-no" title="statement not covered" >      logger.info('\nPer-Surah Details:');</span>
 <span class="cstat-no" title="statement not covered" >      stats.surahDetails.forEach(<span class="fstat-no" title="function not covered" >(d</span>etail) =&gt; {</span>
         const surah = <span class="cstat-no" title="statement not covered" >MVP_SURAHS.find(<span class="fstat-no" title="function not covered" >(s</span>) =&gt; <span class="cstat-no" title="statement not covered" >s.number === detail.surah)</span>;</span>
-<span class="cstat-no" title="statement not covered" >        logger.info(`  Surah ${detail.surah} (${surah?.name}): ${detail.verses} verses, ${detail.words} words`);</span>
+<span class="cstat-no" title="statement not covered" >        logger.info(</span>
+          `  Surah ${detail.surah} (${surah?.name}): ${detail.verses} verses, ${detail.words} words`,
+        );
       });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      logger.success('\n✓ Fetch completed successfully!');</span>
@@ -1387,7 +1426,7 @@ const fileStorage = <span class="cstat-no" title="statement not covered" >new Fi
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-04T15:50:39.525Z
+                at 2025-11-06T17:25:31.783Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

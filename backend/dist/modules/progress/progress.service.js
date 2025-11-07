@@ -17,11 +17,24 @@ let ProgressService = class ProgressService {
         this.prisma = prisma;
     }
     async getUserProgress(userId) {
-        const progress = await this.prisma.userProgress.findUnique({
+        let progress = await this.prisma.userProgress.findUnique({
             where: { userId },
         });
         if (!progress) {
-            throw new common_1.NotFoundException('User progress not found');
+            progress = await this.prisma.userProgress.create({
+                data: {
+                    userId,
+                    currentXP: 0,
+                    currentLevel: 1,
+                    currentStreak: 0,
+                    longestStreak: 0,
+                    lastActiveDate: new Date(),
+                    lessonsCompleted: 0,
+                    exercisesCompleted: 0,
+                    totalTimeSpent: 0,
+                    averageAccuracy: 0,
+                },
+            });
         }
         const xpForNextLevel = this.calculateXPForLevel(progress.currentLevel + 1);
         const xpForCurrentLevel = this.calculateXPForLevel(progress.currentLevel);
@@ -56,12 +69,7 @@ let ProgressService = class ProgressService {
         };
     }
     async updateStreak(userId) {
-        const progress = await this.prisma.userProgress.findUnique({
-            where: { userId },
-        });
-        if (!progress) {
-            throw new common_1.NotFoundException('User progress not found');
-        }
+        const progress = await this.getUserProgress(userId);
         const now = new Date();
         const lastActive = progress.lastActiveDate;
         if (!lastActive) {

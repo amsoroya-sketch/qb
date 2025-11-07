@@ -3,4 +3,4 @@ export declare class IsStrongPasswordConstraint implements ValidatorConstraintIn
     validate(password: string): boolean;
     defaultMessage(): string;
 }
-export declare function IsStrongPassword(validationOptions?: ValidationOptions): (object: Object, propertyName: string) => void;
+export declare function IsStrongPassword(validationOptions?: ValidationOptions): (object: object, propertyName: string) => void;

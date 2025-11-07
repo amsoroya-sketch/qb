@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/136</span>
+                <span class='fraction'>0/137</span>
             </div>
         
             
@@ -557,7 +557,9 @@
 <a name='L492'></a><a href='#L492'>492</a>
 <a name='L493'></a><a href='#L493'>493</a>
 <a name='L494'></a><a href='#L494'>494</a>
-<a name='L495'></a><a href='#L495'>495</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L495'></a><a href='#L495'>495</a>
+<a name='L496'></a><a href='#L496'>496</a>
+<a name='L497'></a><a href='#L497'>497</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -675,6 +677,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -819,28 +823,22 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -964,6 +962,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1012,9 +1012,13 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1165,7 +1169,9 @@ class QuranDataVerifier {
           actual: count,
         });
       } else {
-<span class="cstat-no" title="statement not covered" >        console.log(`  ✓ Surah ${surah.number} (${surah.name}): ${count}/${surah.totalVerses} verses`);</span>
+<span class="cstat-no" title="statement not covered" >        console.log(</span>
+          `  ✓ Surah ${surah.number} (${surah.name}): ${count}/${surah.totalVerses} verses`,
+        );
       }
     }
 &nbsp;
@@ -1314,10 +1320,7 @@ class QuranDataVerifier {
     // Verse required fields
     const versesWithNullText = <span class="cstat-no" title="statement not covered" >await this.prisma.quranVerse.count({</span>
       where: {
-        OR: [
-          { textArabic: '' },
-          { translation: '' },
-        ],
+        OR: [{ textArabic: '' }, { translation: '' }],
       },
     });
 &nbsp;
@@ -1328,10 +1331,7 @@ class QuranDataVerifier {
     // Word required fields
     const wordsWithNullRequired = <span class="cstat-no" title="statement not covered" >await this.prisma.verseWord.count({</span>
       where: {
-        OR: [
-          { arabicText: '' },
-          { posType: '' },
-        ],
+        OR: [{ arabicText: '' }, { posType: '' }],
       },
     });
 &nbsp;
@@ -1427,7 +1427,7 @@ class QuranDataVerifier {
           words,
           complete: actual === surah.totalVerses,
         };
-      })
+      }),
     );
 &nbsp;
     // Grammatical property coverage
@@ -1457,7 +1457,9 @@ class QuranDataVerifier {
     const allWords = <span class="cstat-no" title="statement not covered" >await this.prisma.verseWord.findMany({</span>
       select: { [field]: true },
     });
-    const populated = <span class="cstat-no" title="statement not covered" >allWords.filter(<span class="fstat-no" title="function not covered" >(w</span>ord: any) =&gt; <span class="cstat-no" title="statement not covered" >word[field] != null &amp;&amp; word[field] !== '')</span>.length;</span>
+    const populated = <span class="cstat-no" title="statement not covered" >allWords.filter(</span>
+<span class="fstat-no" title="function not covered" >      (w</span>ord: any) =&gt; <span class="cstat-no" title="statement not covered" >word[field] != null &amp;&amp; word[field] !== '',</span>
+    ).length;
 <span class="cstat-no" title="statement not covered" >    return (populated / total) * 100;</span>
   }
 &nbsp;
@@ -1497,7 +1499,7 @@ class QuranDataVerifier {
 <span class="cstat-no" title="statement not covered" >    result.statistics.surahStats.forEach(<span class="fstat-no" title="function not covered" >(s</span>tat) =&gt; {</span>
       const icon = <span class="cstat-no" title="statement not covered" >stat.complete ? '✓' : '✗';</span>
 <span class="cstat-no" title="statement not covered" >      console.log(</span>
-        `  ${icon} Surah ${stat.surah} (${stat.name}): ${stat.actual}/${stat.expected} verses, ${stat.words} words`
+        `  ${icon} Surah ${stat.surah} (${stat.name}): ${stat.actual}/${stat.expected} verses, ${stat.words} words`,
       );
     });
 &nbsp;
@@ -1505,10 +1507,14 @@ class QuranDataVerifier {
 <span class="cstat-no" title="statement not covered" >    console.log(`  POS Type: ${result.statistics.grammaticalCoverage.posType.toFixed(1)}%`);</span>
 <span class="cstat-no" title="statement not covered" >    console.log(`  Gender: ${result.statistics.grammaticalCoverage.gender.toFixed(1)}%`);</span>
 <span class="cstat-no" title="statement not covered" >    console.log(`  Number: ${result.statistics.grammaticalCoverage.number.toFixed(1)}%`);</span>
-<span class="cstat-no" title="statement not covered" >    console.log(`  Definiteness: ${result.statistics.grammaticalCoverage.definiteness.toFixed(1)}%`);</span>
+<span class="cstat-no" title="statement not covered" >    console.log(</span>
+      `  Definiteness: ${result.statistics.grammaticalCoverage.definiteness.toFixed(1)}%`,
+    );
 <span class="cstat-no" title="statement not covered" >    console.log(`  I'rab Case: ${result.statistics.grammaticalCoverage.irabCase.toFixed(1)}%`);</span>
 <span class="cstat-no" title="statement not covered" >    console.log(`  Case Sign: ${result.statistics.grammaticalCoverage.caseSign.toFixed(1)}%`);</span>
-<span class="cstat-no" title="statement not covered" >    console.log(`  Structure Type: ${result.statistics.grammaticalCoverage.structureType.toFixed(1)}%`);</span>
+<span class="cstat-no" title="statement not covered" >    console.log(</span>
+      `  Structure Type: ${result.statistics.grammaticalCoverage.structureType.toFixed(1)}%`,
+    );
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    console.log('\n' + '='.repeat(60) + '\n');</span>
   }
@@ -1552,7 +1558,7 @@ class QuranDataVerifier {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-04T15:50:39.525Z
+                at 2025-11-06T17:25:31.783Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

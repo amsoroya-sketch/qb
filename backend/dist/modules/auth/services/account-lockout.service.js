@@ -13,6 +13,7 @@ exports.AccountLockoutService = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const ioredis_1 = require("ioredis");
+const crypto = require("crypto");
 let AccountLockoutService = class AccountLockoutService {
     constructor(config) {
         this.config = config;
@@ -102,12 +103,10 @@ let AccountLockoutService = class AccountLockoutService {
         };
     }
     getAttemptsKey(identifier) {
-        const crypto = require('crypto');
         const hash = crypto.createHash('sha256').update(identifier).digest('hex');
         return `lockout:attempts:${hash}`;
     }
     getLockKey(identifier) {
-        const crypto = require('crypto');
         const hash = crypto.createHash('sha256').update(identifier).digest('hex');
         return `lockout:lock:${hash}`;
     }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class TokenBlacklistService {
@@ -100,7 +101,6 @@ export class TokenBlacklistService {
    */
   private getBlacklistKey(token: string): string {
     // Hash token for privacy (don't store raw tokens in Redis)
-    const crypto = require('crypto');
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     return `blacklist:token:${tokenHash}`;
   }

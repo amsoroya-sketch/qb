@@ -11,7 +11,7 @@ export class AuditLogInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
 
-    const { method, url, ip, headers } = request;
+    const { method, url, headers } = request;
     const userAgent = headers['user-agent'] || 'unknown';
     const userId = request.user?.id || request.user?.sub;
 
@@ -23,7 +23,7 @@ export class AuditLogInterceptor implements NestInterceptor {
         const statusCode = response.statusCode;
 
         // Log specific security-relevant endpoints
-        if (this.isSecurityRelevantEndpoint(url, method)) {
+        if (this.isSecurityRelevantEndpoint(url)) {
           this.auditLogService.log({
             eventType: this.getEventType(url, method, statusCode),
             userId,
@@ -82,7 +82,7 @@ export class AuditLogInterceptor implements NestInterceptor {
   /**
    * Determine if endpoint is security-relevant and should be logged
    */
-  private isSecurityRelevantEndpoint(url: string, _method: string): boolean {
+  private isSecurityRelevantEndpoint(url: string): boolean {
     const securityEndpoints = [
       '/api/v1/auth/login',
       '/api/v1/auth/register',

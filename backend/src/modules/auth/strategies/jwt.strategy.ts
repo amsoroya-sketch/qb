@@ -59,6 +59,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User not found');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _password, ...sanitizedUser } = user;
     // Add 'sub' property for compatibility with @CurrentUser('sub') decorator
     return { ...sanitizedUser, sub: payload.sub };

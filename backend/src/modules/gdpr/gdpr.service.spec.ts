@@ -5,8 +5,6 @@ import { AuditLogService } from '../../common/middleware/audit-log.service';
 
 describe('GdprService', () => {
   let service: GdprService;
-  let prismaService: PrismaService;
-  let auditLogService: AuditLogService;
 
   const mockPrismaService = {
     user: {
@@ -59,8 +57,6 @@ describe('GdprService', () => {
     }).compile();
 
     service = module.get<GdprService>(GdprService);
-    prismaService = module.get<PrismaService>(PrismaService);
-    auditLogService = module.get<AuditLogService>(AuditLogService);
   });
 
   afterEach(() => {

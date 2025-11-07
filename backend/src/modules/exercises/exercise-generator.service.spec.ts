@@ -5,7 +5,6 @@ import { ExerciseType } from '@prisma/client';
 
 describe('ExerciseGeneratorService', () => {
   let service: ExerciseGeneratorService;
-  let prismaService: PrismaService;
 
   const mockPrismaService = {
     quranVerse: {
@@ -28,7 +27,6 @@ describe('ExerciseGeneratorService', () => {
     }).compile();
 
     service = module.get<ExerciseGeneratorService>(ExerciseGeneratorService);
-    prismaService = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {

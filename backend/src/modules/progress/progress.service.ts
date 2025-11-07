@@ -18,12 +18,26 @@ export class ProgressService {
   constructor(private prisma: PrismaService) {}
 
   async getUserProgress(userId: string): Promise<UserProgressResponseDto> {
-    const progress = await this.prisma.userProgress.findUnique({
+    let progress = await this.prisma.userProgress.findUnique({
       where: { userId },
     });
 
+    // Create default progress if none exists (for new users)
     if (!progress) {
-      throw new NotFoundException('User progress not found');
+      progress = await this.prisma.userProgress.create({
+        data: {
+          userId,
+          currentXP: 0,
+          currentLevel: 1,
+          currentStreak: 0,
+          longestStreak: 0,
+          lastActiveDate: new Date(),
+          lessonsCompleted: 0,
+          exercisesCompleted: 0,
+          totalTimeSpent: 0,
+          averageAccuracy: 0,
+        },
+      });
     }
 
     // Calculate level progress
@@ -67,13 +81,8 @@ export class ProgressService {
   }
 
   async updateStreak(userId: string) {
-    const progress = await this.prisma.userProgress.findUnique({
-      where: { userId },
-    });
-
-    if (!progress) {
-      throw new NotFoundException('User progress not found');
-    }
+    // Use getUserProgress which will create default if needed
+    const progress = await this.getUserProgress(userId);
 
     const now = new Date();
     const lastActive = progress.lastActiveDate;

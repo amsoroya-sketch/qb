@@ -18,6 +18,7 @@ export declare class JwtStrategy extends JwtStrategy_base {
         progress: {
             id: string;
             createdAt: Date;
+            userId: string;
             updatedAt: Date;
             currentXP: number;
             currentLevel: number;
@@ -28,13 +29,12 @@ export declare class JwtStrategy extends JwtStrategy_base {
             exercisesCompleted: number;
             totalTimeSpent: number;
             averageAccuracy: import("@prisma/client/runtime/library").Decimal;
-            userId: string;
         } | null;
-        id: string;
         email: string;
-        name: string;
         role: import(".prisma/client").$Enums.UserRole;
+        id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
     }>;
 }

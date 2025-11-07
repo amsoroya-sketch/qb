@@ -7,7 +7,6 @@ const cache_service_1 = require("../../common/cache/cache.service");
 const common_1 = require("@nestjs/common");
 describe('ExercisesService', () => {
     let service;
-    let prismaService;
     const mockPrismaService = {
         exercise: {
             findMany: jest.fn(),
@@ -44,7 +43,6 @@ describe('ExercisesService', () => {
             ],
         }).compile();
         service = module.get(exercises_service_1.ExercisesService);
-        prismaService = module.get(prisma_service_1.PrismaService);
     });
     afterEach(() => {
         jest.clearAllMocks();

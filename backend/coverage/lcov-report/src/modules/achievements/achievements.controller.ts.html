@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/19</span>
+                <span class='fraction'>0/23</span>
             </div>
         
             
@@ -39,14 +39,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>0/8</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/17</span>
+                <span class='fraction'>0/21</span>
             </div>
         
             
@@ -120,13 +120,16 @@
 <a name='L55'></a><a href='#L55'>55</a>
 <a name='L56'></a><a href='#L56'>56</a>
 <a name='L57'></a><a href='#L57'>57</a>
-<a name='L58'></a><a href='#L58'>58</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -154,6 +157,21 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -177,13 +195,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import {</span>
-  Controller,
-  Get,
-  Post,
-  Param,
-  UseGuards,
-} from '@nestjs/common';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import { Controller, Get, Post, Param, UseGuards } from '@nestjs/common';</span>
 <span class="cstat-no" title="statement not covered" >import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';</span>
 <span class="cstat-no" title="statement not covered" >import { AchievementsService } from './achievements.service';</span>
 <span class="cstat-no" title="statement not covered" >import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';</span>
@@ -203,9 +215,24 @@ export <span class="cstat-no" title="statement not covered" >class <span class="
 &nbsp;
   @Get('stats')
   @ApiOperation({ summary: 'Get achievement statistics' })
-  @ApiResponse({ status: 200, description: 'Returns achievement stats' })
+  @ApiResponse({ status: 200, description: 'Returns achievement stats with category breakdown' })
 <span class="fstat-no" title="function not covered" >  async <span class="cstat-no" title="statement not covered" ></span>getStats() {</span>
 <span class="cstat-no" title="statement not covered" >    return this.achievementsService.getAchievementStats();</span>
+  }
+&nbsp;
+  @Get('categories')
+  @ApiOperation({ summary: 'Get all achievement categories' })
+  @ApiResponse({ status: 200, description: 'Returns list of achievement categories' })
+<span class="fstat-no" title="function not covered" >  async <span class="cstat-no" title="statement not covered" ></span>getCategories() {</span>
+<span class="cstat-no" title="statement not covered" >    return this.achievementsService.getAchievementCategories();</span>
+  }
+&nbsp;
+  @Get('categories/:category')
+  @ApiOperation({ summary: 'Get achievements by category' })
+  @ApiResponse({ status: 200, description: 'Returns achievements in the specified category' })
+  @ApiResponse({ status: 404, description: 'Category not found or no achievements in category' })
+<span class="fstat-no" title="function not covered" >  async <span class="cstat-no" title="statement not covered" ></span>getAchievementsByCategory(@Param('category') category: string) {</span>
+<span class="cstat-no" title="statement not covered" >    return this.achievementsService.getAchievementsByCategory(category);</span>
   }
 &nbsp;
   @Get(':id')
@@ -241,7 +268,7 @@ export <span class="cstat-no" title="statement not covered" >class <span class="
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-04T15:50:39.525Z
+                at 2025-11-06T17:25:31.783Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

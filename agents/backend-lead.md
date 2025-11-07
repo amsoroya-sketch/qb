@@ -192,8 +192,9 @@
    - Avoid N+1 queries (use eager loading)
 
 ### Validation Checklist (Before Returning Work)
+- [ ] **ZERO ERROR POLICY**: `npm run lint` passes with 0 errors, 0 warnings
 - [ ] `npm run build` completes with 0 errors
-- [ ] `npm run lint` passes with 0 warnings
+- [ ] `npm run type-check` passes with 0 type errors
 - [ ] `npm test` shows 100% passing tests
 - [ ] All API endpoints documented in Swagger
 - [ ] All endpoints require authentication (except public routes)
@@ -205,6 +206,42 @@
 - [ ] API response time <50ms (check with profiling)
 - [ ] Code follows project coding standards
 - [ ] No TODO comments without GitHub issue links
+
+### Code Quality Standards (ZERO ERROR POLICY)
+**Critical Rules - NO EXCEPTIONS**:
+1. **No Unused Imports**: Remove ALL unused imports immediately
+   - ❌ `import { RefreshTokenDto } from './dto/refresh-token.dto';` // Never used
+   - ✅ Only import what you actually use
+
+2. **No Unused Variables**: Remove or prefix with underscore
+   - ❌ `const { password, ...user } = data;` // password never used
+   - ✅ `const { password: _password, ...user } = data;` // Explicitly ignored
+   - ✅ Add `// eslint-disable-next-line @typescript-eslint/no-unused-vars` if intentional
+
+3. **No require() Statements**: Always use ES6 imports
+   - ❌ `const crypto = require('crypto');`
+   - ✅ `import * as crypto from 'crypto';`
+
+4. **No Object Type**: Use lowercase object or specific types
+   - ❌ `function decorator(object: Object, prop: string)`
+   - ✅ `function decorator(object: object, prop: string)`
+
+5. **Test File Mocks**: Remove unused service mocks in tests
+   - ❌ `const prismaService = module.get<PrismaService>(PrismaService);` // Never used
+   - ✅ Only extract services you actually use in tests
+
+6. **Unused Interface Definitions**: Remove completely
+   - ❌ `interface SurahMetadata { }` // Defined but never used
+   - ✅ Remove the interface entirely
+
+### Pre-Commit Verification Commands
+```bash
+# MUST pass ALL of these with ZERO errors:
+npm run lint              # ESLint: 0 errors, 0 warnings
+npm run type-check        # TypeScript: 0 type errors
+npm run test              # Jest: 100% passing tests
+npm run build             # Build: Must succeed
+```
 
 ### After Completion
 1. **Create Pull Request** with:

@@ -15,13 +15,6 @@ jest.mock('bcrypt');
 
 describe('AuthService', () => {
   let service: AuthService;
-  let prismaService: PrismaService;
-  let jwtService: JwtService;
-  let configService: ConfigService;
-  let tokenBlacklistService: TokenBlacklistService;
-  let accountLockoutService: AccountLockoutService;
-  let refreshTokenService: RefreshTokenService;
-  let auditLogService: AuditLogService;
 
   const mockPrismaService = {
     user: {
@@ -106,13 +99,6 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    prismaService = module.get<PrismaService>(PrismaService);
-    jwtService = module.get<JwtService>(JwtService);
-    configService = module.get<ConfigService>(ConfigService);
-    tokenBlacklistService = module.get<TokenBlacklistService>(TokenBlacklistService);
-    accountLockoutService = module.get<AccountLockoutService>(AccountLockoutService);
-    refreshTokenService = module.get<RefreshTokenService>(RefreshTokenService);
-    auditLogService = module.get<AuditLogService>(AuditLogService);
   });
 
   afterEach(() => {

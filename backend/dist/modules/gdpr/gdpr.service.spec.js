@@ -6,8 +6,6 @@ const prisma_service_1 = require("../../prisma/prisma.service");
 const audit_log_service_1 = require("../../common/middleware/audit-log.service");
 describe('GdprService', () => {
     let service;
-    let prismaService;
-    let auditLogService;
     const mockPrismaService = {
         user: {
             findUnique: jest.fn(),
@@ -56,8 +54,6 @@ describe('GdprService', () => {
             ],
         }).compile();
         service = module.get(gdpr_service_1.GdprService);
-        prismaService = module.get(prisma_service_1.PrismaService);
-        auditLogService = module.get(audit_log_service_1.AuditLogService);
     });
     afterEach(() => {
         jest.clearAllMocks();

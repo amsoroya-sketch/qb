@@ -8,8 +8,6 @@ const refresh_token_service_1 = require("./refresh-token.service");
 const prisma_service_1 = require("../../../prisma/prisma.service");
 describe('RefreshTokenService', () => {
     let service;
-    let prismaService;
-    let jwtService;
     const mockPrismaService = {
         refreshToken: {
             create: jest.fn(),
@@ -52,8 +50,6 @@ describe('RefreshTokenService', () => {
             ],
         }).compile();
         service = module.get(refresh_token_service_1.RefreshTokenService);
-        prismaService = module.get(prisma_service_1.PrismaService);
-        jwtService = module.get(jwt_1.JwtService);
     });
     afterEach(() => {
         jest.clearAllMocks();

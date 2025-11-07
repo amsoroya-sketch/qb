@@ -254,9 +254,10 @@
    - Test with screen readers
 
 ### Validation Checklist (Before Returning Work)
+- [ ] **ZERO ERROR POLICY**: `npm run lint` passes with 0 errors, 0 warnings
+- [ ] **ZERO ERROR POLICY**: `npm run type-check` passes with 0 TypeScript errors
 - [ ] `npm run build` completes with 0 errors
-- [ ] `npm run lint` passes with 0 warnings
-- [ ] `npm test` shows 100% passing tests
+- [ ] `npm run test` shows 100% passing tests
 - [ ] All pages responsive (mobile 375px, tablet 768px, desktop 1440px)
 - [ ] RTL layout works correctly (test with `dir="rtl"`)
 - [ ] Arabic text renders correctly with diacritics
@@ -266,8 +267,45 @@
 - [ ] Lighthouse score >90 (Performance, Accessibility, Best Practices, SEO)
 - [ ] All images optimized (<500KB per image)
 - [ ] Page load time <2 seconds (3G network simulation)
-- [ ] No TypeScript errors (`tsc --noEmit` passes)
 - [ ] Code follows project coding standards (Prettier, ESLint)
+
+### Code Quality Standards (ZERO ERROR POLICY)
+**Critical Rules - NO EXCEPTIONS**:
+1. **No Unused Imports**: Remove ALL unused imports immediately
+   - ❌ `import { useState, useEffect, useMemo } from 'react';` // useMemo never used
+   - ✅ `import { useState, useEffect } from 'react';` // Only what's used
+
+2. **No Any Types**: Never use `any`, use proper TypeScript types
+   - ❌ `const data: any = response.json();`
+   - ✅ `const data: User = response.json();` // Proper interface
+   - ✅ `const data: unknown = response.json();` // If truly unknown, validate first
+
+3. **No Console Statements**: Remove all console.log in production code
+   - ❌ `console.log('Debug:', data);`
+   - ✅ Use proper error logging service
+   - ✅ Or wrap: `if (process.env.NODE_ENV === 'development') console.log('Debug:', data);`
+
+4. **Component Memoization**: Memoize expensive components
+   - ❌ Large lists without React.memo
+   - ✅ `export const ItemCard = memo(function ItemCard(props) { ... });`
+
+5. **Missing Dependencies in useEffect**: Fix all exhaustive-deps warnings
+   - ❌ `useEffect(() => { fetchData(userId); }, []);` // userId missing
+   - ✅ `useEffect(() => { fetchData(userId); }, [userId]);`
+   - ✅ Or use eslint-disable with justification comment
+
+6. **Use Next.js Image**: Never use <img> tag
+   - ❌ `<img src="/logo.png" alt="Logo" />`
+   - ✅ `<Image src="/logo.png" alt="Logo" width={100} height={100} />`
+
+### Pre-Commit Verification Commands
+```bash
+# MUST pass ALL of these with ZERO errors:
+npm run lint              # ESLint: 0 errors, 0 warnings
+npm run type-check        # TypeScript: 0 type errors
+npm run test              # Jest/Playwright: 100% passing tests
+npm run build             # Build: Must succeed
+```
 
 ### After Completion
 1. **Create Pull Request** with:

@@ -6,7 +6,6 @@ import { NotFoundException } from '@nestjs/common';
 
 describe('VersesService', () => {
   let service: VersesService;
-  let prismaService: PrismaService;
 
   const mockPrismaService = {
     quranVerse: {
@@ -47,7 +46,6 @@ describe('VersesService', () => {
     }).compile();
 
     service = module.get<VersesService>(VersesService);
-    prismaService = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {

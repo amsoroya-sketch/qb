@@ -463,7 +463,16 @@
 <a name='L398'></a><a href='#L398'>398</a>
 <a name='L399'></a><a href='#L399'>399</a>
 <a name='L400'></a><a href='#L400'>400</a>
-<a name='L401'></a><a href='#L401'>401</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L401'></a><a href='#L401'>401</a>
+<a name='L402'></a><a href='#L402'>402</a>
+<a name='L403'></a><a href='#L403'>403</a>
+<a name='L404'></a><a href='#L404'>404</a>
+<a name='L405'></a><a href='#L405'>405</a>
+<a name='L406'></a><a href='#L406'>406</a>
+<a name='L407'></a><a href='#L407'>407</a>
+<a name='L408'></a><a href='#L408'>408</a>
+<a name='L409'></a><a href='#L409'>409</a>
+<a name='L410'></a><a href='#L410'>410</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -497,6 +506,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -522,8 +532,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -663,9 +671,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -716,6 +721,12 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -726,6 +737,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -844,9 +865,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -889,7 +907,8 @@
  * Configuration
  */
 const CONFIG = <span class="cstat-no" title="statement not covered" >{</span>
-  MORPHOLOGY_FILE: '/home/dev/Development/arQ/quran-morphology-data/quranic-corpus-morphology-0.4.txt',
+  MORPHOLOGY_FILE:
+    '/home/dev/Development/arQ/quran-morphology-data/quranic-corpus-morphology-0.4.txt',
   OUTPUT_DIR: path.join(__dirname, '../../../data/raw/corpus-morphology'),
 };
 &nbsp;
@@ -921,9 +940,7 @@ const CONFIG = <span class="cstat-no" title="statement not covered" >{</span>
 <span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (current % 1000 === 0 || current === total) {</span>
       const percentage = <span class="cstat-no" title="statement not covered" >((current / total) * 100).toFixed(1);</span>
       const elapsed = <span class="cstat-no" title="statement not covered" >((Date.now() - this.startTime) / 1000).toFixed(2);</span>
-<span class="cstat-no" title="statement not covered" >      console.log(</span>
-        `[${elapsed}s] ⏳ Progress: ${current}/${total} (${percentage}%) - ${item}`
-      );
+<span class="cstat-no" title="statement not covered" >      console.log(`[${elapsed}s] ⏳ Progress: ${current}/${total} (${percentage}%) - ${item}`);</span>
     }
   }
 }
@@ -1068,10 +1085,7 @@ const logger = <span class="cstat-no" title="statement not covered" >new Logger(
   /**
    * Build a complete word from its segments
    */
-  private <span class="fstat-no" title="function not covered" >buildWordFromSegments(</span>
-    location: string,
-    segments: CorpusMorphemeSegment[]
-  ): CorpusWord {
+  private <span class="fstat-no" title="function not covered" >buildWordFromSegments(</span>location: string, segments: CorpusMorphemeSegment[]): CorpusWord {
     const [surah, verse, wordPosition] = <span class="cstat-no" title="statement not covered" >location.split(':').map(Number);</span>
 &nbsp;
     // Sort segments by segment number
@@ -1125,7 +1139,23 @@ const logger = <span class="cstat-no" title="statement not covered" >new Logger(
       case: features.NOM ? 'NOM' : features.ACC ? 'ACC' : features.GEN ? 'GEN' : undefined,
       aspect: features.PERF ? 'PERF' : features.IMPF ? 'IMPF' : features.IMPV ? 'IMPV' : undefined,
       voice: features.ACT ? 'ACT' : features.PASS ? 'PASS' : undefined,
-      person: features['1P'] ? '1' : features['2MS'] || features['2FS'] || features['2MD'] || features['2FD'] || features['2MP'] || features['2FP'] ? '2' : features['3MS'] || features['3FS'] || features['3MD'] || features['3FD'] || features['3MP'] || features['3FP'] ? '3' : undefined,
+      person: features['1P']
+        ? '1'
+        : features['2MS'] ||
+            features['2FS'] ||
+            features['2MD'] ||
+            features['2FD'] ||
+            features['2MP'] ||
+            features['2FP']
+          ? '2'
+          : features['3MS'] ||
+              features['3FS'] ||
+              features['3MD'] ||
+              features['3FD'] ||
+              features['3MP'] ||
+              features['3FP']
+            ? '3'
+            : undefined,
       rawFeatures: segments.map(<span class="fstat-no" title="function not covered" >(s</span>) =&gt; <span class="cstat-no" title="statement not covered" >s.features)</span>.join(' | '),
       segments,
     };
@@ -1243,10 +1273,7 @@ const logger = <span class="cstat-no" title="statement not covered" >new Logger(
       });
 &nbsp;
       // Save to JSON
-      const outputPath = <span class="cstat-no" title="statement not covered" >path.join(</span>
-        CONFIG.OUTPUT_DIR,
-        'parsed-morphology.json'
-      );
+      const outputPath = <span class="cstat-no" title="statement not covered" >path.join(CONFIG.OUTPUT_DIR, 'parsed-morphology.json');</span>
 <span class="cstat-no" title="statement not covered" >      await parser.saveToFile(data, outputPath);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      logger.success('\\n✓ Parsing completed successfully!');</span>
@@ -1270,7 +1297,7 @@ const logger = <span class="cstat-no" title="statement not covered" >new Logger(
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-04T15:50:39.525Z
+                at 2025-11-06T17:25:31.783Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

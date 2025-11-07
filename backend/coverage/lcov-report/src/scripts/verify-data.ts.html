@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/26</span>
+                <span class='fraction'>0/27</span>
             </div>
         
             
@@ -116,7 +116,13 @@
 <a name='L51'></a><a href='#L51'>51</a>
 <a name='L52'></a><a href='#L52'>52</a>
 <a name='L53'></a><a href='#L53'>53</a>
-<a name='L54'></a><a href='#L54'>54</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -124,21 +130,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -154,6 +145,25 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -167,6 +177,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import { PrismaClient } from '@prisma/client';</span>
@@ -175,31 +187,35 @@ const prisma = <span class="cstat-no" title="statement not covered" >new PrismaC
 &nbsp;
 async function <span class="fstat-no" title="function not covered" >verify(</span>) {
 <span class="cstat-no" title="statement not covered" >  console.log('=== DATA INTEGRITY VERIFICATION ===\n');</span>
-  
+&nbsp;
   // Count check
   const verses = <span class="cstat-no" title="statement not covered" >await prisma.quranVerse.count();</span>
   const words = <span class="cstat-no" title="statement not covered" >await prisma.verseWord.count();</span>
 <span class="cstat-no" title="statement not covered" >  console.log('Total verses:', verses);</span>
 <span class="cstat-no" title="statement not covered" >  console.log('Total words:', words);</span>
-<span class="cstat-no" title="statement not covered" >  console.log(verses === 6236 &amp;&amp; words === 77429 ? '✅ Count check PASSED' : '❌ Count check FAILED');</span>
-  
+<span class="cstat-no" title="statement not covered" >  console.log(</span>
+    verses === 6236 &amp;&amp; words === 77429 ? '✅ Count check PASSED' : '❌ Count check FAILED',
+  );
+&nbsp;
   // Sample verse (Al-Fatiha 1:1)
 <span class="cstat-no" title="statement not covered" >  console.log('\n=== Sample Verse: Al-Fatiha 1:1 (Bismillah) ===');</span>
   const verse = <span class="cstat-no" title="statement not covered" >await prisma.quranVerse.findFirst({</span>
     where: { surahNumber: 1, verseNumber: 1 },
     include: { words: { orderBy: { position: 'asc' } } },
   });
-  
+&nbsp;
 <span class="cstat-no" title="statement not covered" >  <span class="missing-if-branch" title="if path not taken" >I</span>if (verse) {</span>
 <span class="cstat-no" title="statement not covered" >    console.log('Arabic:', verse.textArabic);</span>
 <span class="cstat-no" title="statement not covered" >    console.log('Translation:', verse.translation);</span>
 <span class="cstat-no" title="statement not covered" >    console.log('Words:', verse.words.length);</span>
 <span class="cstat-no" title="statement not covered" >    console.log('\nWord Breakdown:');</span>
-<span class="cstat-no" title="statement not covered" >    verse.words.forEach(<span class="fstat-no" title="function not covered" >w </span>=&gt; {</span>
-<span class="cstat-no" title="statement not covered" >      console.log(`  [${w.position}] ${w.arabicText} → ${w.translation} (${w.posType}, root: ${w.root || 'N/A'})`);</span>
+<span class="cstat-no" title="statement not covered" >    verse.words.forEach(<span class="fstat-no" title="function not covered" >(w</span>) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >      console.log(</span>
+        `  [${w.position}] ${w.arabicText} → ${w.translation} (${w.posType}, root: ${w.root || 'N/A'})`,
+      );
     });
   }
-  
+&nbsp;
   // POS distribution
 <span class="cstat-no" title="statement not covered" >  console.log('\n=== POS Distribution ===');</span>
   const posTypes = <span class="cstat-no" title="statement not covered" >await prisma.verseWord.groupBy({</span>
@@ -208,20 +224,22 @@ async function <span class="fstat-no" title="function not covered" >verify(</spa
     orderBy: { _count: { id: 'desc' } },
     take: 10,
   });
-  
-<span class="cstat-no" title="statement not covered" >  posTypes.forEach(<span class="fstat-no" title="function not covered" >p </span>=&gt; {</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  posTypes.forEach(<span class="fstat-no" title="function not covered" >(p</span>) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    console.log(`${p.posType}: ${p._count.id.toLocaleString()}`);</span>
   });
-  
+&nbsp;
   // Words with roots
   const wordsWithRoots = <span class="cstat-no" title="statement not covered" >await prisma.verseWord.count({ where: { root: { not: null } } });</span>
   const coverage = <span class="cstat-no" title="statement not covered" >((wordsWithRoots / words) * 100).toFixed(2);</span>
 <span class="cstat-no" title="statement not covered" >  console.log(`\nWords with root data: ${wordsWithRoots.toLocaleString()} (${coverage}%)`);</span>
-  
+&nbsp;
 <span class="cstat-no" title="statement not covered" >  console.log('\n✅ Data verification complete!');</span>
 }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >verify().catch(console.error).finally(<span class="fstat-no" title="function not covered" >() =</span>&gt; <span class="cstat-no" title="statement not covered" >prisma.$disconnect())</span>;</span>
+<span class="cstat-no" title="statement not covered" >verify()</span>
+  .catch(console.error)
+  .finally(<span class="fstat-no" title="function not covered" >() =</span>&gt; <span class="cstat-no" title="statement not covered" >prisma.$disconnect())</span>;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -229,7 +247,7 @@ async function <span class="fstat-no" title="function not covered" >verify(</spa
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-04T15:50:39.525Z
+                at 2025-11-06T17:25:31.783Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

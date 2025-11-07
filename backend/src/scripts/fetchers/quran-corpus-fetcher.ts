@@ -15,12 +15,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import {
-  CorpusVerseData,
-  CorpusWordData,
-  SurahMetadata,
-  MVP_SURAHS,
-} from '../types/quran-corpus.types';
+import { CorpusVerseData, CorpusWordData, MVP_SURAHS } from '../types/quran-corpus.types';
 
 /**
  * Fetcher Configuration

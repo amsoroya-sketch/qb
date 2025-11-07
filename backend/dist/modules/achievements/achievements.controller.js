@@ -37,6 +37,9 @@ let AchievementsController = class AchievementsController {
     async findOne(id) {
         return this.achievementsService.findOne(id);
     }
+    async getMyStats(userId) {
+        return this.achievementsService.getUserStats(userId);
+    }
     async getMyAchievements(userId) {
         return this.achievementsService.getUserAchievements(userId);
     }
@@ -89,6 +92,17 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AchievementsController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Get)('me/stats'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiOperation)({ summary: 'Get user achievement statistics' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Returns user achievement stats with rarity breakdown' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('sub')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AchievementsController.prototype, "getMyStats", null);
 __decorate([
     (0, common_1.Get)('me/unlocked'),
     (0, swagger_1.ApiBearerAuth)(),

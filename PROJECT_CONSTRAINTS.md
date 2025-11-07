@@ -374,9 +374,11 @@ export async function GET(request, { params }) {
 
 ## 3. SECURITY CONSTRAINTS
 
+⚠️ **CRITICAL: Security Grade A- (92/100)** - See COMPREHENSIVE_SECURITY_ANALYSIS.md
+
 ### 3.1 Environment Variables
 
-**NEVER hardcode credentials**
+**NEVER hardcode credentials** ⚠️ **Recent incident: .env exposed with 5 JWT secrets**
 
 ```typescript
 // ✅ CORRECT: Use environment variables
@@ -390,6 +392,8 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   NEXTAUTH_SECRET: z.string().min(32),
   NEXTAUTH_URL: z.string().url(),
+  JWT_ACCESS_SECRET: z.string().min(64), // 256-bit minimum
+  JWT_REFRESH_SECRET: z.string().min(64),
 });
 
 const env = envSchema.parse(process.env);
@@ -404,18 +408,38 @@ const dbUrl = 'postgresql://user:password@localhost:5432/arq';
 **.env.local** (NEVER commit):
 ```env
 DATABASE_URL="postgresql://..."
+JWT_SECRET="generate-with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+ACCESS_TOKEN_SECRET="generate-with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+REFRESH_TOKEN_SECRET="generate-with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+JWT_ACCESS_SECRET="generate-with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+JWT_REFRESH_SECRET="generate-with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+REDIS_PASSWORD="your-redis-password"
 NEXTAUTH_SECRET="generate-with: openssl rand -base64 32"
 NEXTAUTH_URL="http://localhost:3000"
 ```
 
 **.env.example** (Commit this):
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/arq"
+# Generate all secrets with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+DATABASE_URL="postgresql://postgres:YOUR_DB_PASSWORD@localhost:5432/arq_dev"
+JWT_SECRET="your_jwt_secret_here_generate_with_crypto_randomBytes_32"
+ACCESS_TOKEN_SECRET="your_access_token_secret_generate_64_chars"
+REFRESH_TOKEN_SECRET="your_refresh_token_secret_generate_64_chars"
+JWT_ACCESS_SECRET="your_jwt_access_secret_generate_64_chars"
+JWT_REFRESH_SECRET="your_jwt_refresh_secret_generate_64_chars"
+REDIS_PASSWORD="your_redis_password_here"
 NEXTAUTH_SECRET="your-secret-here-generate-with-openssl-rand"
 NEXTAUTH_URL="http://localhost:3000"
 ```
 
+**Security Best Practices:**
+- ✅ Use 256-bit (64 hex character) secrets for JWT
+- ✅ Rotate secrets quarterly (see SECURITY.md section on rotation)
+- ✅ Pre-commit hooks prevent .env commits (installed: `.git/hooks/pre-commit`)
+- ✅ Three-layer .gitignore protection (root, backend, frontend)
+
 **Reference:** PROJECT_OVERVIEW.md, Section "Security & Privacy"
+**See Also:** SECURITY_IMPROVEMENTS_SUMMARY.md for secret rotation procedures
 
 ---
 
@@ -531,6 +555,196 @@ const result = await prisma.$queryRawUnsafe(
 ```
 
 **Reference:** PROJECT_OVERVIEW.md, Section "Security Measures"
+
+---
+
+### 3.5 Security Best Practices (From Comprehensive Analysis)
+
+**JWT Token Management:**
+```typescript
+// ✅ Access Token: Short-lived (15 minutes)
+const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {
+  expiresIn: '15m'
+});
+
+// ✅ Refresh Token: Long-lived (7 days) with rotation
+const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
+  expiresIn: '7d'
+});
+
+// Store refresh token hash in database for rotation tracking
+await prisma.refreshToken.create({
+  data: {
+    tokenHash: crypto.createHash('sha256').update(refreshToken).digest('hex'),
+    familyId: generateFamilyId(),
+    userId,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  }
+});
+```
+
+**HttpOnly Cookie Authentication:**
+```typescript
+// ✅ CORRECT: HttpOnly cookies (XSS protection)
+response.cookie('accessToken', accessToken, {
+  httpOnly: true,        // Cannot be accessed by JavaScript
+  secure: isProduction,  // HTTPS only in production
+  sameSite: 'strict',    // CSRF protection
+  maxAge: 15 * 60 * 1000, // 15 minutes
+  path: '/',
+});
+
+response.cookie('refreshToken', refreshToken, {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: 'strict',
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  path: '/api/v1/auth', // Only sent to auth endpoints
+});
+
+// ❌ WRONG: localStorage (XSS vulnerable)
+localStorage.setItem('accessToken', accessToken);
+```
+
+**Password Security:**
+```typescript
+// ✅ CORRECT: Bcrypt with 10 salt rounds
+const hashedPassword = await bcrypt.hash(password, 10);
+
+// ✅ CORRECT: Constant-time comparison
+const valid = await bcrypt.compare(password, user.password);
+
+// ✅ CORRECT: Password complexity requirements
+import { IsStrongPassword } from '@/validators/password-strength';
+
+class RegisterDto {
+  @IsStrongPassword() // Enforces: upper, lower, number, special char
+  password: string;
+}
+```
+
+**Account Lockout:**
+```typescript
+// ✅ CORRECT: Redis-based account lockout (5 attempts, 15 min)
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 15 * 60; // 15 minutes
+
+await accountLockoutService.recordFailedAttempt(email, ipAddress);
+const isLocked = await accountLockoutService.isLocked(email, ipAddress);
+
+if (isLocked) {
+  throw new UnauthorizedException('Account locked. Try again in 15 minutes.');
+}
+```
+
+**Token Blacklist:**
+```typescript
+// ✅ CORRECT: Redis-based token blacklist for logout
+await tokenBlacklistService.blacklistToken(accessToken, expiresIn);
+
+// ✅ CORRECT: Blacklist all user tokens on password change
+await tokenBlacklistService.blacklistAllUserTokens(userId, 7 * 24 * 60 * 60);
+```
+
+**Audit Logging:**
+```typescript
+// ✅ CORRECT: Log all security events
+auditLogService.log({
+  eventType: AuditEventType.LOGIN_SUCCESS,
+  userId,
+  ipAddress: getClientIp(request),
+  userAgent: request.headers['user-agent'],
+  endpoint: '/api/v1/auth/login',
+  method: 'POST',
+  statusCode: 200,
+  metadata: { duration: Date.now() - startTime },
+});
+
+// Event types to log:
+// - LOGIN_SUCCESS, LOGIN_FAILED, LOGOUT
+// - PASSWORD_CHANGE, TOKEN_REFRESH
+// - TOKEN_REUSE_DETECTED (security incident!)
+// - ACCOUNT_LOCKED, ACCESS_DENIED
+// - DATA_EXPORT_REQUESTED, ACCOUNT_DELETED
+```
+
+**GDPR Compliance:**
+```typescript
+// ✅ CORRECT: Data export endpoint (Article 20)
+@Get('gdpr/export')
+async exportUserData(@CurrentUser() userId: string) {
+  return {
+    exportMetadata: {
+      userId,
+      exportedAt: new Date().toISOString(),
+      formatVersion: '1.0',
+    },
+    userData: {
+      profile: await this.getUserProfile(userId),
+      progress: await this.getUserProgress(userId),
+      exercises: await this.getUserExercises(userId),
+      // ... all user data
+    }
+  };
+}
+
+// ✅ CORRECT: Account deletion endpoint (Article 17)
+@Delete('gdpr/delete-account')
+async deleteAccount(@CurrentUser() userId: string) {
+  // Cascade delete all user data
+  await prisma.user.delete({
+    where: { id: userId },
+    // All related data deleted via onDelete: Cascade
+  });
+
+  // Audit log BEFORE deletion
+  await auditLog.log({ eventType: 'ACCOUNT_DELETED', userId });
+}
+```
+
+**Security Headers (Helmet.js):**
+```typescript
+// ✅ CORRECT: Enhanced security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+      fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
+      connectSrc: ["'self'", 'https://api.sentry.io'],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+}));
+```
+
+**Rate Limiting:**
+```typescript
+// ✅ CORRECT: NestJS Throttler
+@Module({
+  imports: [
+    ThrottlerModule.forRoot({
+      ttl: 60,      // Time window (60 seconds)
+      limit: 10,    // Max requests per window
+    }),
+  ],
+})
+
+// Custom rate limit for sensitive operations
+@Throttle(5, 60) // 5 requests per minute
+@Post('password-reset')
+async resetPassword() {}
+```
+
+**Reference:** COMPREHENSIVE_SECURITY_ANALYSIS.md, SECURITY.md
 
 ---
 
@@ -2219,6 +2433,730 @@ This document should be updated when:
 
 ---
 
+---
+
+## 12. CRITICAL TESTING REQUIREMENTS
+
+**Version:** 3.0
+**Last Updated:** 2025-11-07
+**Based On:** Analysis of 283 test failures from production test run
+
+⚠️ **MANDATORY POLICY: 100% Playwright MCP Test Coverage**
+
+**ALL UI features MUST have comprehensive Playwright E2E tests before being considered complete.**
+
+---
+
+### 12.1 Test Execution Requirements
+
+**Before ANY pull request:**
+
+```bash
+# Navigate to frontend
+cd /home/dev/Development/arQ/frontend
+
+# Run ALL E2E tests
+NEXT_PUBLIC_APP_URL=http://localhost:3005 npx playwright test --reporter=list
+
+# REQUIRED: 100% pass rate (0 failures allowed)
+# Current baseline: 3,528 tests
+```
+
+**Test Success Criteria:**
+- ✅ All tests must pass (3,528/3,528)
+- ✅ Zero compilation errors
+- ✅ Zero timeout errors
+- ✅ Test execution < 5 minutes
+
+---
+
+### 12.2 Root Cause Analysis: Never Repeat These Mistakes
+
+**Documented from 2025-11-07 test run with 283 failures:**
+
+#### ❌ ANTI-PATTERN 1: Missing Test Data (150+ failures)
+
+**Symptoms:**
+```
+TimeoutError: locator.waitFor: Timeout 30000ms exceeded
+Cannot find lesson/exercise/achievement elements
+Empty arrays from API endpoints
+```
+
+**Root Cause:**
+- Database not seeded with test data
+- Tests expect lessons, exercises, achievements to exist
+- API returns empty arrays `[]`
+
+**Solution:**
+```bash
+# ALWAYS seed database before running tests
+cd /home/dev/Development/arQ/backend
+npm run seed
+
+# Verify data exists
+npx prisma studio
+```
+
+**Agent Requirement:**
+```typescript
+// BEFORE creating ANY UI feature with database dependencies:
+
+// 1. Check if seed script exists
+if (!fs.existsSync('prisma/seed.ts')) {
+  throw new Error('Create seed script first!');
+}
+
+// 2. Verify test data requirements
+const REQUIRED_TEST_DATA = {
+  lessons: { trackA: 5, trackB: 5 },
+  exercises: { multipleChoice: 10, trueFalse: 10 },
+  achievements: { bronze: 5, silver: 5, gold: 5 },
+};
+
+// 3. Run seed before tests
+await exec('npm run seed');
+
+// 4. Verify data was seeded
+const lessonCount = await prisma.lesson.count();
+if (lessonCount === 0) {
+  throw new Error('Seed failed - no lessons in database');
+}
+```
+
+---
+
+#### ❌ ANTI-PATTERN 2: Form Validation Not Displaying Errors (60+ failures)
+
+**Symptoms:**
+```
+Test expects error message "Invalid email format"
+No error message displayed in UI
+Form submits with invalid data
+```
+
+**Root Cause:**
+- Client-side validation not implemented
+- Server validation errors not captured
+- Error messages not displayed in UI
+
+**Solution - ALWAYS implement BOTH validations:**
+
+```typescript
+// 1. CLIENT-SIDE VALIDATION (immediate feedback)
+const validateLoginForm = (data: LoginData) => {
+  const errors: Record<string, string> = {};
+
+  if (!data.email) {
+    errors.email = 'Email is required';
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    errors.email = 'Invalid email format';
+  }
+
+  if (!data.password) {
+    errors.password = 'Password is required';
+  } else if (data.password.length < 8) {
+    errors.password = 'Password must be at least 8 characters';
+  }
+
+  return errors;
+};
+
+// 2. SERVER-SIDE VALIDATION (security)
+// backend/src/modules/auth/dto/login.dto.ts
+export class LoginDto {
+  @IsEmail({}, { message: 'Invalid email format' })
+  email: string;
+
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters' })
+  password: string;
+}
+
+// 3. DISPLAY ERRORS IN UI (MANDATORY)
+const LoginForm = () => {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleSubmit = async (data: LoginData) => {
+    // Step 1: Client validation
+    const clientErrors = validateLoginForm(data);
+    if (Object.keys(clientErrors).length > 0) {
+      setErrors(clientErrors);
+      return; // STOP if client validation fails
+    }
+
+    try {
+      // Step 2: Submit to server
+      const response = await api.login(data);
+    } catch (error) {
+      // Step 3: Display server errors
+      if (error.response?.data?.errors) {
+        setErrors(error.response.data.errors);
+      }
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <Input
+        name="email"
+        error={errors.email} // MUST display error
+      />
+      {errors.email && ( // MUST show error message
+        <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+      )}
+      <Input
+        name="password"
+        error={errors.password}
+      />
+      {errors.password && (
+        <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+      )}
+      {errors.general && (
+        <Alert variant="error">{errors.general}</Alert>
+      )}
+    </form>
+  );
+};
+```
+
+**Agent Checklist:**
+- [ ] Client validation function created
+- [ ] Server validation DTO created
+- [ ] Error state managed in component
+- [ ] Errors displayed in UI
+- [ ] Test written to verify error display
+
+---
+
+#### ❌ ANTI-PATTERN 3: Missing Dependencies (Build failures)
+
+**Symptoms:**
+```
+Cannot find module '@prisma/client'
+Cannot find module 'prom-client'
+TypeScript compilation fails
+```
+
+**Root Cause:**
+- Package used but not in package.json
+- Dependencies not installed
+
+**Solution:**
+```bash
+# BEFORE using ANY package:
+
+# 1. Check if it exists
+grep "package-name" package.json || echo "Package not found!"
+
+# 2. Install if missing
+npm install package-name
+
+# 3. Verify installation
+npm list package-name
+```
+
+**Agent Requirement:**
+```typescript
+// NEVER use a package without checking installation
+
+// ❌ WRONG
+import { PrismaClient } from '@prisma/client'; // Assumes installed
+
+// ✅ CORRECT
+// 1. Check package.json first
+const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
+if (!packageJson.dependencies['@prisma/client']) {
+  throw new Error('@prisma/client not installed. Run: npm install @prisma/client');
+}
+
+// 2. Then import
+import { PrismaClient } from '@prisma/client';
+```
+
+---
+
+### 12.3 Test Data Requirements (MANDATORY)
+
+**Every test database MUST have:**
+
+```typescript
+// backend/prisma/seed-test-data.ts
+
+export const MINIMUM_TEST_DATA = {
+  users: {
+    demo: {
+      email: 'demo@arq.com',
+      password: 'Demo123!',
+      role: 'STUDENT',
+      emailVerified: true,
+    },
+  },
+
+  lessons: {
+    trackA: {
+      beginner: 5,      // At least 5 Track A beginner lessons
+      intermediate: 5,  // At least 5 Track A intermediate lessons
+      advanced: 3,      // At least 3 Track A advanced lessons
+    },
+    trackB: {
+      beginner: 5,
+      intermediate: 5,
+      advanced: 3,
+    },
+  },
+
+  exercises: {
+    multipleChoice: 10,   // At least 10 multiple choice
+    trueFalse: 10,        // At least 10 true/false
+    fillInBlank: 10,      // At least 10 fill-in-blank
+  },
+
+  achievements: {
+    bronze: 5,     // At least 5 bronze tier
+    silver: 5,     // At least 5 silver tier
+    gold: 5,       // At least 5 gold tier
+    platinum: 3,   // At least 3 platinum tier
+  },
+
+  verses: {
+    minimumSurahs: 1,   // At least Surah Al-Fatiha
+    minimumVerses: 7,   // At least 7 verses
+  },
+
+  progress: {
+    demo: {
+      lessonsCompleted: 2,
+      exercisesCompleted: 5,
+      xpEarned: 500,
+      currentStreak: 3,
+    },
+  },
+};
+```
+
+**Seed Script Template:**
+
+```typescript
+// backend/prisma/seed.ts
+import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  console.log('🌱 Seeding test database...');
+
+  // 1. Create demo user
+  const hashedPassword = await bcrypt.hash('Demo123!', 10);
+  const demoUser = await prisma.user.upsert({
+    where: { email: 'demo@arq.com' },
+    update: {},
+    create: {
+      email: 'demo@arq.com',
+      name: 'Demo User',
+      password: hashedPassword,
+      role: 'STUDENT',
+      emailVerified: true,
+    },
+  });
+  console.log('✅ Demo user created');
+
+  // 2. Create Track A lessons
+  for (let i = 1; i <= 5; i++) {
+    await prisma.lesson.create({
+      data: {
+        title: `Track A - Beginner Lesson ${i}`,
+        track: 'A',
+        difficulty: 'BEGINNER',
+        content: { /* ... */ },
+      },
+    });
+  }
+  console.log('✅ Track A lessons created');
+
+  // 3. Create exercises
+  // 4. Create achievements
+  // 5. Create progress data
+
+  console.log('✅ Database seeded successfully');
+}
+
+main()
+  .catch((e) => {
+    console.error('❌ Seed failed:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+```
+
+---
+
+### 12.4 Test Writing Standards
+
+**EVERY new feature MUST include these test types:**
+
+#### 1. Display Tests
+```typescript
+test('should display all required elements', async ({ page }) => {
+  await page.goto('/achievements');
+
+  // Verify page loads
+  await expect(page.locator('h1')).toContainText('Achievements');
+
+  // Verify all UI elements present
+  await expect(page.locator('[data-testid="achievement-card"]')).toBeVisible();
+  await expect(page.locator('[data-testid="filter-tabs"]')).toBeVisible();
+  await expect(page.locator('[data-testid="stats-cards"]')).toBeVisible();
+});
+```
+
+#### 2. Interaction Tests
+```typescript
+test('should filter achievements', async ({ page }) => {
+  await page.goto('/achievements');
+
+  // Click filter
+  await page.locator('[data-testid="filter-unlocked"]').click();
+
+  // Verify filtered results
+  const achievements = page.locator('[data-testid="achievement-card"]');
+  await expect(achievements).toHaveCount(5); // Expecting 5 unlocked
+});
+```
+
+#### 3. Validation Tests
+```typescript
+test('should show validation error for invalid email', async ({ page }) => {
+  await page.goto('/login');
+
+  // Enter invalid email
+  await page.fill('[name="email"]', 'invalid-email');
+  await page.click('[type="submit"]');
+
+  // Verify error message
+  await expect(page.locator('.error-message')).toContainText('Invalid email format');
+});
+```
+
+#### 4. API Integration Tests
+```typescript
+test('should handle API error gracefully', async ({ page }) => {
+  // Mock API error
+  await page.route('/api/v1/achievements', route => {
+    route.fulfill({ status: 500, body: JSON.stringify({ error: 'Server error' }) });
+  });
+
+  await page.goto('/achievements');
+
+  // Verify error state displayed
+  await expect(page.locator('[data-testid="error-message"]')).toBeVisible();
+});
+```
+
+#### 5. Responsive Tests
+```typescript
+test('should work on mobile viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE
+
+  await page.goto('/achievements');
+
+  // Verify mobile layout
+  await expect(page.locator('[data-testid="mobile-menu"]')).toBeVisible();
+});
+```
+
+#### 6. Performance Tests
+```typescript
+test('should load page quickly', async ({ page }) => {
+  const startTime = Date.now();
+
+  await page.goto('/achievements');
+  await page.waitForSelector('[data-testid="achievement-card"]');
+
+  const loadTime = Date.now() - startTime;
+  expect(loadTime).toBeLessThan(3000); // < 3 seconds
+});
+```
+
+---
+
+### 12.5 Agent Development Workflow with Tests
+
+**MANDATORY workflow for ALL agents:**
+
+```
+1. REQUIREMENTS GATHERING
+   ├─ Read PROJECT_CONSTRAINTS.md (this file)
+   ├─ Identify required test data
+   ├─ List validation requirements
+   └─ Plan test scenarios
+
+2. IMPLEMENT BACKEND (if needed)
+   ├─ Create Prisma models
+   ├─ Create API endpoints with validation
+   ├─ Add to seed script
+   └─ Run: npm run seed
+
+3. IMPLEMENT FRONTEND
+   ├─ Create components
+   ├─ Add form validation (client + server)
+   ├─ Add error handling
+   ├─ Add loading states
+   └─ Add accessibility features
+
+4. WRITE TESTS (BEFORE considering feature complete)
+   ├─ Display tests (all elements visible)
+   ├─ Interaction tests (user workflows)
+   ├─ Validation tests (error messages)
+   ├─ API integration tests (loading, errors)
+   ├─ Responsive tests (mobile, tablet)
+   └─ Performance tests (page load)
+
+5. VERIFY TESTS PASS
+   ├─ Run: npm run type-check (0 errors)
+   ├─ Run: npm run lint (0 warnings)
+   ├─ Run: npm run seed (verify data)
+   ├─ Run: npm run test:e2e (0 failures)
+   └─ Fix any failures (DO NOT proceed with failures)
+
+6. AGENT SELF-VALIDATION CHECKLIST
+   ├─ [ ] All tests pass (0 failures)
+   ├─ [ ] Test data seeded successfully
+   ├─ [ ] Form validation working (client + server)
+   ├─ [ ] Error messages displayed in UI
+   ├─ [ ] No missing dependencies
+   ├─ [ ] No TypeScript errors
+   ├─ [ ] No console.log statements
+   └─ [ ] Feature works on mobile
+
+7. RETURN TO PM
+   ├─ Provide test results summary
+   ├─ List any warnings or issues
+   └─ Confirm 100% test pass rate
+```
+
+---
+
+### 12.6 Common Test Failures and Solutions
+
+#### Failure 1: "Element not found"
+```
+TimeoutError: locator.waitFor: Timeout 30000ms exceeded
+```
+
+**Solution:**
+```typescript
+// Check if test data exists
+const lessonCount = await prisma.lesson.count();
+if (lessonCount === 0) {
+  throw new Error('No lessons in database. Run: npm run seed');
+}
+
+// Use proper selectors
+await page.waitForSelector('[data-testid="lesson-card"]', {
+  timeout: 10000 // Give it enough time
+});
+```
+
+#### Failure 2: "Validation error not displayed"
+```
+Expected error message, got nothing
+```
+
+**Solution:**
+```typescript
+// ALWAYS display errors in UI
+{errors.email && (
+  <p className="text-sm text-red-500 mt-1" data-testid="email-error">
+    {errors.email}
+  </p>
+)}
+
+// Test can find error
+await expect(page.locator('[data-testid="email-error"]')).toBeVisible();
+```
+
+#### Failure 3: "API returns 404"
+```
+API endpoint /api/v1/lessons returns 404
+```
+
+**Solution:**
+```typescript
+// Verify API route exists
+// app/api/v1/lessons/route.ts
+export async function GET(request: Request) {
+  const lessons = await prisma.lesson.findMany();
+  return NextResponse.json(lessons);
+}
+```
+
+---
+
+### 12.7 Test Coverage Requirements
+
+**Minimum coverage for each feature:**
+
+| Feature Type | Minimum Tests Required |
+|--------------|------------------------|
+| Authentication | 15+ tests (login, register, validation, errors) |
+| CRUD Feature | 10+ tests (create, read, update, delete, validation) |
+| List/Browse | 8+ tests (display, filter, search, pagination) |
+| Form | 12+ tests (display, validation, submit, errors) |
+| Dashboard | 6+ tests (display, stats, navigation) |
+
+**Example: Login Feature**
+- ✅ Display login form (1 test)
+- ✅ Login with valid credentials (1 test)
+- ✅ Show error for invalid email (1 test)
+- ✅ Show error for wrong password (1 test)
+- ✅ Show error for empty fields (1 test)
+- ✅ Password visibility toggle (1 test)
+- ✅ Remember me checkbox (1 test)
+- ✅ Forgot password link (1 test)
+- ✅ Navigate to register (1 test)
+- ✅ API error handling (500, 404) (2 tests)
+- ✅ Loading state (1 test)
+- ✅ Session persistence (1 test)
+- ✅ Redirect after login (1 test)
+- ✅ Mobile responsive (1 test)
+- ✅ Accessibility (1 test)
+
+**Total: 15 tests minimum**
+
+---
+
+### 12.8 Pre-Commit Checklist
+
+**Before EVERY commit:**
+
+```bash
+# 1. Type check
+cd backend && npm run type-check
+cd frontend && npm run type-check
+
+# 2. Lint
+cd backend && npm run lint
+cd frontend && npm run lint
+
+# 3. Seed database (if tests need data)
+cd backend && npm run seed
+
+# 4. Run E2E tests
+cd frontend && NEXT_PUBLIC_APP_URL=http://localhost:3005 npx playwright test
+
+# 5. Verify results
+# ✅ 0 TypeScript errors
+# ✅ 0 ESLint warnings
+# ✅ All tests passing (3,528/3,528)
+# ✅ No timeouts
+```
+
+**If ANY check fails: DO NOT COMMIT**
+
+---
+
+### 12.9 Test Data Validation Script
+
+**Create this helper script:**
+
+```typescript
+// scripts/validate-test-data.ts
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function validateTestData() {
+  console.log('🔍 Validating test data...\n');
+
+  const checks = {
+    users: await prisma.user.count(),
+    lessons: await prisma.lesson.count(),
+    exercises: await prisma.exercise.count(),
+    achievements: await prisma.achievement.count(),
+  };
+
+  const requirements = {
+    users: 1,
+    lessons: 20, // 5 beginner + 5 intermediate + 3 advanced × 2 tracks
+    exercises: 30, // 10 multiple choice + 10 true/false + 10 fill-in-blank
+    achievements: 18, // 5 bronze + 5 silver + 5 gold + 3 platinum
+  };
+
+  let allPassed = true;
+
+  for (const [key, count] of Object.entries(checks)) {
+    const required = requirements[key];
+    const status = count >= required ? '✅' : '❌';
+
+    console.log(`${status} ${key}: ${count}/${required}`);
+
+    if (count < required) {
+      allPassed = false;
+    }
+  }
+
+  if (!allPassed) {
+    console.error('\n❌ Test data validation failed!');
+    console.error('Run: npm run seed');
+    process.exit(1);
+  }
+
+  console.log('\n✅ Test data validation passed!');
+}
+
+validateTestData();
+```
+
+**Run before tests:**
+```bash
+npx ts-node scripts/validate-test-data.ts
+```
+
+---
+
+### 12.10 Quick Reference: Test Failure Patterns
+
+| Error Message | Root Cause | Solution |
+|---------------|------------|----------|
+| `TimeoutError: locator.waitFor` | Missing test data | Run `npm run seed` |
+| `Expected error, got nothing` | Validation not displaying | Add error display in UI |
+| `Cannot find module` | Missing dependency | Run `npm install <package>` |
+| `API returns 404` | Route doesn't exist | Create API route file |
+| `API returns empty array []` | No database data | Run `npm run seed` |
+| `Element not visible` | CSS display issue | Check responsive design |
+| `Navigation timeout` | Slow page load | Optimize performance |
+
+---
+
+## VERSION HISTORY
+
+**v3.0 (2025-11-07)**
+- **CRITICAL:** Added Section 12: Testing Requirements
+- Based on analysis of 283 test failures from production run
+- Documented root causes: missing test data, form validation, dependencies
+- Added test data requirements and seed script templates
+- Added test writing standards (6 test types required)
+- Added agent workflow with mandatory testing steps
+- Added pre-commit checklist and validation scripts
+- **Rationale:** Prevents test failures by requiring tests BEFORE feature completion
+
+**v2.1 (2025-11-04)**
+- Added Section 10: Quranic Data Source Constraints
+
+**v2.0 (2025-11-04)**
+- Comprehensive rewrite with all project constraints
+
+**v1.0 (2025-11-02)**
+- Initial version
+
+---
+
 **END OF DOCUMENT**
 
 **Remember:** This document exists to **prevent mistakes before they happen**, not to fix them afterward. Read it before every task.
+
+**NEW RULE:** NO feature is complete without comprehensive Playwright tests that pass 100%.

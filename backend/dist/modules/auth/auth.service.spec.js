@@ -14,13 +14,6 @@ const bcrypt = require("bcrypt");
 jest.mock('bcrypt');
 describe('AuthService', () => {
     let service;
-    let prismaService;
-    let jwtService;
-    let configService;
-    let tokenBlacklistService;
-    let accountLockoutService;
-    let refreshTokenService;
-    let auditLogService;
     const mockPrismaService = {
         user: {
             findUnique: jest.fn(),
@@ -96,13 +89,6 @@ describe('AuthService', () => {
             ],
         }).compile();
         service = module.get(auth_service_1.AuthService);
-        prismaService = module.get(prisma_service_1.PrismaService);
-        jwtService = module.get(jwt_1.JwtService);
-        configService = module.get(config_1.ConfigService);
-        tokenBlacklistService = module.get(token_blacklist_service_1.TokenBlacklistService);
-        accountLockoutService = module.get(account_lockout_service_1.AccountLockoutService);
-        refreshTokenService = module.get(refresh_token_service_1.RefreshTokenService);
-        auditLogService = module.get(audit_log_service_1.AuditLogService);
     });
     afterEach(() => {
         jest.clearAllMocks();

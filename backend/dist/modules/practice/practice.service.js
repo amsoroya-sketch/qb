@@ -146,7 +146,7 @@ let PracticeService = class PracticeService {
     }
     async getChallengeMode(userId, count = 10) {
         const verses = await this.selectRandomVerses(null, count * 4);
-        const advancedTopics = ['morpheme', 'agreement', 'syntactic_role'];
+        const advancedTopics = ['root', 'sentence_type', 'root'];
         const exercisePromises = verses.map((verse, index) => {
             const topic = advancedTopics[index % advancedTopics.length];
             return this.generateExerciseForVerse(verse, topic).catch(() => null);

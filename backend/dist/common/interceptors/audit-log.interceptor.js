@@ -20,14 +20,14 @@ let AuditLogInterceptor = class AuditLogInterceptor {
     intercept(context, next) {
         const request = context.switchToHttp().getRequest();
         const response = context.switchToHttp().getResponse();
-        const { method, url, ip, headers } = request;
+        const { method, url, headers } = request;
         const userAgent = headers['user-agent'] || 'unknown';
         const userId = request.user?.id || request.user?.sub;
         const startTime = Date.now();
         return next.handle().pipe((0, operators_1.tap)(() => {
             const duration = Date.now() - startTime;
             const statusCode = response.statusCode;
-            if (this.isSecurityRelevantEndpoint(url, method)) {
+            if (this.isSecurityRelevantEndpoint(url)) {
                 this.auditLogService.log({
                     eventType: this.getEventType(url, method, statusCode),
                     userId,
@@ -74,7 +74,7 @@ let AuditLogInterceptor = class AuditLogInterceptor {
             throw error;
         }));
     }
-    isSecurityRelevantEndpoint(url, _method) {
+    isSecurityRelevantEndpoint(url) {
         const securityEndpoints = [
             '/api/v1/auth/login',
             '/api/v1/auth/register',
